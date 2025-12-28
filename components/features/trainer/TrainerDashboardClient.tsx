@@ -38,6 +38,12 @@ interface DashboardStats {
   courseStats?: CourseStat[];
 }
 
+type DisplayedTraining = TrainingStat & {
+  id: string;
+  title: string;
+  course?: { id: string; title: string } | undefined;
+};
+
 interface TrainerDashboardClientProps {
   initialStats: DashboardStats;
   initialTrainingPreferences: string[]; // Array of training IDs in order
@@ -90,7 +96,7 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
         course: training.course,
       };
     })
-    .filter((t): t is TrainingStat & { id: string; title: string; course?: { id: string; title: string } } => t !== null);
+    .filter((t): t is DisplayedTraining => t !== null);
 
   // Get courses currently on dashboard
   const displayedCourses = coursePreferences
