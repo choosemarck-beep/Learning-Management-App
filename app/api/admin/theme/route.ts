@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
 import bcrypt from "bcryptjs";
+import { themeUpdateSchema } from "@/lib/validation/schemas";
+import { z } from "zod";
 
 // GET - Fetch current theme settings
 export async function GET(request: NextRequest) {
