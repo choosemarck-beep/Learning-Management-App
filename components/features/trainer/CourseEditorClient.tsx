@@ -325,7 +325,7 @@ export const CourseEditorClient: React.FC<CourseEditorClientProps> = ({ course: 
         <Card className={styles.trainingsCard}>
           <CardHeader>
             <div className={styles.cardHeader}>
-              <h2 className={styles.sectionTitle}>Trainings ({course.trainings.length})</h2>
+              <h2 className={styles.sectionTitle}>Trainings ({course.trainings?.length || 0})</h2>
             </div>
           </CardHeader>
           <CardBody>
