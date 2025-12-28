@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
+import { courseCreateSchema } from "@/lib/validation/schemas";
+import { z } from "zod";
 
 // GET - List all courses created by the trainer
 export async function GET(request: NextRequest) {
