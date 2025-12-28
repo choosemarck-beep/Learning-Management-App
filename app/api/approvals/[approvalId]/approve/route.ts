@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
+import { approvalActionSchema } from "@/lib/validation/schemas";
+import { z } from "zod";
 
 export async function POST(
   request: NextRequest,

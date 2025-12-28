@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
 import { recalculateTrainingProgressForAllUsers } from "@/lib/utils/trainingProgress";
 import { notifyTrainingUpdateBatch } from "@/lib/utils/notifications";
+import { miniTrainingCreateSchema } from "@/lib/validation/schemas";
 import { z } from "zod";
 
 // GET - List all mini trainings for a training
