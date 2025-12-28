@@ -46,7 +46,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Get team members based on manager role
-    let teamMembers: any[] = [];
+    type TeamMember = {
+      id: string;
+      name: string;
+      xp: number | null;
+      courseProgresses: Array<{
+        progress: number;
+        isCompleted: boolean;
+      }>;
+    };
+    let teamMembers: TeamMember[] = [];
 
     if (role === "BRANCH_MANAGER") {
       teamMembers = await prisma.user.findMany({
@@ -120,7 +129,7 @@ export async function GET(request: NextRequest) {
     let totalTeamXP = 0;
 
     teamMembers.forEach((member) => {
-      member.courseProgresses.forEach((cp: any) => {
+      member.courseProgresses.forEach((cp: { progress: number; isCompleted: boolean }) => {
         totalProgress += cp.progress;
         totalStarted++;
         if (cp.isCompleted) {
@@ -140,7 +149,7 @@ export async function GET(request: NextRequest) {
         name: member.name,
         xp: member.xp || 0,
         coursesCompleted: member.courseProgresses.filter(
-          (cp: any) => cp.isCompleted
+          (cp: { progress: number; isCompleted: boolean }) => cp.isCompleted
         ).length,
       }))
       .sort((a, b) => {

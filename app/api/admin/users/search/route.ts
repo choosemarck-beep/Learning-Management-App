@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
 
     // Apply filters from Gemini (or extracted)
     if (searchParams.filters) {
-      Object.entries(searchParams.filters).forEach(([field, value]) => {
+      Object.entries(searchParams.filters).forEach(([field, value]: [string, unknown]) => {
         switch (field) {
           case "branch":
             where.branch = { contains: value as string, mode: "insensitive" };

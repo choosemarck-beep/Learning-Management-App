@@ -113,7 +113,17 @@ export async function GET(request: NextRequest) {
     });
 
     // Calculate stats per course
-    const statsMap = new Map<string, any>();
+    interface CourseStat {
+      courseId: string;
+      courseTitle: string;
+      totalAssigned: number;
+      completed: number;
+      inProgress: number;
+      notStarted: number;
+      totalProgress: number;
+      progressCount: number;
+    }
+    const statsMap = new Map<string, CourseStat>();
 
     // Initialize stats for all published courses
     allCourses.forEach((course) => {
@@ -149,7 +159,7 @@ export async function GET(request: NextRequest) {
 
     // Calculate averages and format
     const stats = Array.from(statsMap.values())
-      .map((stat) => ({
+      .map((stat: CourseStat) => ({
         courseId: stat.courseId,
         courseTitle: stat.courseTitle,
         totalAssigned: stat.totalAssigned,

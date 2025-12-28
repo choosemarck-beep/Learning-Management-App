@@ -210,7 +210,7 @@ export async function GET(request: NextRequest) {
       const avgProgress =
         member.courseProgresses.length > 0
           ? member.courseProgresses.reduce(
-              (sum, cp) => sum + cp.progress,
+              (sum: number, cp: { progress: number }) => sum + cp.progress,
               0
             ) / member.courseProgresses.length
           : 0;
