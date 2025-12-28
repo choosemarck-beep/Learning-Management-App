@@ -9,7 +9,20 @@ export const metadata: Metadata = {
   themeColor: "#0F172A",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      {
+        rel: "mask-icon",
+        url: "/safari-pinned-tab.svg",
+        color: "#8B5CF6",
+      },
+    ],
   },
 };
 
