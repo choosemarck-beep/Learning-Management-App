@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
+import { randomizeQuizQuestions } from "@/lib/utils/quizRandomization";
 
 export async function POST(
   request: NextRequest,
