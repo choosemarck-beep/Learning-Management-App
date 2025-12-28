@@ -53,10 +53,28 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
+      // Normalize email and trim password on client side too
+      const normalizedEmail = data.email.toLowerCase().trim();
+      const trimmedPassword = data.password.trim();
+
+      console.log("Login attempt:", { 
+        email: normalizedEmail, 
+        passwordLength: trimmedPassword.length,
+        originalEmail: data.email,
+        originalPasswordLength: data.password.length
+      });
+
       const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
+        email: normalizedEmail,
+        password: trimmedPassword,
         redirect: false,
+      });
+
+      console.log("SignIn result:", { 
+        error: result?.error, 
+        ok: result?.ok, 
+        status: result?.status,
+        url: result?.url 
       });
 
       if (result?.error) {
@@ -68,14 +86,23 @@ function LoginForm() {
         } else if (result.error === "ACCOUNT_REJECTED") {
           errorMessage =
             "Your account has been rejected. Please contact support for assistance.";
+        } else if (result.error === "CredentialsSignin") {
+          errorMessage = "The email or password you entered is incorrect. Please try again.";
         }
+        console.error("Login failed:", result.error);
         toast.error(errorMessage);
         setIsLoading(false);
-      } else {
+      } else if (result?.ok) {
+        console.log("Login successful, redirecting to:", callbackUrl);
         router.push(callbackUrl);
         router.refresh();
+      } else {
+        console.error("Unexpected login result:", result);
+        toast.error("Something went wrong. Please try again in a moment.");
+        setIsLoading(false);
       }
     } catch (err) {
+      console.error("Login error:", err);
       toast.error("Something went wrong. Please try again in a moment.");
       setIsLoading(false);
     }
