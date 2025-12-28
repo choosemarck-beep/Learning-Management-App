@@ -169,12 +169,6 @@ export default async function EmployeeProfilePage({
         dashboardRoute={
           employeeData.role === "BRANCH_MANAGER"
             ? "/employee/branch-manager/dashboard"
-            : employeeData.role === "AREA_MANAGER"
-            ? "/employee/area-manager/dashboard"
-            : employeeData.role === "REGIONAL_MANAGER"
-            ? "/employee/regional-manager/dashboard"
-            : employeeData.role === "TRAINER"
-            ? "/employee/trainer/dashboard"
             : "/employee/staff/dashboard"
         }
       />
