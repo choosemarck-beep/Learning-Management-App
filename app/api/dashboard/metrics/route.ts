@@ -47,7 +47,6 @@ export async function GET(request: NextRequest) {
             earnedAt: true,
           },
         },
-        createdAt: true,
       },
     });
 
