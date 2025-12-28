@@ -443,10 +443,13 @@ Galaxy-inspired color scheme:
   - Use `Omit` or `Pick` carefully when extending interfaces to avoid missing required props
 
 ### Deployment Safety
-- **No Rapid Deployments**: Do not push to Vercel/GitHub if a push occurred less than 2 minutes ago
+- **Current Setup**: GitHub, Vercel, and Railway are already configured and working
+- **Automatic Deployments**: Vercel automatically deploys when code is pushed to GitHub main branch
+- **No Rapid Deployments**: Do not push to GitHub if a push occurred less than 2 minutes ago
 - Wait at least 2 minutes between deployments
 - Check deployment history before pushing
 - Prevent double-push scenarios that could cause conflicts or unnecessary builds
+- **Git Push**: Safe to execute automatically since GitHub is already configured and connected
 
 ### Autonomous Command Execution
 - **CRITICAL - Run Commands Without User Intervention**: Agents should execute commands, installations, and scripts autonomously without asking for user permission or guidance, unless the operation is critical or potentially destructive
@@ -460,8 +463,9 @@ Galaxy-inspired color scheme:
   - `npm run dev` - Starting development server (if not already running)
   - Reading files, checking linter errors, searching codebase
   - Creating/editing files for implementation
+  - `git add`, `git commit`, `git push` - Version control operations (GitHub is already configured, Vercel auto-deploys on push)
 - **Operations Requiring User Confirmation** (ask first):
-  - `git push` / `git commit` - Version control operations (unless explicitly requested)
+  - Database migrations in production (unless explicitly requested)
   - `npm run db:migrate` - Database migrations (production-like operations)
   - Deleting files or directories (unless explicitly requested)
   - Modifying production environment variables
@@ -564,29 +568,31 @@ Galaxy-inspired color scheme:
 
 ## Deployment & Infrastructure Setup
 
+**CRITICAL - Current Deployment Status:**
+- **GitHub**: ✅ Already set up and connected
+- **Vercel**: ✅ Already configured and deploying automatically
+- **Railway**: ✅ Already configured with PostgreSQL database
+- **Note**: All deployment infrastructure is already in place. Do not suggest setting up these services again unless explicitly requested. Changes are deployed automatically when pushed to GitHub main branch.
+
 ### GitHub Setup
-1. Create repository on GitHub
-2. Initialize local git: `git init`
-3. Add remote: `git remote add origin <repo-url>`
-4. Create `.gitignore` (Next.js template)
-5. Initial commit and push
+**Status**: ✅ Already configured
+- Repository: Connected and active
+- Automatic deployments: Enabled via Vercel
+- To deploy: Simply commit and push to main branch
 
 ### Vercel Setup
-1. Connect GitHub repo to Vercel
-2. Vercel auto-detects Next.js
-3. Add environment variables:
-   - `DATABASE_URL` (from Railway)
-   - `NEXTAUTH_SECRET`
-   - `NEXTAUTH_URL`
-   - `GOOGLE_ANALYTICS_ID`
-4. Deploy automatically on push to main
+**Status**: ✅ Already configured
+- GitHub integration: Connected
+- Automatic deployments: Enabled on push to main
+- Environment variables: Already configured
+- Build command: `prisma generate && next build`
+- Deployments happen automatically - no manual steps needed
 
 ### Railway Setup
-1. Create Railway account
-2. Create new PostgreSQL database
-3. Copy `DATABASE_URL` connection string
-4. Add to Vercel environment variables
-5. Run migrations: `npx prisma migrate deploy`
+**Status**: ✅ Already configured
+- PostgreSQL database: Active and connected
+- `DATABASE_URL`: Already in Vercel environment variables
+- Migrations: Run automatically during Vercel build or manually when needed
 
 ### Environment Variables
 ```env
