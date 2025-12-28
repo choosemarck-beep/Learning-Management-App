@@ -607,6 +607,61 @@ NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"
 BLOB_READ_WRITE_TOKEN="..."
 ```
 
+### Cloudflare Pages Optimization
+
+**CRITICAL**: When deploying to Cloudflare Pages, follow these optimization rules to prevent build errors and runtime issues:
+
+1. **TypeScript Type Safety**:
+   - **ALWAYS** define complete type interfaces for all data structures
+   - **NEVER** use `any` types - Cloudflare's build process is stricter than local development
+   - **ALWAYS** include optional properties (`?`) in type definitions if they might be undefined
+   - **VERIFY** all object literals match their type definitions exactly
+   - **Example**: If a component expects `{ id: string; title: string; courseTitle?: string }`, ensure all objects passed match this structure
+
+2. **Database Query Results**:
+   - **ALWAYS** fetch required fields from database - don't rely on `getCurrentUser()` to return all fields
+   - **ALWAYS** use Prisma `select` or `include` to explicitly fetch needed fields
+   - **VERIFY** all accessed properties exist in the Prisma query result type
+   - **Example**: If you need `onboardingCompleted`, fetch it explicitly: `prisma.user.findUnique({ where: { id }, select: { onboardingCompleted: true } })`
+
+3. **Component Props**:
+   - **ALWAYS** use proper React Hook Form types (`UseFormSetValue`, `UseFormWatch`, etc.) instead of generic function types
+   - **ALWAYS** pass all required props to components - check component interfaces before using
+   - **VERIFY** prop types match component expectations exactly
+   - **Example**: Use `UseFormSetValue<any>` instead of `(name: string, value: any) => void`
+
+4. **Conditional Logic**:
+   - **REMOVE** unreachable code - TypeScript will error on impossible conditions
+   - **VERIFY** all conditional branches are logically possible
+   - **Example**: If a role check filters to only `EMPLOYEE` and `BRANCH_MANAGER`, don't check for `AREA_MANAGER` later
+
+5. **Build Process**:
+   - **ALWAYS** ensure Prisma client is generated: `npx prisma generate` must run before build
+   - **ALWAYS** test TypeScript compilation locally: `npm run build` should pass without errors
+   - **ALWAYS** fix all TypeScript errors before pushing - Cloudflare build is stricter than local
+   - **VERIFY** all imports resolve correctly - missing imports cause build failures
+
+6. **Edge Runtime Compatibility**:
+   - **AVOID** Node.js-specific APIs in Edge Runtime contexts
+   - **USE** Web APIs instead of Node.js APIs when possible
+   - **NOTE**: Warnings about `bcryptjs` in Edge Runtime are acceptable (it's used in Node.js runtime only)
+
+7. **Error Prevention Checklist**:
+   - [ ] All TypeScript types are complete and match actual data structures
+   - [ ] All component props match their interface definitions
+   - [ ] All database queries fetch required fields explicitly
+   - [ ] No unreachable code or impossible conditions
+   - [ ] All imports resolve correctly
+   - [ ] Prisma client is generated before build
+   - [ ] Local build passes: `npm run build` succeeds
+
+8. **Common Cloudflare Build Errors & Fixes**:
+   - **"Property X does not exist on type Y"**: Add missing property to type definition or fetch it from database
+   - **"Type X is not assignable to type Y"**: Use proper React Hook Form types instead of generic functions
+   - **"Return statement is not allowed here"**: Fix function structure (missing try-catch, wrong scope)
+   - **"await isn't allowed in non-async function"**: Add `async` keyword to function or move await to async context
+   - **"This comparison appears to be unintentional"**: Remove unreachable code or fix type narrowing
+
 ## Agent Roles & Context
 
 ### Frontend Agent

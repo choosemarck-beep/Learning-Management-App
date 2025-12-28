@@ -120,6 +120,7 @@ export default async function TrainerDashboardPage() {
   const trainingStats: Array<{
     trainingId: string;
     title: string;
+    courseTitle?: string;
     completionRate: number;
     totalAssigned: number;
     totalCompleted: number;
