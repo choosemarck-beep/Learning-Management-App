@@ -217,7 +217,7 @@ export const QuizResultsClient: React.FC<QuizResultsClientProps> = ({
                     <div className={styles.correctAnswerHint}>
                       <span className={styles.hintLabel}>Correct answer:</span>
                       <span className={styles.hintAnswer}>
-                        {result.correctAnswerText || result.correctAnswer}
+                        {result.correctAnswer}
                       </span>
                     </div>
                   )}
