@@ -252,7 +252,7 @@ export const PhotoManagementModal: React.FC<PhotoManagementModalProps> = ({
               ) : (
                 <div className={styles.emptySlot}>
                   <input
-                    ref={(el) => (fileInputRefs.current[idx] = el)}
+                    ref={(el) => { fileInputRefs.current[idx] = el; }}
                     type="file"
                     accept="image/*"
                     onChange={(e) => handleFileChange(e, idx)}
