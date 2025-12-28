@@ -1,0 +1,56 @@
+/* Carousel Placeholder - Mobile-First Design (320px-428px) */
+
+.placeholder {
+  width: 100%;
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+  border: 2px dashed rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.placeholderContent {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.placeholderText {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  text-align: center;
+  padding: var(--spacing-md);
+}
+
+.label {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  color: var(--color-primary-purple);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.dimensions {
+  font-size: 0.75rem; /* 12px */
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.modes {
+  font-size: 0.7rem; /* 11px */
+  color: var(--color-text-secondary);
+  margin: var(--spacing-xs) 0 0 0;
+  line-height: 1.4;
+  opacity: 0.8;
+}
+

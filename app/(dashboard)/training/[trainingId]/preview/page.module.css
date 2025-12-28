@@ -1,0 +1,11 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  background: var(--color-bg-dark);
+  padding-bottom: 80px; /* Space for bottom nav */
+}
+

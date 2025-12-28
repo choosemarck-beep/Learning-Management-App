@@ -1,0 +1,99 @@
+/* Management Page - MOBILE-FIRST Design (320px-428px) */
+/* This component is exclusively for Regional/Area/Branch Manager dashboards */
+/* DO NOT use desktop breakpoints - this is mobile-optimized only */
+/* Admin/Super Admin use UserManagementTabs/UsersTable which are desktop-only */
+/* No Scrolling - All content fits in viewport */
+
+.container {
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
+  overflow: hidden;
+  padding: var(--spacing-sm) var(--spacing-md);
+  padding-bottom: 80px; /* Space for bottom navigation */
+  gap: var(--spacing-sm);
+}
+
+.header {
+  flex-shrink: 0;
+  margin-bottom: var(--spacing-xs);
+}
+
+.title {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+  line-height: 1.4;
+}
+
+.subtitle {
+  font-size: 0.875rem; /* 14px */
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.tabBar {
+  display: flex;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  margin-bottom: var(--spacing-sm);
+  flex-shrink: 0;
+}
+
+.tab {
+  flex: 1;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+  min-height: var(--touch-target-min);
+  position: relative;
+}
+
+.tab:hover {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--color-text-primary);
+}
+
+.tab.active {
+  color: var(--color-primary-purple);
+  font-weight: 600;
+}
+
+.tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: calc(-1 * var(--spacing-xs) - 1px);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary-purple) 0%,
+    var(--color-primary-indigo) 100%
+  );
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.tabContent {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+

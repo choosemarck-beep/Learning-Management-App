@@ -1,0 +1,138 @@
+/* Inbox Tab - Mobile-First Design (320px-428px) */
+
+.itemsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.itemCard {
+  width: 100%;
+  transition: transform var(--transition-normal) ease,
+    box-shadow var(--transition-normal) ease;
+}
+
+.itemCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
+}
+
+.itemCard.unread {
+  border-left: 3px solid var(--color-primary-purple);
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.itemContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.itemHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.itemTitleRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.unreadDot {
+  color: var(--color-primary-purple);
+  flex-shrink: 0;
+}
+
+.itemTitle {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.sender {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.senderAvatar,
+.senderAvatarPlaceholder {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.senderAvatar {
+  object-fit: cover;
+}
+
+.senderAvatarPlaceholder {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600;
+}
+
+.senderName {
+  font-size: 0.875rem; /* 14px */
+  color: var(--color-text-secondary);
+}
+
+.itemText {
+  font-size: 0.875rem; /* 14px */
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.itemFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--spacing-xs);
+}
+
+.itemDate {
+  font-size: 0.75rem; /* 12px */
+  color: var(--color-text-secondary);
+}
+
+.markReadButton {
+  font-size: 0.75rem; /* 12px */
+  padding: 0.25rem var(--spacing-sm);
+  min-height: auto;
+}
+
+.emptyCard {
+  width: 100%;
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  min-height: 200px;
+}
+
+.emptyMessage {
+  font-size: 0.875rem; /* 14px */
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  text-align: center;
+}
+

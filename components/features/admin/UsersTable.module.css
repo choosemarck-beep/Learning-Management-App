@@ -1,0 +1,299 @@
+/* Users Table Component - DESKTOP ONLY */
+/* This component is exclusively for Admin/Super Admin dashboards */
+/* DO NOT use mobile breakpoints - this is desktop-optimized only */
+/* Managers use ManagementPage/TeamMembersTab which are mobile-first */
+
+.tableWrapper {
+  width: 100%;
+  height: 100%;
+  max-height: 100%; /* Constrain height for internal scrolling */
+  overflow: hidden; /* Prevent horizontal scrollbars - columns constrained to table width */
+  border-radius: var(--radius-lg);
+  max-width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  table-layout: fixed;
+  height: 100%;
+  max-height: 100%; /* Constrain height for internal scrolling */
+  display: flex;
+  flex-direction: column;
+}
+
+.table thead {
+  background: rgba(139, 92, 246, 0.1);
+  border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+  display: table-header-group;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  width: 100%;
+}
+
+.table thead tr {
+  display: table-row;
+  width: 100%;
+}
+
+.table tbody {
+  display: block;
+  overflow-y: auto;
+  overflow-x: hidden; /* Prevent horizontal scrolling - columns constrained */
+  flex: 1;
+  min-height: 0;
+  max-height: 100%;
+}
+
+.table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Ensure proper alignment between header and body */
+.table thead tr,
+.table tbody tr {
+  display: table-row;
+}
+
+.table thead th,
+.table tbody td {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+/* Column width definitions - Dynamic widths via inline styles */
+.table th,
+.table td {
+  padding: var(--spacing-xs) 8px; /* More compact padding */
+  white-space: nowrap; /* Prevent text wrapping - Excel-like behavior */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+}
+
+/* Employee Status column - don't truncate badges */
+.table td:nth-child(7) {
+  text-overflow: clip; /* Don't show ellipsis for badges */
+  overflow: visible; /* Allow badge to display fully */
+}
+
+/* Actions column - don't truncate button and enforce minimum width */
+.table th:nth-child(8),
+.table td:nth-child(8) {
+  text-overflow: clip;
+  overflow: visible;
+  min-width: 50px !important; /* Force minimum width for Actions column */
+  width: 50px !important; /* Ensure Actions column always has space */
+}
+
+/* Resizable header styles */
+.resizableHeader {
+  position: relative;
+  user-select: none;
+}
+
+.headerContent {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resizeHandle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 2;
+  transition: background-color var(--transition-normal) ease;
+}
+
+.resizeHandle:hover {
+  background: rgba(139, 92, 246, 0.6);
+}
+
+.resizeHandle:active {
+  background: rgba(139, 92, 246, 0.9);
+}
+
+/* Show resize cursor when hovering over header */
+.resizableHeader:hover .resizeHandle {
+  background: rgba(139, 92, 246, 0.3);
+}
+
+/* Additional table styles */
+.table tbody tr {
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+  transition: background-color var(--transition-normal) ease;
+  width: 100%;
+  cursor: context-menu; /* Indicate right-click is available */
+}
+
+.tableRow {
+  cursor: context-menu;
+}
+
+.table tbody tr:hover {
+  background: rgba(139, 92, 246, 0.05);
+}
+
+/* Header and cell text styles - Standardized typography */
+.table th {
+  text-align: left;
+  font-size: 0.75rem; /* Slightly smaller for more compact layout */
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.table td {
+  font-size: 0.75rem; /* Slightly smaller for more compact layout */
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  vertical-align: middle;
+}
+
+.nameCell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.email {
+  color: var(--color-text-secondary);
+}
+
+.usid {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-family: monospace;
+  opacity: 0.8;
+}
+
+.employeeNumber,
+.company,
+.position,
+.branch,
+.hireType,
+.employeeStatus {
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+.roleBadge {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(139, 92, 246, 0.1);
+  display: inline-block;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.date {
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.actionButton {
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionButton svg {
+  width: 14px;
+  height: 14px;
+}
+
+.deleteButton {
+  color: var(--color-status-error);
+}
+
+.deleteButton:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--color-status-error);
+}
+
+.loading,
+.empty {
+  padding: var(--spacing-2xl);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.addButton {
+  margin-top: var(--spacing-md);
+}
+
+.menuButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+}
+
+.menuButton:hover {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--color-text-primary);
+}
+
+.menuButton:active {
+  background: rgba(139, 92, 246, 0.2);
+  transform: scale(0.95);
+}
+
+/* DESKTOP ONLY - No mobile breakpoints */
+/* This component is for Admin/Super Admin dashboards which are desktop-only */
+/* Managers use ManagementPage/TeamMembersTab components which are mobile-first */
+

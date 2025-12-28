@@ -1,0 +1,58 @@
+/* User Search Filter Component - Desktop-Optimized */
+
+.container {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  flex-shrink: 1;
+}
+
+.searchForm {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.searchInputWrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: var(--spacing-md);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.searchInput {
+  width: 100%;
+  padding-left: calc(var(--spacing-md) * 2 + 20px); /* Space for icon */
+  padding-right: calc(var(--spacing-md) * 2 + 20px); /* Space for clear button */
+}
+
+.clearButton {
+  position: absolute;
+  right: var(--spacing-md);
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-normal) ease;
+  z-index: 1;
+}
+
+.clearButton:hover {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--color-text-primary);
+}
+
+

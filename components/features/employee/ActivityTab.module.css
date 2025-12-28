@@ -1,0 +1,127 @@
+/* Activity Tab Component - Timeline Style */
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.activityCard {
+  width: 100%;
+}
+
+.activityItem {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: flex-start;
+}
+
+.iconContainer {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: rgba(139, 92, 246, 0.1);
+}
+
+.iconTask {
+  color: var(--color-status-success);
+}
+
+.iconLesson {
+  color: var(--color-accent-cyan);
+}
+
+.iconCourse {
+  color: var(--color-primary-purple);
+}
+
+.iconAchievement {
+  color: var(--color-star-gold);
+}
+
+.iconLevelUp {
+  color: var(--color-crystal-bright);
+}
+
+.activityContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.activityDescription {
+  font-size: 0.8125rem; /* 13px - reduced from 16px */
+  color: var(--color-text-primary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.activityTimestamp {
+  font-size: 0.75rem; /* 12px - reduced from 14px */
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  gap: var(--spacing-sm);
+}
+
+.loader {
+  color: var(--color-crystal-purple);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  font-size: 0.8125rem; /* 13px - reduced from 16px */
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Error State */
+.errorCard {
+  width: 100%;
+}
+
+.errorText {
+  font-size: 0.8125rem; /* 13px - reduced from 16px */
+  color: var(--color-status-error);
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Empty State */
+.emptyCard {
+  width: 100%;
+}
+
+.emptyText {
+  font-size: 0.8125rem; /* 13px - reduced from 16px */
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
+}
+

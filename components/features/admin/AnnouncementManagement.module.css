@@ -1,0 +1,136 @@
+/* Announcement Management - Desktop Design */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.formCard {
+  margin-bottom: var(--spacing-lg);
+}
+
+.formCard h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-normal) ease;
+}
+
+.closeButton:hover {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--color-text-primary);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.formLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.formActions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.announcementsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.announcementCard {
+  width: 100%;
+}
+
+.announcementHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+}
+
+.announcementHeader h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.announcementType {
+  font-size: 0.75rem;
+  color: var(--color-primary-purple);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.announcementActions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.actionButton {
+  background: transparent;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-normal) ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionButton:hover {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: var(--color-primary-purple);
+  color: var(--color-text-primary);
+}
+
+.announcementMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(139, 92, 246, 0.2);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.announcementMeta span {
+  padding: var(--spacing-xxs) var(--spacing-xs);
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: var(--radius-sm);
+}
+

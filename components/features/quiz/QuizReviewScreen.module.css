@@ -1,0 +1,228 @@
+/* Quiz Review Screen - Mobile-First Design (320px-428px) */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  min-height: 100vh;
+  background: var(--background-primary);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-sm);
+  background: var(--background-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.statCardWarning {
+  border-color: var(--color-status-warning);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: var(--spacing-xs);
+}
+
+.questionsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  flex: 1;
+  margin-bottom: var(--spacing-md);
+}
+
+.questionCard {
+  padding: var(--spacing-md);
+  background: var(--background-secondary);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-color);
+}
+
+.questionCardCorrect {
+  border-color: var(--color-status-success);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.questionCardIncorrect {
+  border-color: var(--color-status-error);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.questionCardUnanswered {
+  border-color: var(--color-status-warning);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.questionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.questionNumber {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary-purple);
+}
+
+.statusBadgeCorrect,
+.statusBadgeIncorrect,
+.statusBadgeUnanswered {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.statusBadgeCorrect {
+  background: var(--color-status-success);
+  color: white;
+}
+
+.statusBadgeIncorrect {
+  background: var(--color-status-error);
+  color: white;
+}
+
+.statusBadgeUnanswered {
+  background: var(--color-status-warning);
+  color: white;
+}
+
+.questionText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-md) 0;
+  line-height: 1.5;
+}
+
+.optionsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.optionItem {
+  padding: var(--spacing-sm);
+  background: var(--background-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.optionSelected {
+  border-color: var(--primary-purple);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.optionCorrect {
+  border-color: var(--color-status-success);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.optionContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.optionText {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.selectedLabel,
+.correctLabel {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.selectedLabel {
+  background: var(--primary-purple);
+  color: white;
+}
+
+.correctLabel {
+  background: var(--color-status-success);
+  color: white;
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
+  position: sticky;
+  bottom: 0;
+  background: var(--background-primary);
+  padding-bottom: var(--spacing-md);
+}
+
+.backButton,
+.submitButton {
+  flex: 1;
+}
+
+.warning {
+  padding: var(--spacing-sm);
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid var(--color-status-warning);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.warning p {
+  font-size: 0.875rem;
+  color: var(--color-status-warning);
+  margin: 0;
+}
+

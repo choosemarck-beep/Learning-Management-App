@@ -1,0 +1,65 @@
+/* Trainer Dashboard - Desktop-Optimized Design */
+
+.container {
+  width: 100%;
+  margin: 0;
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  height: calc(100vh - 64px);
+  min-height: calc(100vh - 64px);
+  max-height: calc(100vh - 64px);
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  gap: var(--spacing-md);
+}
+
+.cardTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.cardCount {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-primary-purple);
+  margin: 0 0 var(--spacing-xs) 0;
+  line-height: 1;
+}
+
+.cardDescription {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.quickActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+
+.actionLink {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: all var(--transition-normal) ease;
+}
+
+.actionLink:hover {
+  background: rgba(139, 92, 246, 0.3);
+  border-color: rgba(139, 92, 246, 0.5);
+  transform: translateY(-2px);
+}

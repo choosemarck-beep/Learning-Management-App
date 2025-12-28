@@ -1,0 +1,150 @@
+/* Login Page - Mobile-First Design (320px-428px) */
+
+.loadingText {
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+/* Improved UX with chunking, ease of use, and positive framing */
+/* Typography: 2-3 font sizes max, consistent spacing, proper line-height */
+
+.container {
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: var(--spacing-sm) var(--spacing-md); /* Reduced top/bottom padding */
+}
+
+/* Login Section */
+.loginSection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md); /* Reduced from xl to md */
+  min-height: auto; /* Changed from flex: 1 to auto - fits content */
+  /* Removed justify-content: center to prevent vertical centering */
+  /* Glassmorphism: Semi-transparent background with blur */
+  background: rgba(0, 0, 0, 0.2); /* Black background with 20% opacity */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-md); /* Reduced from lg to md */
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  border: none; /* No border for clean glassmorphism */
+}
+
+.carousel {
+  margin-bottom: var(--spacing-sm); /* Reduced from md to sm */
+}
+
+/* Form */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm); /* Reduced from md to sm for tighter spacing */
+  width: 100%;
+  align-items: center; /* Center form elements */
+  /* Smooth height transitions */
+  transition: height 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.inputGroup {
+  width: 100%;
+  max-width: 320px; /* Shorter input boxes */
+  align-self: center; /* Center the inputs */
+}
+
+/* Info Message - Positive Framing */
+.infoMessage {
+  padding: var(--spacing-md); /* Consistent padding using 8px grid */
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid var(--color-status-success);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: 0.875rem; /* 14px - Small size */
+  font-weight: 400; /* Regular weight */
+  text-align: center;
+  line-height: 1.6; /* Generous line-height to prevent text truncation */
+  margin: 0; /* Reset margin */
+  margin-bottom: var(--spacing-md);
+  letter-spacing: normal; /* Standard letter-spacing */
+  word-spacing: normal; /* Standard word-spacing */
+}
+
+/* Error Message - Positive Framing */
+.errorMessage {
+  padding: var(--spacing-md); /* Consistent padding using 8px grid */
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--color-status-error);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: 0.875rem; /* 14px - Small size */
+  font-weight: 400; /* Regular weight */
+  text-align: center;
+  line-height: 1.6; /* Generous line-height to prevent text truncation */
+  margin: 0; /* Reset margin */
+  width: 100%; /* Ensure error message is full width */
+  align-self: stretch; /* Stretch to full width even with form align-items: center */
+  letter-spacing: normal; /* Standard letter-spacing */
+  word-spacing: normal; /* Standard word-spacing */
+}
+
+/* Submit Button */
+.submitButton {
+  width: fit-content; /* Changed from 100% to fit-content */
+  min-width: fit-content;
+  padding-left: calc(1rem + 5px) !important; /* Add 5px to existing 1rem (16px) = 21px left padding */
+  padding-right: calc(1rem + 5px) !important; /* Add 5px to existing 1rem (16px) = 21px right padding (total 10px wider) */
+  margin-top: var(--spacing-xs); /* Reduced from sm to xs */
+  margin-left: auto; /* Center horizontally */
+  margin-right: auto; /* Center horizontally */
+  min-height: var(--touch-target-min); /* 44px minimum touch target */
+  font-weight: 600; /* Medium weight - clear hierarchy */
+}
+
+/* Signup Link Section */
+.signupLink {
+  margin-top: var(--spacing-sm); /* Reduced from md to sm */
+  padding-top: var(--spacing-sm); /* Reduced from md to sm */
+  border-top: 1px solid rgba(203, 213, 225, 0.1);
+  text-align: center;
+}
+
+.signupText {
+  font-size: 0.875rem; /* 14px - Small size (consistent with error message) */
+  font-weight: 400; /* Regular weight */
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6; /* Generous line-height to prevent text truncation */
+  padding: 0 var(--spacing-sm); /* Adequate padding to prevent clipping */
+  letter-spacing: normal; /* Standard letter-spacing */
+  word-spacing: normal; /* Standard word-spacing */
+}
+
+.signupLinkText {
+  color: var(--color-primary-purple);
+  text-decoration: none;
+  font-weight: 600; /* Medium weight - clear hierarchy */
+  transition: color var(--transition-normal) ease;
+  display: inline-block;
+  letter-spacing: normal; /* Standard letter-spacing */
+  word-spacing: normal; /* Standard word-spacing */
+  min-height: var(--touch-target-min); /* Ensure touch target size */
+  padding: var(--spacing-xs) var(--spacing-xs); /* Adequate padding for touch */
+}
+
+.signupLinkText:hover {
+  color: var(--color-primary-indigo);
+  text-decoration: underline;
+}
+
+.signupLinkText:focus-visible {
+  outline: 2px solid var(--color-primary-purple);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

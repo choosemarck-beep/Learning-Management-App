@@ -1,0 +1,49 @@
+/* Profile Stats Tab - Mobile-First Design (320px-428px) */
+/* Unified Container - No Card Wrapper */
+
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.statLabel {
+  font-size: 0.6875rem; /* 11px */
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.statValue {
+  font-size: 1rem; /* 16px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.progressSection {
+  margin-top: var(--spacing-sm);
+  flex-shrink: 0;
+}
+

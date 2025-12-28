@@ -1,0 +1,109 @@
+/* User Details Modal - Desktop-Optimized Design */
+
+.modal {
+  max-width: 800px !important; /* Desktop-optimized width */
+  width: 90vw;
+  max-height: 85vh;
+}
+
+.content {
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-height: calc(85vh - 80px); /* Account for header */
+  overflow-y: auto;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.sectionTitle {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.label {
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.value {
+  font-size: 0.9375rem; /* 15px */
+  color: var(--color-text-primary);
+  word-break: break-word;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.role {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary-purple);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.companyType {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+/* Desktop optimizations */
+@media (min-width: 1024px) {
+  .modal {
+    max-width: 900px !important;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+
+  .section {
+    padding: var(--spacing-lg);
+  }
+}
+
+/* Tablet adjustments */
+@media (max-width: 1023px) and (min-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+

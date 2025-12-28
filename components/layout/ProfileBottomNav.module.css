@@ -1,0 +1,154 @@
+/* Profile Bottom Navigation - Mobile-First Design (320px-428px) */
+
+.nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  /* Glassmorphism: Semi-transparent background with blur */
+  background: rgba(0, 0, 0, 0.2); /* Black background with 20% opacity */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(139, 92, 246, 0.3);
+  max-width: 428px;
+  margin: 0 auto;
+  box-shadow: 
+    0 -4px 6px -1px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(0);
+  transition: transform 0.3s ease-in-out;
+}
+
+.nav.hidden {
+  transform: translateY(100%);
+}
+
+.navContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  gap: 0.25rem; /* 4px - reduced gap for 5 buttons */
+  position: relative;
+}
+
+.navLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 0.75rem; /* 12px */
+  font-weight: 500;
+  transition: all var(--transition-normal) ease;
+  min-width: 0; /* Allow buttons to shrink for 5-button layout */
+  min-height: var(--touch-target-min); /* 44px */
+  flex: 1;
+  position: relative;
+  /* Neumorphism: Soft raised effect */
+  box-shadow: 
+    3px 3px 8px rgba(0, 0, 0, 0.3),
+    -3px -3px 8px rgba(255, 255, 255, 0.03),
+    inset 1px 1px 3px rgba(0, 0, 0, 0.2),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.navLink:hover {
+  color: var(--color-text-primary);
+  /* Enhanced neumorphism on hover */
+  box-shadow: 
+    4px 4px 10px rgba(0, 0, 0, 0.4),
+    -4px -4px 10px rgba(255, 255, 255, 0.05),
+    inset 2px 2px 5px rgba(0, 0, 0, 0.2),
+    inset -2px -2px 5px rgba(255, 255, 255, 0.03);
+  background: rgba(139, 92, 246, 0.1);
+  transform: translateY(-1px);
+}
+
+.navLink.active {
+  color: var(--color-primary-purple);
+  /* Pressed neumorphism effect for active state */
+  box-shadow: 
+    inset 2px 2px 6px rgba(0, 0, 0, 0.3),
+    inset -2px -2px 6px rgba(139, 92, 246, 0.1);
+  background: rgba(139, 92, 246, 0.15);
+}
+
+.navLink:active {
+  /* Pressed neumorphism effect */
+  box-shadow: 
+    inset 2px 2px 6px rgba(0, 0, 0, 0.3),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.01);
+  transform: translateY(0);
+}
+
+.navLink.active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary-purple) 0%,
+    var(--color-primary-indigo) 100%
+  );
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+
+.icon {
+  flex-shrink: 0;
+  transition: transform var(--transition-normal) ease;
+}
+
+.navLink.active .icon {
+  transform: scale(1.1);
+}
+
+.label {
+  font-size: 0.625rem; /* 10px */
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Avatar Container */
+.avatarContainer {
+  position: relative;
+  flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.avatarNavLink {
+  /* Inherits navLink styles */
+}
+
+.avatarImage,
+.avatarPlaceholder {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.avatarPlaceholder {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-primary);
+}
+

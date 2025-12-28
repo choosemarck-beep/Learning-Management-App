@@ -1,0 +1,95 @@
+/* About Tab Component */
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.card {
+  width: 100%;
+}
+
+.cardTitle {
+  font-size: 0.9375rem; /* 15px - reduced from 18px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Bio Section */
+.bioSection {
+  width: 100%;
+}
+
+.bioText {
+  font-size: 0.8125rem; /* 13px - reduced from 16px */
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Info Grid */
+.infoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.infoLabel {
+  font-size: 0.75rem; /* 12px */
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.infoValue {
+  font-size: 0.8125rem; /* 13px - reduced from 16px */
+  color: var(--color-text-primary);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Stats Section */
+.statsSection {
+  width: 100%;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.statLabel {
+  font-size: 0.75rem; /* 12px */
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.statValue {
+  font-size: 1rem; /* 16px - reduced from 20px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.progressSection {
+  margin-top: var(--spacing-sm);
+}
+

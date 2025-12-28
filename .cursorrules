@@ -1,0 +1,980 @@
+# Learning Management Web App - Project Rules
+
+## Project Overview
+- **Type**: Mobile-first Learning Management Web App (PWA)
+- **Customer Experience Standard**: Duolingo-inspired gamification
+- **Priority**: Professional-grade UI/UX with playful, on-brand interactions
+- **Deployment**: Vercel (frontend/API) + Railway (PostgreSQL) + GitHub
+
+## Tech Stack (Industry Standard)
+
+### Frontend
+- **Framework**: Next.js 14+ (App Router) with TypeScript
+- **Styling**: CSS Modules (scoped, component-level styles)
+- **Animations**: Framer Motion (Duolingo-style playful interactions)
+- **State Management**: 
+  - Zustand (client state)
+  - React Query/TanStack Query (server state)
+- **Forms**: React Hook Form + Zod validation
+- **Icons**: Lucide React or Heroicons
+
+### Backend
+- **API**: Next.js API Routes (serverless)
+- **Database**: PostgreSQL (Railway)
+- **ORM**: Prisma
+- **Authentication**: NextAuth.js v5
+- **Email Service**: Resend (transactional emails)
+- **File Uploads**: Vercel Blob or Cloudinary
+
+### PWA & Notifications
+- **PWA**: next-pwa package
+- **Push Notifications**: Web Push API with service worker
+- **Offline**: Not required initially
+
+### Deployment & Infrastructure
+- **Frontend/API**: Vercel (automatic deployments from GitHub)
+- **Database**: Railway (PostgreSQL)
+- **Version Control**: GitHub
+- **CDN**: Vercel Edge Network (automatic)
+- **Analytics**: Google Analytics 4 (GA4)
+
+### Development Tools
+- **Package Manager**: npm or pnpm
+- **Linting**: ESLint + Prettier
+- **Type Checking**: TypeScript strict mode
+- **Git Hooks**: Husky + lint-staged
+
+## Design System
+
+### Color Palette (Pixel Galaxy Theme)
+Galaxy-inspired color scheme:
+- **Primary Purple/Blue**: `#8B5CF6` to `#6366F1` (nebula gradient)
+- **Deep Space Purple**: `#4C1D95` to `#5B21B6` (deep space)
+- **Accent Cyan/Teal**: `#06B6D4` to `#0EA5E9` (star energy)
+- **Star Gold**: `#FBBF24` to `#F59E0B` (bright stars)
+- **Success/Positive**: `#10B981` (green)
+- **Warning**: `#F59E0B` (amber)
+- **Error**: `#EF4444` (red)
+- **Background Dark**: `#0F172A` to `#1E1B4B` (deep space/void)
+- **Text Primary**: `#FFFFFF` (white)
+- **Text Secondary**: `#CBD5E1` (light gray)
+- **Energy Crystal**: `#A78BFA` to `#C084FC` (bright purple for rewards)
+
+### Typography
+- **Font Family**: **Glacial Indifference** (Google Fonts) - Global font for entire application
+  - Weights: 400 (regular), 700 (bold)
+  - Applied via CSS variable: `var(--font-glacial)`
+  - **CRITICAL**: All components must use Glacial Indifference font - no exceptions
+- **Font Size Hierarchy** (Standardized CSS Variables - Use Consistently):
+  - **Heading 1 (h1)**: `var(--font-size-3xl)` (32px / 2rem) - Page titles, main headings
+  - **Heading 2 (h2)**: `var(--font-size-2xl)` (24px / 1.5rem) - Section titles
+  - **Heading 3 (h3)**: `var(--font-size-xl)` (20px / 1.25rem) - Subsection titles
+  - **Body**: `var(--font-size-base)` (16px / 1rem) - Paragraphs, descriptions, default text
+  - **Small**: `var(--font-size-sm)` (14px / 0.875rem) - Labels, helper text, captions
+  - **Tiny**: `var(--font-size-xs)` (12px / 0.75rem) - Fine print, timestamps
+- **Font Weight Hierarchy** (Standardized CSS Variables):
+  - **Regular (400)**: `var(--font-weight-regular)` - Body text, descriptions
+  - **Medium (500)**: `var(--font-weight-medium)` - Optional, for subtle emphasis
+  - **Semibold (600)**: `var(--font-weight-semibold)` - Buttons, links, labels
+  - **Bold (700)**: `var(--font-weight-bold)` - Headings, strong emphasis
+- **Typography Standards**:
+  - **MANDATORY**: Always use CSS variables for font sizes (`var(--font-size-*)`) - never hardcode pixel values
+  - **MANDATORY**: Always use CSS variables for font weights (`var(--font-weight-*)`) - never hardcode weight values
+  - **Consistent Hierarchy**: Follow the standardized font size hierarchy across ALL components
+  - **Line Height**: Generous (1.6-1.8 for body, 1.2-1.4 for headings) for readability
+  - **Consistent Spacing**: Maintain consistent letter-spacing and word-spacing (avoid excessive spacing)
+  - **Text Truncation**: Never cut off text at the bottom - ensure proper line-height and padding
+  - **Professional Standards**: Follow UI/UX typography best practices:
+    - Consistent baseline grid
+    - Proper text alignment
+    - Adequate contrast for readability
+    - No text overflow or clipping
+    - Proper text wrapping for long content
+  - **Future Components**: All new components MUST use the standardized font size and weight variables
+
+### UI/UX Principles
+1. **Mobile-Only Design**: All user-facing pages must be designed and optimized exclusively for mobile viewports (320px - 428px width). Elements, sizes, positioning, and layouts must be contained within mobile constraints. NO desktop scaling or responsive breakpoints for user-facing content.
+2. **No Emojis**: Do not use emojis in buttons, assets, UI elements, or any visual components. Use icons from Lucide React or Heroicons instead. Emojis are not professional and can cause rendering issues across platforms.
+3. **Typography & Visual Hierarchy**:
+   - **Streamlined Font System**: Use maximum 2-3 font sizes consistently (e.g., heading, body, small)
+   - **Consistent Spacing**: Maintain uniform spacing between text elements - avoid excessive or inconsistent gaps
+   - **Letter/Word Spacing**: Use standard, professional letter-spacing and word-spacing (avoid excessive spacing that looks unprofessional)
+   - **Text Truncation Prevention**: Never cut off text at the bottom - ensure proper line-height, padding, and container height
+   - **Font Weight Consistency**: Use clear, limited weight hierarchy (regular, medium, bold) - avoid mixing too many weights
+4. **Icon Quality & Consistency**:
+   - **No Distortion**: Icons must maintain proper aspect ratio and not be stretched or distorted
+   - **Consistent Sizing**: Use consistent icon sizes throughout the app
+   - **Proper Rendering**: Ensure icons render clearly at all sizes and resolutions
+   - **Icon Library**: Use Lucide React or Heroicons for consistency
+5. **Design Quality Standards**:
+   - **Visual Harmony**: Ensure consistent spacing, alignment, and visual rhythm
+   - **Professional Polish**: Apply design principles (proximity, alignment, repetition, contrast)
+   - **No Visual Glitches**: Prevent text clipping, icon distortion, layout breaks, or overflow issues
+   - **Proper Containers**: Ensure text containers have adequate padding to prevent clipping
+   - **Responsive Text**: Text should wrap properly and never overflow its container
+6. **Touch Targets**: Minimum 44x44px for all interactive elements
+7. **Spacing**: Generous whitespace, 8px grid system - maintain consistency
+   - **Viewport Optimization**: All content must fit within mobile viewport (320px-428px) without requiring scrolling
+   - **Avoid Vertical Centering**: Do not use `justify-content: center` or `align-items: center` on main containers as this pushes content and requires scrolling
+   - **Tight Spacing**: Use smaller spacing values (sm, md) rather than large (lg, xl) to maximize content visibility
+   - **Reduced Padding**: Minimize container padding (use sm for top/bottom, md for sides)
+   - **Compact Layouts**: Reduce gaps between form elements, carousel items, and sections to fit viewport
+   - **No Excess Margins**: Remove unnecessary margin-top/bottom values, especially on last elements
+8. **Chunking & Ease of Use**: 
+   - **CRITICAL PRIORITY**: When creating pages, processes, forms, and any element, prioritize chunking and making the user's life as easy as possible
+   - Break complex tasks into small, manageable steps
+   - Show one thing at a time when possible
+   - Use multi-step forms with progress indicators
+   - Group related information together
+   - Minimize cognitive load
+   - Reduce friction in every interaction
+   - **Multi-Step Forms**: Use 3+ steps for complex forms (e.g., registration, onboarding)
+   - **Progress Indicators**: Always show progress for multi-step processes (e.g., "Step 1 of 3")
+   - **Step-by-Step Validation**: Validate each step before allowing progression
+   - **Data Preservation**: Preserve form data when navigating between steps
+9. **Behavioral Science & Positive Framing**:
+   - Apply behavioral science principles throughout the app
+   - Use positive framing in all messaging (e.g., "You're making great progress!" instead of "You haven't completed this yet")
+   - Frame challenges as opportunities
+   - Celebrate small wins and progress
+   - Use loss aversion carefully (emphasize what they'll gain, not lose)
+   - Implement social proof where appropriate
+   - Create clear calls-to-action with positive outcomes
+10. **Animations**: 
+   - Playful micro-interactions (Duolingo-style)
+   - Smooth transitions (200-300ms)
+   - Celebration animations for achievements
+   - Loading states with personality
+11. **Accessibility**: WCAG AA compliance
+   - Color contrast ratios (4.5:1 minimum)
+   - Keyboard navigation
+   - Screen reader support
+   - Focus indicators
+12. **Feedback**: Immediate visual feedback for all user actions
+13. **Progressive Disclosure**: Show information gradually, avoid overwhelming
+14. **Toast Notifications (CRITICAL)**: 
+   - **ALWAYS use toast notifications** for success/error/warning messages instead of inline messages that cause layout shifts
+   - **Prevents layout movement**: Toast notifications appear as overlays, keeping page elements stable
+   - **Better UX**: Non-intrusive, dismissible, and doesn't require scrolling
+   - **Use cases**: 
+     - Success messages (account created, action completed)
+     - Error messages (validation errors, API errors, form validation failures)
+     - Warning messages (validation warnings, confirmations)
+     - Info messages (approval status, confirmations)
+   - **Implementation**: Use `react-hot-toast` library
+   - **Pattern**: 
+     - Show toast notification immediately after action or validation failure
+     - Redirect/navigate after toast is visible (optional delay for better UX)
+     - Remove inline message elements that cause layout shifts
+     - **Form Validation**: Use toasts for step-level validation errors instead of inline error messages below input fields
+   - **Example**: After signup, show success toast → redirect to login (no URL parameters needed)
+   - **Example**: When form validation fails, show error toast with the first error message
+   - **Exception**: Only use inline messages for real-time field-level validation hints (not errors that cause layout shifts)
+
+### Mobile Viewport Constraints
+- **Target Viewports**: 320px - 428px width (iPhone SE to iPhone 14 Pro Max)
+- **Maximum Container Width**: 428px (largest common mobile width)
+- **No Desktop Breakpoints**: Do not use `@media (min-width: 768px)` or larger breakpoints for user-facing pages
+- **Mobile-First Sizing**:
+  - Font sizes: 14px - 18px base, 24px - 32px headings
+  - Padding/Margins: 8px - 24px (use spacing variables)
+  - Touch targets: Minimum 44x44px
+  - Single column layouts only
+  - **No Scrolling Required**: All primary content must fit within viewport height without scrolling
+- **Viewport Optimization Rules**:
+  - **Container Alignment**: Use `align-items: flex-start` instead of `center` to prevent vertical centering that pushes content
+  - **Spacing Priority**: Prefer `--spacing-sm` (12px) and `--spacing-md` (16px) over `--spacing-lg` (24px) and `--spacing-xl` (32px)
+  - **Carousel Height**: Keep carousel wrapper heights compact (180px-200px max) to preserve space for forms
+  - **Form Spacing**: Use `--spacing-md` (16px) gaps between form elements, not `--spacing-lg` (24px)
+  - **Section Gaps**: Reduce gaps between major sections (carousel, form, footer) to `--spacing-md` (16px) or less
+  - **Padding Reduction**: Use `var(--spacing-sm) var(--spacing-md)` for containers (12px top/bottom, 16px sides)
+  - **Icon Heights**: Keep icon wrapper heights compact (48px) rather than large (64px+)
+  - **Last Element Spacing**: Remove excessive margin-bottom/padding-bottom on last elements in containers
+- **CRITICAL - Desktop Layout Exception (STRICT)**:
+  - **Admin, Super Admin, and Trainer Dashboards ONLY**: These pages MUST use desktop layouts with sidebar navigation, multi-column grids, and desktop-optimized UI
+  - **Desktop Routes**: `/admin/**`, `/super-admin/**`, and `/employee/trainer/**` - Desktop layouts REQUIRED
+  - **Design Inspiration**: Take inspiration from modern admin dashboards with:
+    - Left sidebar navigation (dark theme, persistent)
+    - Top header bar (search, notifications, user profile dropdown)
+    - Main content area with multi-column grid layouts
+    - Card-based widgets and sections
+    - Desktop-optimized spacing, typography, and interactions
+    - Responsive breakpoints starting at 768px (tablet) and 1024px (desktop)
+  - **Employee/Branch Manager Pages**: MUST remain mobile-only (320px-428px viewports)
+  - **Routes**: `/employee/**` (except `/employee/trainer/**`) - Mobile-only, NO desktop breakpoints
+  - **Strict Enforcement**: Never use desktop layouts for employee/branch manager pages (except trainers)
+
+## Gamification Features (Duolingo-Inspired)
+
+### Core Mechanics
+1. **XP/Points System**: Energy crystals/stars as currency
+2. **Levels**: User progression levels (e.g., "Stellar Explorer", "Galaxy Master", "Cosmic Guardian")
+3. **Streaks**: Daily login/consecutive days
+4. **Leaderboards**: 
+   - Personal rank
+   - Squad/team rank
+   - Global leaderboard
+5. **Badges/Achievements**: Unlockable rewards
+6. **Progress Visualization**: 
+   - Progress bars
+   - Completion percentages
+   - Visual journey maps (constellation paths)
+7. **Rewards**: 
+   - Immediate feedback on task completion
+   - Energy collection animations
+   - Star cluster reveals
+   - Nebula burst celebrations
+8. **Daily Challenges/Quests**: Space/galaxy-themed tasks
+
+### Theme: Pixel Galaxy
+- Consistent pixel/galaxy theme throughout
+- Space terminology (Welcome, Explorer, Squad, Energy, Stars, etc.)
+- Pixel art illustrations (stars, planets, galaxies, nebulas, space ships, asteroids)
+- Galaxy-inspired color gradients (purples, blues, cyans, golds)
+
+## Learning Management Features
+
+### Course Structure
+- **Courses** → **Modules** → **Lessons** → **Tasks/Exercises**
+- Hierarchical content organization
+- Prerequisites and unlockable content
+- Progress tracking at all levels
+
+### Content Types
+- Text content
+- Interactive exercises
+- Quizzes/Assessments
+- Video (future)
+- Gamified challenges
+
+### Assessment
+- Quizzes with immediate feedback
+- Task completion tracking
+- Skill-based assessments
+- Progress reports
+
+## Development Best Practices
+
+### Code Quality
+- **TypeScript**: Strict mode enabled, no `any` types
+- **Component Structure**: 
+  - Atomic design principles
+  - Reusable, composable components
+  - Single Responsibility Principle
+- **Naming Conventions**:
+  - Components: PascalCase (`TaskCard.tsx`)
+  - Functions: camelCase (`calculateXP()`)
+  - Constants: UPPER_SNAKE_CASE (`MAX_STREAK_DAYS`)
+  - Files: Match component/function names
+- **Comments**: Self-documenting code preferred, comments for complex logic only
+
+### File Structure
+```
+/app                    # Next.js App Router
+  /(auth)              # Auth routes
+  /(dashboard)        # Protected routes
+  /api                 # API routes
+  globals.css          # Global styles and CSS variables
+/components            # React components
+  /ui                  # Base UI components
+  /features            # Feature-specific components
+  /layout              # Layout components
+/lib                   # Utilities, helpers
+  /prisma              # Prisma client
+  /utils               # Helper functions
+  /hooks               # Custom React hooks
+  /constants           # Constants, configs
+/types                 # TypeScript types
+/styles                # Shared CSS files
+  design-system.css    # Design system utilities
+/public                # Static assets
+/docs                  # Documentation
+  /wireframes          # Wireframe documentation
+```
+
+### CSS Modules Guidelines
+- Use CSS Modules (`.module.css`) for component-scoped styles
+- Import styles: `import styles from './Component.module.css'`
+- Use CSS variables from `globals.css` for theming
+- Component files: `Component.tsx` with `Component.module.css`
+- Global utilities in `/styles/design-system.css` (optional)
+- Avoid global CSS except in `globals.css`
+- **NO INLINE STYLES**: Never use inline `style={{}}` prop except for:
+  - Dynamic values that change frequently (e.g., `width: ${percentage}%`)
+  - Framer Motion animation props (which require inline styles)
+  - Third-party library requirements
+- All styling must be in CSS Modules files using CSS variables from the design system
+- **Mobile Constraints**: 
+  - Maximum container width: 428px
+  - No desktop media queries for user-facing pages
+  - Single column layouts
+  - Mobile-optimized font sizes and spacing
+
+### API Design
+- RESTful conventions
+- Consistent error handling
+- Response standardization
+- Rate limiting
+- Input validation (Zod schemas)
+
+### Logical Validation & Data Integrity Rules
+- **CRITICAL - Always Apply Logical Validation**: All form inputs, date fields, numeric fields, and user data must be validated for logical consistency, not just format correctness
+- **Date Validation Rules**:
+  - **Future Dates**: Dates that logically cannot be in the future must be restricted (e.g., hire date, birth date, start date)
+  - **Past Dates**: Dates that logically cannot be in the past must be restricted (e.g., appointment dates, scheduled events)
+  - **Date Ranges**: Ensure start dates come before end dates, and date ranges make logical sense
+  - **Implementation**: Use HTML5 `max` attribute for date inputs to prevent future dates, and Zod validation for server-side validation
+  - **Example**: Hire date cannot be in the future - set `max={today}` on DatePicker and validate in Zod schema
+- **Numeric Validation Rules**:
+  - **Positive Numbers Only**: Quantities, counts, amounts that cannot be negative (e.g., age, quantity, price)
+  - **Reasonable Ranges**: Set min/max values based on real-world constraints (e.g., age: 18-100, phone length: 10-15 digits)
+  - **Zero Values**: Determine if zero is valid (e.g., quantity can be 0, but age cannot)
+- **Text Validation Rules**:
+  - **Name Fields**: Should not contain numbers or special characters (except hyphens/apostrophes for names like "Mary-Jane" or "O'Brien")
+  - **Email Format**: Must follow standard email format (already handled by Zod `.email()`)
+  - **Phone Numbers**: Must match country-specific formats and reasonable length
+  - **Employee Numbers**: Should follow company-specific format if applicable
+- **Business Logic Validation**:
+  - **Dependencies**: If field A is required when field B has value X, validate this relationship
+  - **Conditional Requirements**: Some fields may only be required based on other field values
+  - **Cross-Field Validation**: Ensure related fields make sense together (e.g., end date after start date)
+- **Real-World Constraints**:
+  - **Age Requirements**: Minimum age for employment, accounts, etc.
+  - **Date Logic**: Birth dates cannot be in the future, hire dates cannot be before birth date + minimum age
+  - **Time Logic**: End times must be after start times
+  - **Quantity Logic**: Cannot order negative items, cannot have negative balance
+- **Validation Implementation**:
+  - **Client-Side**: Use HTML5 attributes (`max`, `min`, `pattern`) and Zod schema validation
+  - **Server-Side**: Always validate on the server, even if client-side validation exists
+  - **User Feedback**: Provide clear, helpful error messages explaining why the value is invalid
+  - **Prevention Over Correction**: Use `max`/`min` attributes to prevent invalid selections rather than just showing errors
+- **Examples of Logical Validations**:
+  - ✅ Hire date: Cannot be in the future (set `max={today}`)
+  - ✅ Birth date: Cannot be in the future, must allow reasonable age range
+  - ✅ Age: Must be positive number, within reasonable range (e.g., 18-100 for employment)
+  - ✅ Phone number: Must match country format and length
+  - ✅ Email: Must be valid email format
+  - ✅ Password confirmation: Must match password field
+  - ✅ Start date/End date: End date must be after start date
+  - ✅ Quantity: Cannot be negative, must be integer if applicable
+  - ✅ Percentage: Must be between 0-100
+  - ✅ Employee number: Must follow company format if specified
+
+### Database
+- Normalized schema design
+- Indexes on frequently queried fields
+- Soft deletes where appropriate
+- Audit trails for important actions
+- Migrations via Prisma
+
+### Performance
+- Image optimization (Next.js Image component)
+- Code splitting (dynamic imports)
+- Lazy loading
+- Caching strategies
+- Bundle size monitoring
+
+### Security
+- Input sanitization
+- SQL injection prevention (Prisma)
+- XSS prevention
+- CSRF protection
+- Secure authentication (NextAuth.js)
+- Environment variables for secrets
+
+### Mobile-First Development
+- **Viewport Testing**: Always test at 375px, 390px, and 428px widths for employee/branch manager pages
+- **Container Constraints**: Use max-width: 428px for main containers (employee/branch manager pages only)
+- **Layout Patterns** (Employee/Branch Manager Pages):
+  - Single column layouts
+  - Stack elements vertically
+  - Full-width buttons and inputs
+  - Bottom navigation for mobile
+- **CRITICAL - Desktop Layout Rules (Admin/Super Admin/Trainer ONLY)**:
+  - **Strict Exception**: Routes matching `/admin/**`, `/super-admin/**`, or `/employee/trainer/**` MUST use desktop layouts
+  - **Design Pattern**: Left sidebar navigation + main content area with multi-column grids
+  - **Responsive Breakpoints**: 
+    ```css
+    /* ONLY for admin/super-admin/trainer pages */
+    @media (min-width: 768px) { /* tablet - sidebar + content */ }
+    @media (min-width: 1024px) { /* desktop - full sidebar + wide content */ }
+    @media (min-width: 1440px) { /* large desktop - optimized spacing */ }
+    ```
+  - **Layout Components**:
+    - Left sidebar: Navigation menu (dark theme, persistent, collapsible on mobile)
+    - Top header: Search bar, notifications, user profile dropdown
+    - Main content: Multi-column grid (2-3 columns), card-based widgets
+    - Desktop-optimized spacing, typography, and touch targets
+  - **Never Apply to**: Employee, Branch Manager, Area Manager, or Regional Manager pages - these MUST remain mobile-only
+
+## Development Workflow Rules
+
+### Code Safety
+- **Never delete important code** without explicit user confirmation
+- Always preserve existing functionality when making changes
+- Use version control to track changes
+- Ask before removing or refactoring significant code sections
+
+### Database & Data Consistency Rules
+- **CRITICAL - Seed Data Must Match Frontend Defaults**: 
+  - When adding default/hardcoded data to frontend components (e.g., dropdown options, select lists), **ALWAYS** update the database seed file (`prisma/seed.ts`) to include the same data
+  - Frontend default data and database seed data must be kept in sync
+  - Never use hardcoded IDs in frontend that don't exist in the database
+  - **Rule**: If you add `DEFAULT_COMPANIES`, `DEFAULT_POSITIONS`, or any default data array to a component, immediately update `prisma/seed.ts` to create those records in the database
+- **Foreign Key Validation**:
+  - Always verify that foreign key relationships exist before creating records
+  - When using `companyId`, `positionId`, or any foreign key, ensure the referenced record exists in the database
+  - Test foreign key constraints during development, not just in production
+- **Database Seed Maintenance**:
+  - After updating frontend default data, run `npm run db:seed` to populate the database
+  - Keep seed file organized: group related data (companies, positions, etc.) together
+  - Use `upsert` in seed files to prevent duplicate creation errors
+  - Document any data dependencies in seed file comments
+
+### Component Props & TypeScript Rules
+- **CRITICAL - Always Destructure All Used Props**:
+  - When using a prop in a component (even in a handler), it MUST be explicitly destructured from props
+  - Never access props via `props.propName` if the prop is used in the component logic
+  - If a prop is used in a function (like `onKeyDown` in `handleKeyDown`), it must be destructured: `{ prop1, prop2, onKeyDown, ...rest }`
+  - **Example Error**: Using `onKeyDown` in `handleKeyDown` function but not destructuring it from props will cause "onKeyDown is not defined" error
+- **TypeScript Interface Completeness**:
+  - All props used in component logic must be included in the component's TypeScript interface
+  - When extending HTML element props, ensure custom props are properly typed
+  - Use `Omit` or `Pick` carefully when extending interfaces to avoid missing required props
+
+### Deployment Safety
+- **No Rapid Deployments**: Do not push to Vercel/GitHub if a push occurred less than 2 minutes ago
+- Wait at least 2 minutes between deployments
+- Check deployment history before pushing
+- Prevent double-push scenarios that could cause conflicts or unnecessary builds
+
+### Autonomous Command Execution
+- **CRITICAL - Run Commands Without User Intervention**: Agents should execute commands, installations, and scripts autonomously without asking for user permission or guidance, unless the operation is critical or potentially destructive
+- **Autonomous Operations** (execute immediately):
+  - `npm install` / `npm run install` - Installing dependencies
+  - `npm run db:seed` - Running database seed scripts
+  - `npx prisma generate` - Regenerating Prisma client
+  - `npx prisma db push` - Syncing database schema (development)
+  - `npm run build` - Building the application (non-production)
+  - `npm run lint` - Running linters
+  - `npm run dev` - Starting development server (if not already running)
+  - Reading files, checking linter errors, searching codebase
+  - Creating/editing files for implementation
+- **Operations Requiring User Confirmation** (ask first):
+  - `git push` / `git commit` - Version control operations (unless explicitly requested)
+  - `npm run db:migrate` - Database migrations (production-like operations)
+  - Deleting files or directories (unless explicitly requested)
+  - Modifying production environment variables
+  - Running commands that could cause data loss
+  - Operations that require payment or external service setup
+- **When in Doubt**: If an operation could have significant consequences (data loss, production changes, costs), ask the user first
+- **Error Handling**: If a command fails due to permissions, try with appropriate `required_permissions` flags before asking the user
+- **Rationale**: This rule enables agents to work efficiently and complete tasks end-to-end without unnecessary interruptions, while still protecting against destructive operations
+
+### Prisma & Database Rules
+- **Schema-Client Synchronization**:
+  - After modifying `prisma/schema.prisma`, **ALWAYS** run `npx prisma generate` to regenerate the Prisma client
+  - After database schema changes, run `npx prisma db push` (development) or `npx prisma migrate dev` (with migrations)
+  - Never commit schema changes without regenerating the Prisma client
+  - If Prisma errors mention "Unknown argument" or missing fields, regenerate the client first
+- **Migration Best Practices**:
+  - Use `prisma db push` for rapid development iterations
+  - Use `prisma migrate dev` for tracked migrations in development
+  - Use `prisma migrate deploy` for production deployments
+  - Always test migrations on a development database first
+- **Data Seeding Requirements**:
+  - Seed files must create all data referenced by frontend default values
+  - Run `npm run db:seed` after schema changes that affect seed data
+  - Verify seed data matches frontend expectations before deployment
+
+### Terminal & Command Line Guide (For Non-Developers)
+- **CRITICAL - Always Provide Step-by-Step Instructions**: When asking users to run terminal commands, ALWAYS provide:
+  1. **What a terminal is**: A text-based interface to run commands on your computer
+  2. **How to open it**: 
+     - **Mac**: Press `Cmd + Space`, type "Terminal", press Enter
+     - **Windows**: Press `Win + R`, type "cmd", press Enter
+     - **Or**: Right-click in your project folder, select "Open Terminal Here" or "Open in Terminal"
+  3. **Navigation**: Explain `cd` command to change directories
+  4. **Current directory**: Always verify they're in the project folder using `pwd` (Mac/Linux) or `cd` (Windows)
+  5. **Command explanation**: Explain what each command does in simple terms
+  6. **Expected output**: Show what success looks like
+  7. **Error handling**: What to do if something goes wrong
+- **Common Commands Explained**:
+  - `pwd` (Mac/Linux) or `cd` (Windows): Shows current folder location
+  - `cd "folder name"`: Changes to that folder (use quotes if folder name has spaces)
+  - `npm run db:seed`: Runs the database seed script to populate data
+  - `npx prisma generate`: Regenerates Prisma client after schema changes
+  - `npx prisma db push`: Updates database structure to match schema
+- **Before Running Any Command**:
+  1. Open Terminal (see instructions above)
+  2. Navigate to project folder: `cd "/Users/marck.baldorado/Documents/Learning Management"`
+  3. Verify location: Run `pwd` to confirm you're in the right place
+  4. You should see the project path ending with "Learning Management"
+- **Running Database Seed**:
+  1. Make sure you're in the project folder (see above)
+  2. Type: `npm run db:seed`
+  3. Press Enter
+  4. Wait for completion (you'll see "✅ Created X companies" and "✅ Created X positions")
+  5. If you see errors, share them - don't proceed if there are errors
+- **Troubleshooting**:
+  - **"command not found"**: You're not in the project folder - navigate there first
+  - **"Cannot find module"**: Run `npm install` first to install dependencies
+  - **Permission errors**: Contact your system administrator or check file permissions
+  - **Database connection errors**: Check your `.env` file has the correct `DATABASE_URL`
+
+### External Tools & Services Selection
+- **CRITICAL - Always Provide Choices**: When evaluating or recommending external tools, services, or third-party integrations, ALWAYS provide multiple options with:
+  - **Pros and Cons** for each option
+  - **Cost breakdown** (free tiers, pricing tiers, scalability costs)
+  - **Vendor lock-in assessment** (how easy it is to switch later)
+  - **Industry standard status** (is it widely adopted?)
+  - **Limitations** of free/low-cost tiers
+  - **Recommendation with rationale** (explain why one option is best)
+- **Prioritization Criteria**:
+  - **Cost-efficiency**: Prefer free tiers and industry-standard solutions
+  - **No vendor lock-in**: Choose solutions that can be easily replaced
+  - **Not too limiting**: Free tier should accommodate initial growth
+  - **Industry standard**: Prefer widely-adopted, well-documented solutions
+- **Stakeholder Communication**: Since stakeholders are not developers, always explain:
+  - What each tool does in simple terms
+  - Why we need it
+  - Cost implications (now and at scale)
+  - What happens if we need to switch later
+  - Trade-offs between options
+
+## Wireframing & Design Process
+
+### Continuous Wireframing
+- Create wireframes BEFORE implementing features
+- Use tools: Figma, Excalidraw, or simple markdown diagrams
+- Document in `/docs/wireframes/` directory
+- Update wireframes as features evolve
+- Include:
+  - User flows
+  - Component layouts
+  - Interaction states
+  - Responsive breakpoints
+
+### Design Workflow
+1. **Wireframe** → Low-fidelity layout
+2. **Mockup** → High-fidelity design with colors/typography
+3. **Prototype** → Interactive prototype (optional)
+4. **Implementation** → Code with design system
+5. **Review** → Compare implementation vs. design
+
+## Deployment & Infrastructure Setup
+
+### GitHub Setup
+1. Create repository on GitHub
+2. Initialize local git: `git init`
+3. Add remote: `git remote add origin <repo-url>`
+4. Create `.gitignore` (Next.js template)
+5. Initial commit and push
+
+### Vercel Setup
+1. Connect GitHub repo to Vercel
+2. Vercel auto-detects Next.js
+3. Add environment variables:
+   - `DATABASE_URL` (from Railway)
+   - `NEXTAUTH_SECRET`
+   - `NEXTAUTH_URL`
+   - `GOOGLE_ANALYTICS_ID`
+4. Deploy automatically on push to main
+
+### Railway Setup
+1. Create Railway account
+2. Create new PostgreSQL database
+3. Copy `DATABASE_URL` connection string
+4. Add to Vercel environment variables
+5. Run migrations: `npx prisma migrate deploy`
+
+### Environment Variables
+```env
+# Database
+DATABASE_URL="postgresql://..."
+
+# NextAuth
+NEXTAUTH_SECRET="generate-random-string"
+NEXTAUTH_URL="https://your-app.vercel.app"
+
+# Email Service (Resend)
+RESEND_API_KEY="re_your_api_key_here"
+
+# Analytics
+NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"
+
+# Optional: File Upload
+BLOB_READ_WRITE_TOKEN="..."
+```
+
+## Agent Roles & Context
+
+### Frontend Agent
+- Focus: React/Next.js components, UI/UX implementation
+- Context: Design system, component library, user interactions
+- Output: TypeScript React components, CSS Modules styling
+- **CRITICAL**: Never use inline styles (`style={{}}`). Always use CSS Modules with CSS variables from the design system
+- **NO EMOJIS**: Never use emojis in buttons, assets, or any UI elements. Use Lucide React or Heroicons instead.
+- **MOBILE-ONLY**: All user-facing components must be designed for mobile viewports (320px-428px) only. No desktop breakpoints except for admin/super admin pages (`/admin/**`, `/super-admin/**`)
+- **TYPOGRAPHY QUALITY**: 
+  - Use maximum 2-3 font sizes consistently
+  - Maintain consistent spacing between text elements
+  - Never cut off text at the bottom - ensure proper line-height and padding
+  - Use standard letter-spacing and word-spacing (no excessive spacing)
+  - Follow professional UI/UX typography standards
+- **ICON QUALITY**: 
+  - Icons must not be distorted or stretched
+  - Maintain proper aspect ratios
+  - Use consistent icon sizes
+  - Ensure proper rendering at all sizes
+- **DESIGN POLISH**: 
+  - Apply design principles (proximity, alignment, repetition, contrast)
+  - Prevent visual glitches (text clipping, icon distortion, overflow)
+  - Ensure proper container padding to prevent text cutoff
+  - Maintain visual harmony and consistency
+- **CHUNKING & EASE OF USE**: When creating pages, forms, processes, or any UI element, prioritize:
+  - Breaking complex tasks into small, manageable steps
+  - Reducing cognitive load
+  - Minimizing friction
+  - Making the user's life as easy as possible
+  - **Viewport Efficiency**: Ensure all critical content is visible without scrolling
+  - **Compact Layouts**: Optimize spacing to fit maximum content in viewport
+- **BEHAVIORAL SCIENCE**: Apply positive framing, celebrate progress, use social proof, and frame challenges as opportunities
+- **TEACHING MANDATORY**: User is not a developer - always explain:
+  - What you're doing and why
+  - The problem being solved
+  - How the solution works
+  - Technical concepts in simple terms
+
+### Backend Agent
+- Focus: API routes, database schema, business logic
+- Context: Database models, API contracts, authentication
+- Output: Prisma schemas, API route handlers, utilities
+- **TEACHING MANDATORY**: User is not a developer - always explain:
+  - What you're doing and why
+  - The problem being solved
+  - How the solution works
+  - Technical concepts in simple terms
+
+### Design Agent
+- Focus: Wireframes, design system, user flows
+- Context: Brand guidelines, accessibility, mobile-first
+- Output: Design documentation, wireframe updates
+
+### DevOps Agent
+- Focus: Deployment, CI/CD, infrastructure
+- Context: Vercel, Railway, GitHub workflows
+- Output: Deployment configs, environment setup guides
+
+## Anti-Hallucination Rules
+
+1. **Never assume** features not explicitly mentioned
+2. **Always reference** existing codebase structure
+3. **Verify** tech stack compatibility before suggesting
+4. **Check** existing implementations before creating new ones
+5. **Document** decisions and rationale
+6. **Ask for clarification** if requirements are ambiguous
+7. **Maintain consistency** with established patterns
+8. **Reference** this rules file when making decisions
+
+## Agent Context Review Requirements
+
+- **CRITICAL - Always Review Context Files**: All agents MUST automatically review and reference the following context files when working on any task:
+  - **@.cursorrules** - Project rules, design system, UI/UX principles, workflow rules
+  - **@docs/CONTEXTBIBLE.md** - Technical implementation rules, database schema, business logic, API structure, gamification calculations
+- **Context Tagging**: Agents should always tag these files in their responses when:
+  - Starting a new task or feature
+  - Making design decisions
+  - Implementing business logic
+  - Working with database schemas
+  - Creating or modifying components
+  - Making UI/UX changes
+- **Why This Matters**: These files contain critical project rules, design standards, and technical specifications that ensure consistency and prevent errors
+- **Review Before Implementation**: Always check both files before implementing features to ensure compliance with project standards
+
+## Related Rules Files
+
+**CRITICAL**: This project has THREE complementary rules files that MUST be followed:
+
+1. **`.cursorrules`** (this file) - Project overview, design system, UI/UX principles, workflow rules
+2. **`.uiuxrules.md`** - Universal UI/UX design principles, accessibility standards, interaction patterns, and continuously evolving design learnings
+3. **`.contextbible-rules.md`** - Technical implementation rules, database schema, business logic, API structure, gamification calculations
+
+**All agents MUST reference ALL THREE files** when implementing features:
+- Use `.cursorrules` for project-specific design, UI/UX, and workflow guidance
+- Use `.uiuxrules.md` for universal UI/UX principles, accessibility standards, and design best practices
+- Use `.contextbible-rules.md` for technical specifications, database rules, business logic, and implementation patterns
+
+The `.uiuxrules.md` file contains:
+- Foundational UI/UX principles (accessibility, cognitive load, Gestalt principles)
+- Mobile-first design guidelines and viewport constraints
+- Visual design standards (typography, spacing, color)
+- Interaction design patterns (feedback, micro-interactions, progressive disclosure)
+- User psychology and behavioral science principles
+- Problem-solution patterns for common design issues
+- Evolution log documenting continuous learnings and updates
+
+The `.contextbible-rules.md` file contains:
+- Database schema requirements and field specifications
+- Authentication and authorization flow rules
+- Gamification system calculations (XP, levels, ranks, badges)
+- Business logic rules (progress calculation, XP awards, badge unlocking)
+- API structure and response format requirements
+- Component architecture patterns
+- Project structure and routing rules
+- Terminology and messaging rules
+
+## Admin Management Features
+
+### Multimedia Management Page
+- **Route**: `/admin/media` (Admin) and `/super-admin/media` (Super Admin)
+- **Purpose**: Combined page for managing carousel banners, splash screen images, and theme customization
+- **Features**:
+  - **Carousel Management**:
+    - Mode selection (Photo Carousel or Video)
+    - Upload up to 4 carousel images (Photo Carousel mode)
+    - Upload single looping video (Video mode)
+    - Edit, delete, and reorder carousel images
+    - **Live Preview**: Shows how the carousel appears on staff dashboards
+    - File requirements displayed (format, size, resolution, orientation)
+  - **Splash Screen Management**:
+    - Upload splash screen background image
+    - Preview current splash screen image
+    - Delete/reset splash screen image
+    - File requirements displayed (format, size, resolution, orientation)
+  - **Theme Management**:
+    - **Background Type Selection**: Choose between Galaxy (animated), Plain (solid color), or Moving Gradient
+    - **Color Group Pickers**: Organized color controls for Button, Text, Accent, Gold, and Status colors
+    - **Plain Background Color Picker**: Appears inline with other color buttons when "Plain" background is selected
+    - **Live Preview**: All color changes apply immediately to the page for real-time preview
+    - **Color Preservation**: When switching to "Plain" background, the last selected color is preserved and displayed
+    - **Background Application**: Plain background color is applied to body, html, and layout containers for full coverage
+    - **React Portal Rendering**: Color picker dropdowns use React Portal to render outside DOM hierarchy, preventing clipping by overflow containers
+- **File Requirements**:
+  - **Carousel Images**: PNG/JPG/JPEG, max 5MB, 1920×1080 landscape, horizontal orientation
+  - **Carousel Video**: MP4/WebM/MOV, max 50MB, 1920×1080 landscape, 10-30 seconds recommended
+  - **Splash Screen**: PNG/JPG/JPEG, max 10MB, 428×926 portrait, vertical orientation, mobile-optimized
+- **UI Design**: Smaller buttons, compact layout, desktop-optimized
+
+## User Roles & Access Control
+
+### User Role Types
+The application supports four distinct user roles with different access levels:
+
+1. **Super Admin**
+   - **Route**: `/super-admin/dashboard`
+   - **Access**: Dashboard for managing admins and creating account types
+   - **No Profile Page**: Super admins do not have profile pages
+   - **Layout**: Desktop-optimized (admin exception)
+   - **Device**: Desktop only
+
+2. **Admin**
+   - **Route**: `/admin/dashboard`
+   - **Access**: Dashboard for managing branch managers and employees
+   - **No Profile Page**: Admins do not have profile pages
+   - **Layout**: Desktop-optimized (admin exception)
+   - **Device**: Desktop only
+
+3. **Branch Manager**
+   - **Route**: `/employee/profile` (first page after login)
+   - **Access**: Profile page + Basic Home Page
+   - **Has Profile Page**: Branch managers have profile pages with onboarding
+   - **Layout**: Mobile-optimized (320px-428px viewport)
+   - **Device**: Mobile only
+   - **Onboarding**: Shows welcome message/onboarding modal
+
+4. **Employees**
+   - **Route**: `/employee/profile` (first page after login)
+   - **Access**: Profile page + Basic Home Page
+   - **Has Profile Page**: Employees have profile pages with onboarding
+   - **Layout**: Mobile-optimized (320px-428px viewport)
+   - **Device**: Mobile only
+   - **Onboarding**: Shows welcome message/onboarding modal
+
+5. **Area Manager** (if applicable)
+   - **Route**: `/employee/area-manager/dashboard` or `/employee/profile`
+   - **Layout**: Mobile-optimized (320px-428px viewport)
+   - **Device**: Mobile only
+   - **Onboarding**: Shows welcome message/onboarding modal
+
+6. **Regional Manager** (if applicable)
+   - **Route**: `/employee/regional-manager/dashboard` or `/employee/profile`
+   - **Layout**: Mobile-optimized (320px-428px viewport)
+   - **Device**: Mobile only
+   - **Onboarding**: Shows welcome message/onboarding modal
+
+7. **Trainer** (if applicable)
+   - **Route**: `/employee/trainer/dashboard` or `/employee/trainer/workshop`
+   - **Layout**: Desktop-optimized (admin exception)
+   - **Device**: Desktop only
+   - **No Profile Page**: Trainers do not have profile pages (use dashboard instead)
+   - **Onboarding**: Does NOT show welcome message/onboarding modal (desktop users)
+
+### Mobile vs Desktop User Context
+- **CRITICAL**: Admin, Super Admin, and Trainers use desktop layouts
+- **Desktop Users**: Admin, Super Admin, and Trainers use desktop layouts with sidebar navigation
+- **Mobile Users**: Employees, Branch Managers, Area Managers, and Regional Managers use mobile devices (320px-428px viewports)
+- **OnboardingMessage/Welcome Message**: 
+  - **ONLY shown to mobile users** (employees, branch managers, area managers, regional managers)
+  - **NOT shown to** Admin, Super Admin, or Trainers (they use desktop and don't see onboarding)
+  - **Must be optimized for mobile viewports** (320px-428px) - all spacing, font sizes, and layout must fit within mobile screen
+  - **Design Logic**: New registered users are mobile-only (employees and managers), so the welcome message must be mobile-optimized
+
+### Role-Based Routing Rules
+- **Post-Login Redirect**: Based on user role
+  - Super Admin → `/super-admin/dashboard`
+  - Admin → `/admin/dashboard`
+  - Branch Manager → `/employee/profile`
+  - Employee → `/employee/profile`
+- **Profile Pages**: Only accessible to Branch Managers and Employees
+- **Admin Dashboards**: Only accessible to Super Admins and Admins
+- **Middleware**: Must check user role and redirect accordingly
+
+## Internal Registration Context
+
+### Registration Access
+- **Who Can Register**: Only Employees and Branch Managers can self-register
+- **Admin/Super Admin**: Created manually by existing admins, no registration flow
+- **Registration Purpose**: Internal company employee onboarding
+
+### Multi-Step Form Chunking Pattern
+- **CRITICAL**: Registration forms MUST use chunking (multi-step process)
+- **Standard Pattern**: 3-step form with progress indicator
+  - Step 1: Personal Information (Name, Email, Phone)
+  - Step 2: Employee Details (Employee Number, Hire Type, Company, Position, Department, Branch, Hire Date)
+  - Step 3: Account Setup (Password, Confirm Password)
+- **Progress Indicator**: Visual progress bar showing current step (1/3, 2/3, 3/3)
+- **Navigation**: Next/Back buttons, final step has "Create Account" button
+- **Validation**: Validate each step before allowing progression
+- **Data Preservation**: Form data preserved when navigating between steps
+- **Mobile Optimization**: Each step must fit within viewport without scrolling
+
+## Project-Specific Context
+
+### Current State
+- Project is starting from scratch
+- Mobile-first PWA with gamification
+- **Mobile-only design** for all user-facing pages (320px-428px viewports)
+- **Desktop layouts** ONLY for admin/super admin pages
+- Pixel Galaxy theme
+- Duolingo-inspired UX
+- Vercel + Railway + GitHub infrastructure
+- **Stakeholders**: Referred to as "Multipliers" throughout the project
+- **Core Philosophy**: Chunking, ease of use, and behavioral science principles guide all design decisions
+
+### Future Considerations
+- Offline capabilities (Phase 2)
+- Video content (Phase 2)
+- Social features (Phase 3)
+- Mobile apps (Phase 4)
+- Error tracking (Sentry - Phase 2)
+
+## Communication Guidelines
+
+- Use clear, concise language
+- Explain technical decisions
+- Provide code examples when helpful
+- Reference industry best practices
+- Maintain professional tone
+- Celebrate achievements (gamification mindset!)
+- **Terminology**: Refer to stakeholders as "Multipliers" throughout the project
+- **CRITICAL - User is Not a Developer**: 
+  - Always explain what you're doing and why
+  - Describe the problem before presenting the solution
+  - Explain technical concepts in simple terms
+  - Teach and educate, don't just implement
+  - Break down complex topics into understandable parts
+  - Use analogies when helpful
+  - For every action: explain the problem, the solution, and why it works
+- **Preview Links (MANDATORY)**: 
+  - **ALWAYS** provide a preview link to view the latest changes after completing work
+  - Include the local development URL (e.g., `http://localhost:3000/signup`) or production URL if deployed
+  - Specify which page/route to visit to see the changes
+  - If multiple pages were modified, list all relevant preview links
+  - Example: "Preview the changes at: http://localhost:3000/signup"
+
+## Security Best Practices
+
+### Environment Variables & Secrets
+- **CRITICAL**: Never commit `.env` files or hardcode secrets
+- **ALWAYS** use `process.env` for sensitive values
+- **NEVER** use `NEXT_PUBLIC_*` prefix for secrets (exposes to client)
+- **MUST** create `.env.example` with placeholder values
+- **MUST** verify `.gitignore` excludes `.env*` files before committing
+- **MUST** use different keys for development and production
+- **MUST** rotate keys if accidentally exposed
+
+### API Key Management
+- **ALWAYS** store API keys in environment variables
+- **NEVER** log or expose API keys in error messages
+- **MUST** use different keys for development and production
+- **MUST** rotate keys if accidentally exposed
+- **MUST** verify no API keys in git history (use `git log -p` to check)
+- **MUST** add runtime checks for missing API keys with generic error messages
+
+### Database Input Sanitization
+- **CRITICAL**: Always use Prisma ORM (never raw SQL queries)
+- **MUST** validate all inputs with Zod schemas before database operations
+- **MUST** validate on both client and server (server validation is mandatory)
+- **NEVER** trust user input - always validate and sanitize
+- **MUST** use Prisma's type-safe queries (no string interpolation in queries)
+- **MUST** validate all PATCH/PUT/POST endpoints with Zod schemas
+- **MUST** create shared validation schemas in `lib/validation/schemas.ts` for reusability
+
+### Authentication Security
+- **MUST** hash passwords with bcryptjs (minimum 10 rounds)
+- **MUST** validate login credentials with Zod before processing
+- **MUST** implement rate limiting on login/signup endpoints (prevent brute force)
+- **MUST** use JWT strategy (stateless, secure)
+- **MUST** protect all API routes with authentication middleware
+- **MUST** implement role-based access control (RBAC)
+- **MUST** validate user status (APPROVED) before allowing login
+- **MUST** never expose password hashes in API responses
+- **MUST** enforce password complexity requirements (uppercase, lowercase, number, special character)
+
+### API Security
+- **MUST** validate all request bodies with Zod schemas
+- **MUST** return consistent error responses (don't leak system details)
+- **MUST** implement rate limiting on public and sensitive endpoints
+- **MUST** use HTTPS in production (Vercel handles this automatically)
+- **MUST** validate all URL parameters (userId, etc.) before use
+- **MUST** prevent self-deletion/self-modification where inappropriate
+- **MUST** check user permissions before allowing operations
+- **MUST** sanitize user input before processing (especially for AI prompts)
+
+### XSS Prevention
+- **NEVER** use `dangerouslySetInnerHTML` without sanitization
+- **MUST** sanitize user-generated content before rendering
+- **MUST** use React's built-in XSS protection (automatic escaping)
+- **MUST** validate and sanitize file uploads
+
+### CSRF Protection
+- **MUST** use NextAuth.js CSRF protection (built-in)
+- **MUST** validate origin headers for sensitive operations
+- **MUST** use same-site cookies (NextAuth.js handles this)
+
+### Rate Limiting
+- **MUST** implement rate limiting on authentication endpoints
+- **MUST** implement rate limiting on sensitive operations (password changes, admin actions)
+- **MUST** use appropriate limits:
+  - Login: 5 attempts per 15 minutes per IP
+  - Signup: 3 attempts per hour per IP
+  - Password change: 5 attempts per hour per IP
+  - Admin actions: 10 attempts per minute per IP
+- **MUST** return 429 status code when rate limit exceeded
+- **MUST** log rate limit violations for monitoring
+
+### Development Security
+- **MUST** disable dev-only endpoints in production (check `NODE_ENV`)
+- **MUST** never commit test credentials or seed data with real passwords
+- **MUST** use separate databases for development and production
+- **MUST** review all API routes before deployment
+- **MUST** document dev-only endpoints clearly
+
+### Prompt Injection Prevention (AI Features)
+- **MUST** sanitize user input before sending to AI services (Gemini)
+- **MUST** escape special characters in user queries
+- **MUST** add input length limits (max 500 chars for search queries)
+- **MUST** validate AI responses before using (JSON parsing, structure validation)
+- **MUST** implement fallback for invalid AI responses
+

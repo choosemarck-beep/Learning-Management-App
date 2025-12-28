@@ -1,0 +1,99 @@
+/* Trainer Announcements Section - Mobile-First Design (320px-428px) */
+
+.card {
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+}
+
+.cardTitle {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.compactBody {
+  padding: var(--spacing-xs) !important;
+  margin-bottom: 0 !important;
+}
+
+.announcementsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.announcementItem {
+  padding: var(--spacing-sm);
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.announcementHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.announcementType {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+}
+
+.typeIcon {
+  color: var(--color-primary-purple);
+  flex-shrink: 0;
+}
+
+.announcementDate {
+  font-size: 0.625rem; /* 10px */
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.announcementTitle {
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.announcementContent {
+  font-size: 0.75rem; /* 12px */
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.announcementTrainer {
+  font-size: 0.6875rem; /* 11px */
+  color: var(--color-primary-purple);
+  margin: 0;
+  font-weight: 600;
+}
+
+.loadingText,
+.errorText,
+.emptyText {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  padding: var(--spacing-md);
+  margin: 0;
+}
+
+.errorText {
+  color: var(--color-status-error);
+}
+

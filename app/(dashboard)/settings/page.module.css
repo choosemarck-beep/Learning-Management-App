@@ -1,0 +1,112 @@
+/* Settings Page - Mobile-First Design (320px-428px) */
+
+.container {
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  padding: var(--spacing-sm) var(--spacing-md);
+  padding-bottom: 100px; /* Space for bottom navigation */
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.title {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.subtitle {
+  font-size: 1rem; /* 16px */
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  margin-bottom: var(--spacing-sm);
+}
+
+.menuList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+  margin-top: var(--spacing-md);
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+  width: 100%;
+  min-height: var(--touch-target-min);
+  text-align: left;
+}
+
+.menuItem:hover {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(139, 92, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+.menuItem:active {
+  transform: translateY(0);
+}
+
+.menuItemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--color-primary-purple);
+  flex-shrink: 0;
+}
+
+.menuItemContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+.menuItemLabel {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+.menuItemDescription {
+  font-size: 0.875rem; /* 14px */
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.menuItemArrow {
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+

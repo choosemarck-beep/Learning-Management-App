@@ -1,0 +1,36 @@
+/* Reels Page Client - TikTok-Style Full Screen - Mobile-First Design (320px-428px) */
+
+.container {
+  width: 100%;
+  flex: 1;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  position: relative;
+  background: #000;
+  min-height: 0; /* Allow flex shrinking */
+}
+
+.container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.loading,
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  height: 100dvh;
+  padding: var(--spacing-md);
+}
+
+.emptyMessage {
+  font-size: 0.875rem; /* 14px */
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  text-align: center;
+}

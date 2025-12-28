@@ -1,0 +1,282 @@
+/* Global Styles - Learning Management App */
+/* Pixel Galaxy Theme */
+
+/* Import Glacial Indifference Font */
+@import url('https://fonts.cdnfonts.com/css/glacial-indifference');
+
+:root {
+  /* Colors - Pixel Galaxy Theme */
+  --color-primary-purple: #8b5cf6;
+  --color-primary-indigo: #6366f1;
+  --color-primary-dark: #4c1d95;
+  --color-primary-deep: #5b21b6;
+
+  --color-accent-cyan: #06b6d4;
+  --color-accent-teal: #0ea5e9;
+
+  --color-star-gold: #fbbf24;
+  --color-star-gold-dark: #f59e0b;
+
+  --color-crystal-purple: #a78bfa;
+  --color-crystal-bright: #c084fc;
+
+  --color-bg-dark: #0f172a;
+  --color-bg-dark-secondary: #1e1b4b;
+  --color-bg-dark-hover: rgba(0, 0, 0, 0.3);
+
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #cbd5e1;
+
+  --color-status-success: #10b981;
+  --color-status-warning: #f59e0b;
+  --color-status-error: #ef4444;
+
+  /* Typography - Glacial Indifference */
+  --font-glacial: "Glacial Indifference", system-ui, sans-serif;
+  
+  /* Font Sizes - Standardized Hierarchy */
+  --font-size-xs: 0.75rem;    /* 12px - Tiny text, captions */
+  --font-size-sm: 0.875rem;   /* 14px - Small text, labels, helper text */
+  --font-size-base: 1rem;     /* 16px - Body text, paragraphs */
+  --font-size-lg: 1.125rem;    /* 18px - Large body text */
+  --font-size-xl: 1.25rem;    /* 20px - Small headings */
+  --font-size-2xl: 1.5rem;    /* 24px - Medium headings (h2) */
+  --font-size-3xl: 2rem;      /* 32px - Large headings (h1) */
+  
+  /* Font Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem; /* 8px */
+  --spacing-sm: 0.75rem; /* 12px */
+  --spacing-md: 1rem; /* 16px */
+  --spacing-lg: 1.5rem; /* 24px */
+  --spacing-xl: 2rem; /* 32px */
+  --spacing-2xl: 3rem; /* 48px */
+
+  /* Border Radius */
+  --radius-sm: 0.375rem; /* 6px */
+  --radius-md: 0.5rem; /* 8px */
+  --radius-lg: 0.75rem; /* 12px */
+  --radius-xl: 1rem; /* 16px */
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms;
+  --transition-normal: 200ms;
+  --transition-slow: 300ms;
+
+  /* Touch Targets */
+  --touch-target-min: 44px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Reset & Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-glacial), "Glacial Indifference", system-ui, sans-serif;
+  background-color: #000000; /* Pure black background for glassmorphism effect */
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  background-color: #000000; /* Pure black background */
+}
+
+/* Touch Target Minimum Size (Mobile-First) */
+button,
+a,
+input[type="button"],
+input[type="submit"],
+input[type="checkbox"],
+input[type="radio"] {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+}
+
+/* Focus Indicators for Accessibility (WCAG AA) */
+*:focus-visible {
+  outline: 2px solid var(--color-primary-teal);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Utility Classes */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 0 var(--spacing-lg);
+  }
+}
+
+/* Button Base Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+  text-decoration: none;
+  min-height: var(--touch-target-min);
+}
+
+.btn:active {
+  transform: scale(0.95);
+}
+
+.btn-primary {
+  background-color: var(--color-primary-purple);
+  color: var(--color-text-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-indigo);
+}
+
+.btn-secondary {
+  background-color: var(--color-star-gold);
+  color: var(--color-text-primary);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-star-gold-dark);
+}
+
+/* Card Component */
+.card {
+  background-color: var(--color-bg-dark-secondary);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(76, 29, 149, 0.2);
+}
+
+/* Progress Bar */
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: var(--color-primary-dark);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    var(--color-primary-purple),
+    var(--color-primary-indigo)
+  );
+  transition: width var(--transition-slow) ease;
+}
+
+/* Animations */
+@keyframes celebration {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-celebration {
+  animation: celebration 0.6s ease-out;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Gradient Text */
+.text-gradient {
+  background: linear-gradient(
+    to right,
+    var(--color-primary-purple),
+    var(--color-primary-indigo)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Responsive Typography - Using Standardized Font Sizes */
+h1 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.4;
+}
+
+p {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.6;
+}
+
+/* Desktop typography scaling (admin/trainer pages only) */
+@media (min-width: 768px) {
+  h1 {
+    font-size: var(--font-size-3xl);
+  }
+  h2 {
+    font-size: var(--font-size-2xl);
+  }
+  h3 {
+    font-size: var(--font-size-xl);
+  }
+}

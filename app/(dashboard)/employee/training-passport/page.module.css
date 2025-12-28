@@ -1,0 +1,16 @@
+/* Training Passport Page - Mobile-First Design (320px-428px) */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-bottom: 100px; /* Space for bottom nav */
+}
+
+.content {
+  flex: 1;
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+}
+

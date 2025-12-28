@@ -1,0 +1,119 @@
+/* Training Card - Netflix-Style - Mobile-First Design (320px-428px) */
+
+.card {
+  flex-shrink: 0;
+  width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform var(--transition-normal) ease;
+  text-align: left;
+  padding: 0;
+}
+
+.card:active {
+  transform: scale(0.95);
+}
+
+.thumbnailContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.thumbnailPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.2) 0%,
+    rgba(99, 102, 241, 0.2) 100%
+  );
+}
+
+.playIcon {
+  color: var(--color-primary-purple);
+  opacity: 0.6;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-normal) ease;
+  opacity: 0;
+}
+
+.card:hover .overlay,
+.card:focus .overlay {
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 1;
+}
+
+.playButton {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-bg-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0.8);
+  transition: transform var(--transition-normal) ease;
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+}
+
+.card:hover .playButton,
+.card:focus .playButton {
+  transform: scale(1);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: 0 var(--spacing-xs);
+}
+
+.title {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.xp {
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600;
+  color: var(--color-primary-purple);
+}
+

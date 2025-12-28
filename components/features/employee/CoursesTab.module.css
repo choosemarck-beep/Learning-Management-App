@@ -1,0 +1,105 @@
+/* Courses Tab Component */
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.courseCard {
+  width: 100%;
+}
+
+.courseContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.thumbnail,
+.thumbnailPlaceholder {
+  width: 100%;
+  height: 120px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  background-color: var(--color-bg-dark-secondary);
+}
+
+.thumbnailPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+
+.courseInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.courseTitle {
+  font-size: 0.9375rem; /* 15px - reduced from 18px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.courseDescription {
+  font-size: 0.8125rem; /* 13px - reduced from 14px */
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.progressSection {
+  margin: var(--spacing-xs) 0;
+}
+
+.courseFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-xs);
+  gap: var(--spacing-sm);
+}
+
+.xpBadge {
+  font-size: 0.75rem; /* 12px - reduced from 14px */
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+/* Empty State */
+.emptyCard {
+  width: 100%;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  gap: var(--spacing-sm);
+  text-align: center;
+}
+
+.emptyIcon {
+  color: var(--color-text-secondary);
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 0.8125rem; /* 13px - reduced from 16px */
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+

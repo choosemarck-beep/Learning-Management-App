@@ -1,0 +1,26 @@
+/* PendingUsersList Component - Admin Dashboard */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+}
+
+/* Desktop styles for admin pages */
+@media (min-width: 768px) {
+  .list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+    gap: var(--spacing-lg);
+  }
+}
+

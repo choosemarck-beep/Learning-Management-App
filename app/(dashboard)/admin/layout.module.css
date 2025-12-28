@@ -1,0 +1,15 @@
+/* Admin Layout Wrapper - Bypass mobile constraints from parent layout */
+
+.adminWrapper {
+  width: 100vw;
+  min-width: 100vw;
+  max-width: none !important;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  /* Break out of parent container using viewport width and negative margins */
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  overflow: hidden;
+}
+

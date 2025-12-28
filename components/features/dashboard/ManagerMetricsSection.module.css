@@ -1,0 +1,129 @@
+/* Manager Metrics Section - Mobile-First Design (320px-428px) */
+
+.card {
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+}
+
+.cardTitle {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.compactBody {
+  padding: var(--spacing-xs) !important;
+  margin-bottom: 0 !important;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.metricCard {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.metricIcon {
+  color: var(--color-primary-purple);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.metricContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  min-width: 0;
+}
+
+.metricLabel {
+  font-size: 0.625rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.metricValue {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+.topPerformers {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.topPerformersTitle {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.4;
+}
+
+.performersList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.performerItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: var(--radius-sm);
+}
+
+.performerRank {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-primary-purple);
+  min-width: 24px;
+}
+
+.performerName {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.performerStats {
+  font-size: 0.6875rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.loadingText,
+.errorText {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  padding: var(--spacing-md);
+  margin: 0;
+}
+
+.errorText {
+  color: var(--color-status-error);
+}
+

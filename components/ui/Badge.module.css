@@ -1,0 +1,38 @@
+/* Badge Component - Mobile-First Design (320px-428px) */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  min-height: 20px;
+}
+
+.default {
+  background-color: var(--color-bg-dark-secondary);
+  color: var(--color-text-primary);
+  border: 1px solid rgba(30, 58, 138, 0.3);
+}
+
+.success {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: var(--color-status-success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.warning {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: var(--color-accent-gold);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.error {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: var(--color-status-error);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+

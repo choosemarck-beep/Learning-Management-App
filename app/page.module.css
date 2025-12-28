@@ -1,0 +1,104 @@
+/* Home Page - Mobile-First Design (320px-428px) */
+
+.main {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--spacing-sm); /* Reduced from md */
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  background: transparent; /* Background is now handled by GalaxyBackground */
+}
+
+.glassContainer {
+  width: 100%;
+  /* Glassmorphism: Semi-transparent background with blur */
+  background: rgba(0, 0, 0, 0.2) !important; /* Black background with 20% opacity - override Card default */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1) !important;
+  border: none !important; /* No border for clean glassmorphism */
+  padding: var(--spacing-md); /* Reduced from lg */
+}
+
+.content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md); /* Reduced from lg */
+  text-align: center;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs); /* Reduced from sm */
+  align-items: center;
+}
+
+.logoWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.logo {
+  margin-bottom: 0; /* Removed margin */
+}
+
+.description {
+  font-size: 0.9375rem; /* 15px - reduced from 16px */
+  color: var(--color-text-primary);
+  font-weight: 600;
+  margin-top: 0; /* Removed margin */
+  line-height: 1.3; /* Reduced from 1.4 */
+}
+
+.subtitle {
+  font-size: 0.8125rem; /* 13px - reduced from 14px */
+  color: var(--color-text-secondary);
+  line-height: 1.4; /* Reduced from 1.5 */
+  margin-top: 0; /* Removed margin */
+}
+
+.ctaSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm); /* Reduced from md */
+  width: 100%;
+}
+
+.cardTitle {
+  font-size: 0.9375rem; /* 15px - reduced from 16px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  text-align: center;
+  margin: 0;
+  line-height: 1.3; /* Reduced from 1.4 */
+}
+
+.ctaButtons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs); /* Reduced from sm */
+  width: 100%;
+  align-items: center; /* Center buttons */
+}
+
+.link {
+  width: auto; /* Changed from 100% to auto */
+  text-decoration: none;
+  display: inline-block;
+}
+
+.button {
+  width: auto; /* Changed from 100% to auto - fits content */
+  min-width: fit-content;
+}

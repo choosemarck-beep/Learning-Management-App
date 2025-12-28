@@ -1,0 +1,48 @@
+/* Carousel Preview Modal - Shows Actual Mobile Size */
+
+.modal {
+  max-width: 428px; /* Actual mobile max width */
+  width: 90vw;
+}
+
+.previewContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+}
+
+.previewDescription {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: 0;
+}
+
+.carouselWrapper {
+  width: 100%;
+  max-width: 428px; /* Actual mobile max width */
+  margin: 0 auto; /* Center horizontally */
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+  /* Actual carousel size: 16:9 aspect ratio, max-height 200px */
+  aspect-ratio: 16 / 9;
+  max-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.videoPreview {
+  width: 100%;
+  max-height: 500px;
+  border-radius: var(--radius-md);
+}
+
+.noContent {
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+

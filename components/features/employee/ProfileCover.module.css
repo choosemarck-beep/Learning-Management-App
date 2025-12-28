@@ -1,0 +1,98 @@
+/* Profile Cover Component - Compact Design */
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* Profile Picture Container */
+.profilePictureContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profilePicture,
+.profilePicturePlaceholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid var(--color-crystal-purple);
+  background-color: var(--color-bg-dark-secondary);
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profilePicturePlaceholder {
+  font-size: 2rem; /* 32px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+}
+
+/* Profile Info Section */
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  text-align: center;
+  width: 100%;
+}
+
+.name {
+  font-size: 1.125rem; /* 18px - reduced from 24px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.employeeNumber {
+  font-size: 0.8125rem; /* 13px - reduced from 14px */
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+  font-family: monospace;
+}
+
+.roleBadge {
+  margin: 0;
+}
+
+/* Quick Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm);
+  width: 100%;
+  margin-top: var(--spacing-xs);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  align-items: center;
+}
+
+.statLabel {
+  font-size: 0.75rem; /* 12px */
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.statValue {
+  font-size: 1rem; /* 16px - reduced from 20px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+

@@ -1,0 +1,754 @@
+/* Phase 3: Netflix-Style Training Video Page */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--color-bg-dark);
+  color: var(--color-text-primary);
+  padding-top: 0;
+}
+
+.backButton {
+  position: fixed;
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: var(--radius-full);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.backButton:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* Phase 3: Video Title Section - At top of video */
+.videoTitleSection {
+  padding: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  margin-bottom: 0;
+  position: relative;
+  z-index: 1;
+  background: var(--color-bg-dark);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.videoTitleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: 0;
+  width: 100%;
+}
+
+.videoTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+  min-width: 0; /* Allow text to shrink if needed */
+}
+
+.badges {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+/* Phase 3: Video Player Section */
+.videoSection {
+  width: 100%;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  position: relative;
+  padding: 0 var(--spacing-md);
+  box-sizing: border-box;
+}
+
+.videoContainer {
+  width: 100%;
+  position: relative;
+  background: #000;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  margin-top: 0;
+  z-index: 0;
+}
+
+.youtubePlayer {
+  width: 100%;
+  height: 100%;
+  border: none;
+  pointer-events: none; /* Disable all pointer events on iframe to prevent clicks */
+}
+
+.youtubeOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  pointer-events: auto; /* Overlay is now clickable to start video */
+  transition: opacity 0.3s ease;
+}
+
+/* Click blocker overlay when video is playing - prevents clicks on YouTube UI */
+.youtubeClickBlocker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  pointer-events: auto; /* Block all clicks on YouTube iframe */
+  background: transparent;
+}
+
+/* Video Controls Overlay */
+.videoControlsOverlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.videoControlsOverlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.controlButton {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: opacity 0.2s;
+  pointer-events: auto;
+}
+
+.controlButton:hover {
+  opacity: 0.8;
+}
+
+.controlButton:active {
+  opacity: 0.6;
+}
+
+
+.videoThumbnail {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumbnailImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+.videoPlayer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #000;
+}
+
+.videoOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  pointer-events: none; /* Overlay blocks clicks, but play button has pointer-events: auto */
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  pointer-events: none; /* Disable video controls interaction - only play button works */
+}
+
+/* Phase 3: Progress Timer Overlay - Positioned as part of video */
+.progressTimerOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 60%, transparent 100%);
+  z-index: 2;
+}
+
+.progressTimerHeader {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.timerLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+/* Quiz Button Section - Right below video */
+.quizButtonSection {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  padding-bottom: 0;
+  margin-bottom: 10px;
+  background: var(--color-bg-dark);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.quizButton {
+  width: 350px !important;
+  max-width: 350px;
+  min-width: 350px;
+  margin: 0;
+  margin-bottom: 0;
+  display: block;
+  box-sizing: border-box;
+}
+
+.quizButton.quizUnlocked {
+  background: var(--color-status-success);
+  border-color: var(--color-status-success);
+  color: white;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.2);
+  animation: quizGlow 2s ease-in-out infinite alternate;
+}
+
+.quizButton.quizUnlocked:hover {
+  background: rgba(16, 185, 129, 0.9);
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.6), 0 0 50px rgba(16, 185, 129, 0.3);
+  transform: translateY(-1px);
+}
+
+@keyframes quizGlow {
+  from {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.2);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.6), 0 0 60px rgba(16, 185, 129, 0.3);
+  }
+}
+
+.progressTimerBar {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-full);
+  overflow: visible;
+}
+
+.progressTimerFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary-purple), var(--color-primary-indigo));
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.quizUnlockMarker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.quizUnlockMarker.unlocked {
+  opacity: 0.7;
+}
+
+.markerDot {
+  width: 12px;
+  height: 12px;
+  background: var(--color-star-gold);
+  border: 2px solid var(--color-bg-dark);
+  border-radius: var(--radius-full);
+  margin: 0 auto;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+}
+
+.markerLine {
+  width: 2px;
+  height: 20px;
+  background: var(--color-star-gold);
+  margin: 2px auto 0;
+  opacity: 0.6;
+}
+
+/* Phase 3: Overview Section - Below Quiz Button */
+.overviewSection {
+  width: 100%;
+  padding: 0 var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+  margin-top: 10px;
+  margin-bottom: 0;
+  box-sizing: border-box;
+}
+
+.descriptionContainer {
+  margin-bottom: var(--spacing-md);
+}
+
+.description {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  transition: max-height 0.3s ease;
+  text-align: left;
+}
+
+.descriptionCollapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.seeMoreButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+  background: none;
+  border: none;
+  color: var(--color-primary-purple);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  padding: var(--spacing-xs) 0;
+  transition: color 0.2s;
+}
+
+.seeMoreButton:hover {
+  color: var(--color-primary-indigo);
+}
+
+.metadata {
+  display: flex;
+  gap: var(--spacing-lg);
+  margin-top: 0;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.metadataItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.metadataLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.metadataValue {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.content {
+  width: 100%;
+  padding: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  box-sizing: border-box;
+}
+
+.header {
+  margin-bottom: var(--spacing-md);
+}
+
+.courseLabel {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.3;
+}
+
+/* Legacy description class - keeping for backward compatibility */
+.description {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* Overview description uses the same styles but with collapse functionality */
+
+.progressSection {
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+}
+
+.progressInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.xpBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-star-gold);
+  white-space: nowrap;
+}
+
+.progressText {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.quizCard {
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+}
+
+.quizHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.quizTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.quizScore {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+}
+
+.passed {
+  color: var(--color-status-success);
+  font-weight: var(--font-weight-semibold);
+}
+
+.failed {
+  color: var(--color-status-error);
+  font-weight: var(--font-weight-semibold);
+}
+
+.quizButton {
+  width: 350px !important;
+  max-width: 350px;
+  min-width: 350px;
+  margin-bottom: var(--spacing-sm);
+  box-sizing: border-box;
+}
+
+.quizHint,
+.quizPostponedHint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+/* Updates Section - Feed Format */
+.updatesSection {
+  width: 100%;
+  margin-top: 10px;
+  padding: 0 var(--spacing-md) var(--spacing-md);
+  box-sizing: border-box;
+}
+
+.sectionTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.updatesFeed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.updateCard {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+  position: relative;
+}
+
+.updateCard:not(.updateLocked):hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+}
+
+.updateCard.updateLocked {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.updateCard.updateCompleted {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.updateHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+  gap: var(--spacing-sm);
+}
+
+.updateHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex: 1;
+}
+
+.updateHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.updateTitle {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.lockIcon {
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.completedIcon {
+  color: var(--color-status-success);
+  flex-shrink: 0;
+}
+
+.updateQuizBadge {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  color: var(--color-accent-cyan);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(6, 182, 212, 0.1);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+.updateDescription {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.5;
+}
+
+.updateXP {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--color-star-gold);
+  padding: 0;
+  white-space: nowrap;
+}
+
+.xpIcon {
+  flex-shrink: 0;
+  color: var(--color-star-gold);
+}
+
+.xpValue {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-star-gold);
+}
+
+.lockedMessage {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  padding: var(--spacing-xs);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+  margin-top: var(--spacing-xs);
+}
+
+.completedBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-status-success);
+  padding: var(--spacing-xs);
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: var(--radius-sm);
+  margin-top: var(--spacing-xs);
+}
+
+/* Phase 3: Content wrapper for quiz and mini trainings */
+.content {
+  padding: var(--spacing-md);
+  padding-top: 0;
+  margin-top: 0; /* Consistent spacing - controlled by overviewSection margin-bottom */
+}
+
+/* Quiz Warning Modal Styles - Mobile-First (320px-428px) */
+.quizWarningModalContent {
+  padding: var(--spacing-md);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.quizWarningHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.quizWarningIcon {
+  color: var(--color-status-warning);
+  flex-shrink: 0;
+  margin-top: 2px;
+  width: 24px;
+  height: 24px;
+}
+
+.quizWarningText {
+  flex: 1;
+  min-width: 0; /* Prevent text overflow */
+}
+
+.quizWarningIntro {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  margin: 0;
+  margin-bottom: var(--spacing-sm);
+}
+
+.quizWarningList {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  padding-left: var(--spacing-md);
+}
+
+.quizWarningList li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.quizWarningList li strong {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.quizWarningActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  width: 100%;
+}
+
+.quizWarningButton {
+  width: 100%;
+  min-height: 44px; /* Touch target minimum */
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+

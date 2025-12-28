@@ -1,0 +1,46 @@
+/* ProgressBar Component - Mobile-First Design (320px-428px) */
+
+.wrapper {
+  width: 100%;
+  max-width: 428px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.label {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.percentage {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.bar {
+  width: 100%;
+  height: 8px;
+  background-color: var(--color-primary-dark);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.fill {
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    var(--color-primary-teal),
+    var(--color-primary-blue)
+  );
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow) ease;
+}
+

@@ -1,0 +1,121 @@
+/* DatePicker Component - Mobile-First Design (320px-428px) */
+
+.wrapper {
+  width: 100%;
+  max-width: 428px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.label {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 600;
+  color: var(--color-text-primary);
+  display: block;
+}
+
+.required {
+  color: var(--color-status-error);
+  margin-left: 2px;
+}
+
+.datePickerContainer {
+  position: relative;
+  width: 100%;
+}
+
+.hiddenInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.dateButton {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 1rem; /* 16px */
+  font-family: var(--font-nunito);
+  /* Glassmorphism: Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  min-height: var(--touch-target-min);
+  transition: all var(--transition-normal) ease;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.dateButton:hover {
+  background-color: rgba(0, 0, 0, 0.35);
+  box-shadow: 
+    0 0 0 3px rgba(139, 92, 246, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.dateButton:focus {
+  outline: none;
+  border-color: var(--color-primary-purple);
+  box-shadow: 
+    0 0 0 3px rgba(139, 92, 246, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.35);
+}
+
+/* On-brand calendar picker colors */
+.hiddenInput[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) sepia(1) saturate(5) hue-rotate(250deg);
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.hiddenInput[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  filter: invert(1) sepia(1) saturate(5) hue-rotate(250deg) brightness(1.2);
+}
+
+.dateButton.placeholder .dateDisplay {
+  color: var(--color-text-secondary);
+  opacity: 0.6;
+}
+
+.dateDisplay {
+  flex: 1;
+  color: var(--color-text-primary);
+}
+
+.dateButton.error {
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+    0 0 0 1px var(--color-status-error);
+}
+
+.dateButton.error:focus {
+  box-shadow: 
+    0 0 0 3px rgba(239, 68, 68, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+    0 0 0 1px var(--color-status-error);
+}
+
+.errorText {
+  font-size: 0.75rem; /* 12px */
+  color: var(--color-status-error);
+  display: block;
+}
+
+.helperText {
+  font-size: 0.75rem; /* 12px */
+  color: var(--color-text-secondary);
+  display: block;
+}
+

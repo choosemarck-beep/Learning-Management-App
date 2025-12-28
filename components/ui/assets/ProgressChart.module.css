@@ -1,0 +1,19 @@
+/* Progress Chart Component - Gamified Asset */
+
+.chartWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chartIcon {
+  color: var(--color-accent-cyan);
+  filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.4));
+  transition: transform var(--transition-normal) ease;
+}
+
+.chartWrapper:hover .chartIcon {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.6));
+}
+

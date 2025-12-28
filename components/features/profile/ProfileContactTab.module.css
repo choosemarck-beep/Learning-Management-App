@@ -1,0 +1,44 @@
+/* Profile Contact Tab - Mobile-First Design (320px-428px) */
+/* Unified Container - No Card Wrapper */
+
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.infoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.infoLabel {
+  font-size: 0.6875rem; /* 11px */
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.infoValue {
+  font-size: 0.875rem; /* 14px */
+  color: var(--color-text-primary);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
+

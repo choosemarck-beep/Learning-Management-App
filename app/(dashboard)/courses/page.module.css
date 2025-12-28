@@ -1,0 +1,21 @@
+/* Courses Page - Mobile-First Design (320px-428px) - Netflix Style */
+
+.container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 100px; /* Space for bottom navigation */
+  background: #000000; /* Pure black background for Netflix-style */
+}
+
+.content {
+  flex: 1;
+  padding: var(--spacing-sm) 0;
+  max-width: 428px;
+  margin: 0 auto;
+  width: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+

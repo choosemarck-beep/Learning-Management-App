@@ -1,0 +1,105 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--background-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.path {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-items: flex-start;
+}
+
+.node {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.nodeCircle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-normal) ease;
+}
+
+.nodeCircle.available {
+  background: linear-gradient(135deg, var(--color-primary-purple), var(--color-primary-blue));
+  color: var(--color-text-primary);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.nodeCircle.completed {
+  background: linear-gradient(135deg, var(--color-status-success), #059669);
+  color: var(--color-text-primary);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.nodeCircle.locked {
+  background: var(--background-primary);
+  color: var(--color-text-secondary);
+  border: 2px solid var(--border-color);
+}
+
+.nodeLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+}
+
+.nodeNumber {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.nodeTitle {
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.connector {
+  width: 2px;
+  height: 32px;
+  background: var(--border-color);
+  margin-left: 24px;
+  transition: background var(--transition-normal) ease;
+}
+
+.connectorCompleted {
+  background: linear-gradient(180deg, var(--color-status-success), var(--color-status-success));
+}
+
+@media (max-width: 768px) {
+  .node {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .connector {
+    margin-left: 0;
+    margin-top: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+    height: 24px;
+  }
+}
+

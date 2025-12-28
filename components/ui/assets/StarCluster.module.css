@@ -1,0 +1,19 @@
+/* Star Cluster Component - Gamified Asset */
+
+.clusterWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clusterIcon {
+  color: var(--color-star-gold);
+  filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.4));
+  transition: transform var(--transition-normal) ease;
+}
+
+.clusterWrapper:hover .clusterIcon {
+  transform: scale(1.1) rotate(5deg);
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.6));
+}
+

@@ -1,0 +1,125 @@
+/* Course Completion Card - Desktop-Optimized Design */
+
+.card {
+  width: 100%;
+  position: relative;
+}
+
+.removeButton {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-full);
+  color: var(--color-status-error);
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+  z-index: 10;
+}
+
+.removeButton:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: scale(1.1);
+}
+
+.chartContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: var(--spacing-md) 0;
+}
+
+.progressCircle {
+  width: 120px;
+  height: 120px;
+}
+
+.progressPath {
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.percentage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.percentageValue {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.courseInfo {
+  text-align: center;
+  margin-top: var(--spacing-md);
+}
+
+.courseTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.courseMeta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  margin: var(--spacing-xs) 0;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+}
+
+.courseMeta svg {
+  flex-shrink: 0;
+}
+
+.metaText {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.trainingCount {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-left: var(--spacing-xs);
+}
+
+.stats {
+  margin-top: var(--spacing-xs);
+}
+
+.editButton {
+  margin-top: var(--spacing-sm);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+}
+
+.statText {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+

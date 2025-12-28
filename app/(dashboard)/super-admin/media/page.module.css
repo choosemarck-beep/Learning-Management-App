@@ -1,0 +1,18 @@
+/* Super Admin Media Management Page - Desktop-Optimized */
+
+.container {
+  width: 100%;
+  margin: 0;
+  padding: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  height: calc(100vh - 64px);
+  min-height: calc(100vh - 64px);
+  max-height: calc(100vh - 64px);
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+

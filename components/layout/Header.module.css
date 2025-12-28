@@ -1,0 +1,57 @@
+/* Header Component - Mobile-First Design (320px-428px) */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--color-bg-dark);
+  border-bottom: 1px solid rgba(30, 58, 138, 0.2);
+  padding: var(--spacing-sm) 0;
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-md);
+  width: 100%;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.logoIcon {
+  font-size: 1.5rem;
+}
+
+.logoText {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 800;
+  background: linear-gradient(
+    to right,
+    var(--color-primary-teal),
+    var(--color-primary-blue)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.userArea {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.userName {
+  font-size: 0.875rem; /* 14px */
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+

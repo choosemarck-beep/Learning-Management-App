@@ -1,0 +1,126 @@
+/* Intro Carousel Component - Mobile-First Design (320px-428px) */
+
+.carouselContainer {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md); /* Reduced top/bottom padding */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm); /* Reduced gap */
+}
+
+.carouselWrapper {
+  width: 100%;
+  height: 180px; /* Reduced height to fit viewport better */
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slide {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs); /* Further reduced gap */
+  text-align: center;
+  padding: var(--spacing-sm); /* Reduced padding */
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0; /* Removed margin-bottom */
+  width: 100%;
+  height: 48px; /* Reduced height from 64px to 48px */
+  /* Ensure icon doesn't distort */
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 1rem; /* 16px - Smaller to ensure one line on mobile */
+  font-weight: 700; /* Bold - clear weight hierarchy */
+  color: var(--color-text-primary);
+  line-height: 1.3; /* Proper line-height to prevent truncation */
+  margin: 0;
+  padding: 0 var(--spacing-sm); /* Adequate padding to prevent clipping */
+  letter-spacing: normal; /* Standard letter-spacing */
+  word-spacing: normal; /* Standard word-spacing */
+  max-width: 100%;
+  /* Allow wrapping only on very small screens if absolutely necessary */
+  white-space: normal;
+}
+
+.description {
+  font-size: 0.9375rem; /* 15px - Slightly larger for better readability */
+  font-weight: 400; /* Regular - clear weight hierarchy */
+  color: var(--color-text-secondary);
+  line-height: 1.5; /* Adjusted line-height for better spacing */
+  margin: 0;
+  max-width: 320px;
+  padding: 0 var(--spacing-sm); /* Adequate padding to prevent clipping */
+  letter-spacing: normal; /* Standard letter-spacing */
+  word-spacing: normal; /* Standard word-spacing */
+  /* Allow text to wrap naturally */
+  white-space: normal;
+}
+
+/* Dots indicator */
+.dotsContainer {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+  justify-content: center;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  border: none;
+  background-color: rgba(203, 213, 225, 0.4);
+  cursor: pointer;
+  padding: 0;
+  transition: all var(--transition-normal) ease;
+  min-width: 8px;
+  min-height: 8px;
+}
+
+.dot:hover {
+  background-color: rgba(203, 213, 225, 0.6);
+  transform: scale(1.2);
+}
+
+.dotActive {
+  background-color: var(--color-primary-purple);
+  width: 24px;
+  border-radius: var(--radius-full);
+}
+
+.dotActive:hover {
+  transform: scale(1);
+}
+
+/* Responsive adjustments for very small screens */
+@media (max-width: 360px) {
+  .carouselWrapper {
+    height: 200px; /* Maintain adequate height for description */
+  }
+
+  .title {
+    font-size: 1rem; /* 16px - Smaller for very small screens, still one line */
+    line-height: 1.3; /* Maintain line-height */
+    padding: 0 var(--spacing-xs); /* Maintain padding */
+  }
+
+  .description {
+    font-size: 0.875rem; /* 14px - Small size, consistent with other small text */
+    line-height: 1.5; /* Adjusted line-height */
+    padding: 0 var(--spacing-xs); /* Maintain padding */
+  }
+}
+

@@ -1,0 +1,19 @@
+/* Community Icon Component - Gamified Asset */
+
+.communityWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.communityIcon {
+  color: var(--color-primary-indigo);
+  filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.4));
+  transition: transform var(--transition-normal) ease;
+}
+
+.communityWrapper:hover .communityIcon {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.6));
+}
+

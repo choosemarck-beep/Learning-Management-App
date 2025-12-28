@@ -1,0 +1,8 @@
+/* Admin Activity Logs Page - Desktop Layout */
+
+.container {
+  width: 100%;
+  min-height: 100vh;
+  padding: var(--spacing-lg);
+}
+

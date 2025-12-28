@@ -1,0 +1,124 @@
+/* Stats Card Component */
+
+.statsCard {
+  background: rgba(0, 0, 0, 0.2) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(139, 92, 246, 0.2) !important;
+  transition: all var(--transition-normal) ease;
+  cursor: pointer;
+  padding: 0 !important;
+  width: 250px;
+}
+
+.statsCard :global(.cardBody) {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.statsCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px 0 rgba(139, 92, 246, 0.3),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(139, 92, 246, 0.4) !important;
+}
+
+.content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  background: transparent;
+  border-radius: 0;
+  color: var(--color-primary-purple);
+  flex-shrink: 0;
+}
+
+.icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+}
+
+.label {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+.value {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.trend {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  display: inline-block;
+  width: fit-content;
+}
+
+.trendPositive {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--color-status-success);
+}
+
+.trendNegative {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--color-status-error);
+}
+
+/* Desktop: Optimized sizes */
+@media (min-width: 1024px) {
+  .value {
+    font-size: 1.5rem;
+  }
+
+  .icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .content {
+    padding: var(--spacing-sm);
+  }
+}
+
+/* Mobile: Compact */
+@media (max-width: 767px) {
+  .content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .value {
+    font-size: 1.75rem;
+  }
+}
+

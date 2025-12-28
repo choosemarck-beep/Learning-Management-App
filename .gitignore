@@ -1,0 +1,108 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files
+.env*.local
+.env
+.env.*
+!.env.example
+
+# vercel
+.vercel
+
+# cloudflare
+.wrangler
+.dev.vars
+cloudflared
+
+# secrets and credentials
+*.pem
+*.key
+*.cert
+secrets/
+credentials/
+*.secret
+# Note: Be careful with *secret* and *password* patterns - they might ignore legitimate files
+# Only ignore actual secret/credential files, not route files like change-password
+.env.secret
+.env.password
+*.credentials
+*.secrets
+
+# logs with potential sensitive data
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# prisma
+/prisma/migrations
+
+# PWA
+**/public/sw.js
+**/public/sw.js.map
+**/public/workbox-*.js
+**/public/workbox-*.js.map
+**/public/worker-*.js
+**/public/worker-*.js.map
+
+# Uploads (keep directory structure, ignore uploaded files)
+/public/uploads/avatars/*
+!/public/uploads/avatars/.gitkeep
+/public/uploads/carousel/*
+!/public/uploads/carousel/.gitkeep
+

@@ -1,0 +1,191 @@
+/* Team Tab Component - Branch Managers Only */
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.statsCard,
+.membersCard {
+  width: 100%;
+}
+
+.cardTitle {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Team Stats */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--spacing-md);
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background-color: rgba(139, 92, 246, 0.05);
+  border-radius: var(--radius-md);
+}
+
+.statIcon {
+  color: var(--color-crystal-purple);
+  flex-shrink: 0;
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
+}
+
+.statLabel {
+  font-size: 0.75rem; /* 12px */
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.statValue {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+/* Team Members List */
+.membersList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.memberCard {
+  padding: var(--spacing-md);
+  background-color: rgba(139, 92, 246, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.memberHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+  gap: var(--spacing-sm);
+}
+
+.memberInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.memberName {
+  font-size: 1rem; /* 16px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.memberEmail {
+  font-size: 0.875rem; /* 14px */
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.memberStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.memberStat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  align-items: center;
+  text-align: center;
+}
+
+.memberStatLabel {
+  font-size: 0.75rem; /* 12px */
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.memberStatValue {
+  font-size: 1rem; /* 16px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.memberProgress {
+  margin-top: var(--spacing-sm);
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  gap: var(--spacing-md);
+}
+
+.loader {
+  color: var(--color-crystal-purple);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  font-size: 1rem; /* 16px */
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Error State */
+.errorCard {
+  width: 100%;
+}
+
+.errorText {
+  font-size: 1rem; /* 16px */
+  color: var(--color-status-error);
+  text-align: center;
+  margin: 0;
+}
+
+/* Empty State */
+.emptyText {
+  font-size: 1rem; /* 16px */
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: 0;
+  line-height: 1.6;
+}
+

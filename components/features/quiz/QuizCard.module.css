@@ -1,0 +1,488 @@
+/* QuizCard Component - Duolingo-Style Mobile-First Design */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 428px; /* Mobile max-width */
+  margin: 0 auto;
+  padding: var(--spacing-sm) var(--spacing-md);
+  gap: var(--spacing-md);
+}
+
+/* Progress Section */
+.progressSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  width: 100%;
+  margin-bottom: var(--spacing-xs);
+}
+
+.progressLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.progressBar {
+  width: 100%;
+}
+
+/* Question Card */
+.questionCard {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: none;
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.questionText {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: 1.4;
+  margin: 0 0 var(--spacing-md) 0;
+  text-align: center;
+  padding: 0 var(--spacing-sm);
+}
+
+/* Options Container */
+.optionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+}
+
+.optionButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 48px; /* Smaller, thinner buttons */
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-dark-secondary);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+  font-family: var(--font-glacial);
+  position: relative;
+  overflow: hidden;
+}
+
+.optionButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.optionButton:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.optionButton:hover:not(:disabled) {
+  border-color: var(--color-primary-purple);
+  background: rgba(139, 92, 246, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+.optionButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(139, 92, 246, 0.15);
+}
+
+.optionButton:disabled {
+  cursor: not-allowed;
+}
+
+.optionButton:focus {
+  outline: 3px solid var(--color-primary-purple);
+  outline-offset: 2px;
+}
+
+.optionSelected {
+  border-color: var(--color-primary-purple);
+  background: rgba(139, 92, 246, 0.2);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3);
+}
+
+.optionPending {
+  border-color: var(--color-star-gold);
+  background: rgba(251, 191, 36, 0.15);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(251, 191, 36, 0);
+  }
+}
+
+.optionCorrect {
+  border-color: var(--color-status-success);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.15) 100%);
+  color: var(--color-text-primary);
+  animation: correctReveal 0.4s ease-out;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2), 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+@keyframes correctReveal {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.optionIncorrect {
+  border-color: var(--color-status-error);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(239, 68, 68, 0.15) 100%);
+  color: var(--color-text-primary);
+  animation: incorrectReveal 0.4s ease-out;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2), 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+@keyframes incorrectReveal {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.optionText {
+  line-height: 1.5;
+  word-wrap: break-word;
+  flex: 1;
+  padding-right: var(--spacing-sm);
+}
+
+.correctIcon {
+  color: var(--color-status-success);
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  animation: iconPop 0.3s ease-out 0.2s both;
+}
+
+.incorrectIcon {
+  color: var(--color-status-error);
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  animation: iconPop 0.3s ease-out 0.2s both;
+}
+
+@keyframes iconPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Confirmation Container */
+.confirmationContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+  border: 2px solid var(--color-primary-purple);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-sm);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.confirmationMessage {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  text-align: center;
+  line-height: 1.4;
+  margin-bottom: var(--spacing-xs);
+}
+
+.confirmationActions {
+  display: flex;
+  gap: var(--spacing-xs);
+  width: 100%;
+}
+
+.cancelButton,
+.confirmButton {
+  flex: 1;
+  min-height: 40px;
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+/* Rationale Container */
+.rationaleContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-sm);
+  animation: slideIn 0.4s ease-out;
+}
+
+.rationaleHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+.rationaleIcon {
+  color: var(--color-status-success);
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.rationaleIconError {
+  color: var(--color-status-error);
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.rationaleLabel {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-status-success);
+}
+
+.rationaleLabelError {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-status-error);
+}
+
+.rationaleText {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  padding-left: var(--spacing-sm);
+}
+
+/* Action Container */
+.actionContainer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: var(--spacing-sm);
+  animation: slideIn 0.4s ease-out 0.2s both;
+}
+
+.nextButton {
+  width: 100%;
+  min-height: 44px; /* Smaller button */
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  transition: all var(--transition-normal) ease;
+}
+
+.nextButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+}
+
+.nextButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+/* Completion Card */
+.completionCard {
+  width: 100%;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.completionContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  align-items: center;
+  padding: var(--spacing-xl);
+}
+
+.completionTitle {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-purple) 0%,
+    var(--color-primary-indigo) 50%,
+    var(--color-accent-cyan) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scoreContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  align-items: center;
+  animation: fadeIn 0.5s ease-out 0.2s both;
+}
+
+.scoreText {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+}
+
+.scoreHighlight {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-purple);
+  font-size: var(--font-size-xl);
+}
+
+.scorePercentage {
+  font-size: var(--font-size-4xl, 3rem);
+  font-weight: var(--font-weight-bold);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-purple) 0%,
+    var(--color-primary-indigo) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: scaleIn 0.5s ease-out 0.4s both;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.restartButton {
+  width: 100%;
+  min-height: 56px;
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-lg);
+  animation: fadeIn 0.5s ease-out 0.6s both;
+}
+
+/* Desktop Responsive (max-width-md ~ 600-700px) */
+@media (min-width: 768px) {
+  .container {
+    max-width: 700px;
+    padding: var(--spacing-lg);
+  }
+
+  .questionText {
+    font-size: var(--font-size-2xl);
+  }
+
+  .optionButton {
+    min-height: 72px;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    font-size: var(--font-size-lg);
+  }
+
+  .completionTitle {
+    font-size: var(--font-size-4xl, 3rem);
+  }
+
+  .scoreText {
+    font-size: var(--font-size-xl);
+  }
+}

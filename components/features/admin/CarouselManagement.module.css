@@ -1,0 +1,192 @@
+/* Carousel Management - Desktop Design */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.uploadCard {
+  margin-bottom: var(--spacing-lg);
+}
+
+.uploadLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: rgba(139, 92, 246, 0.1);
+  border: 2px dashed var(--color-primary-purple);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+}
+
+.uploadLabel:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: var(--color-primary-indigo);
+}
+
+.fileInput {
+  display: none;
+}
+
+.imagesList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.imageCard {
+  width: 100%;
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-bottom: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imageActions {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  display: flex;
+  gap: var(--spacing-xs);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+}
+
+.actionButton {
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-normal) ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.formActions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.imageInfo h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.imageInfo p {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.imageMeta {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.modeCard {
+  margin-bottom: var(--spacing-lg);
+}
+
+.modeSelector {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.modeButton {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-lg);
+  background: rgba(139, 92, 246, 0.1);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+  color: var(--color-text-primary);
+}
+
+.modeButton:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: var(--color-primary-purple);
+}
+
+.modeButton.active {
+  background: rgba(139, 92, 246, 0.3);
+  border-color: var(--color-primary-purple);
+}
+
+.modeButton span {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.modeButton small {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.videoPreview {
+  margin-bottom: var(--spacing-md);
+}
+
+.videoPlayer {
+  width: 100%;
+  max-width: 600px;
+  border-radius: var(--radius-md);
+  background: var(--color-background-dark);
+}
+
+.videoInfo {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-top: var(--spacing-sm);
+}
+
+.warning {
+  font-size: 0.875rem;
+  color: var(--color-status-warning);
+  margin-top: var(--spacing-sm);
+  font-weight: 500;
+}
+

@@ -1,0 +1,21 @@
+/* Energy Crystal Component - Gamified Asset */
+
+.crystal {
+  display: block;
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.4));
+  transition: transform var(--transition-normal) ease;
+}
+
+.crystalFill {
+  fill: var(--color-primary-purple);
+}
+
+.crystalStroke {
+  stroke: var(--color-crystal-bright);
+}
+
+.crystal:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.6));
+}
+

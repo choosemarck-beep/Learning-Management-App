@@ -1,0 +1,108 @@
+/* User Management Tabs Component - DESKTOP ONLY */
+/* This component is exclusively for Admin/Super Admin dashboards */
+/* DO NOT use mobile breakpoints - this is desktop-optimized only */
+
+.container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0; /* Remove padding - handled by parent */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%; /* Constrain height to prevent overflow */
+  overflow: hidden;
+  margin: 0;
+  min-height: 0; /* Allow flex shrinking */
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  gap: var(--spacing-md);
+  flex-shrink: 0;
+  padding: 0;
+  flex-wrap: nowrap;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.tabs {
+  display: flex;
+  gap: var(--spacing-xs);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  flex-shrink: 0;
+}
+
+.tab {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+  min-height: 32px;
+  font-family: var(--font-nunito);
+}
+
+.tab:hover {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--color-text-primary);
+}
+
+.tab.active {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.2),
+    rgba(99, 102, 241, 0.2)
+  );
+  color: var(--color-text-primary);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.searchAndButtonGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex: 1;
+  min-width: 0;
+}
+
+.searchAndButtonGroup > *:first-child {
+  flex: 0 1 auto; /* Don't let search bar expand infinitely */
+  max-width: 400px;
+  min-width: 250px;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tableContainer {
+  width: 100%;
+  max-width: 100%;
+  flex: 1;
+  min-height: 0;
+  max-height: 100%; /* Constrain height for internal scrolling */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* DESKTOP ONLY - No mobile breakpoints */
+/* This component is for Admin/Super Admin dashboards which are desktop-only */
+/* Managers use ManagementPage component which is mobile-first */
+

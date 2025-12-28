@@ -1,0 +1,136 @@
+/* Create Trainer Modal - Desktop-Optimized */
+
+.modal {
+  max-width: 500px;
+  width: 100%;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.cancelButton,
+.submitButton {
+  flex: 1;
+}
+
+/* Credentials Modal Styles */
+.credentialsModal {
+  max-width: 500px;
+  width: 100%;
+}
+
+.credentialsContent {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.credentialsContainer {
+  padding: var(--spacing-lg);
+  background: var(--color-bg-dark);
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.credentialsWarning {
+  padding: var(--spacing-md);
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: var(--spacing-lg);
+  line-height: 1.5;
+}
+
+.credentialField {
+  margin-bottom: var(--spacing-lg);
+}
+
+.credentialLabel {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.credentialValue {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-md);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius-md);
+}
+
+.credentialCode {
+  flex: 1;
+  font-family: "Courier New", monospace;
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  background: transparent;
+  border: none;
+  padding: 0;
+  word-break: break-all;
+}
+
+.copyButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-primary-purple);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+  flex-shrink: 0;
+}
+
+.copyButton:hover {
+  background: var(--color-primary-blue);
+  transform: translateY(-1px);
+}
+
+.copyButton:active {
+  transform: translateY(0);
+}
+
+.credentialsActions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
+  margin-top: var(--spacing-md);
+}
+
+.copyImageButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: 160px;
+}
+
+.doneButton {
+  min-width: 120px;
+}

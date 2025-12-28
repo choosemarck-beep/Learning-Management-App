@@ -1,0 +1,166 @@
+/* Trainer Dashboard Client - Desktop-Optimized Design */
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.completionRateSection {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.trainingsSection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.sectionDescription {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.cardWrapper {
+  position: relative;
+}
+
+.reorderControls {
+  position: absolute;
+  left: var(--spacing-xs);
+  top: var(--spacing-xs);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 20;
+  opacity: 0;
+  transition: opacity var(--transition-normal) ease;
+}
+
+.cardWrapper:hover .reorderControls {
+  opacity: 1;
+}
+
+.reorderButton {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+}
+
+.reorderButton:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.3);
+  border-color: rgba(139, 92, 246, 0.5);
+  transform: scale(1.1);
+}
+
+.reorderButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.emptyMessage {
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: var(--spacing-lg);
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.modalContent {
+  padding: var(--spacing-md);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.trainingList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.trainingItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+  text-align: left;
+}
+
+.trainingItem:hover {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.trainingItemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
+  text-align: left;
+}
+
+.trainingItemTitle {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.trainingItemCourse {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.actionButtons {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+}
+

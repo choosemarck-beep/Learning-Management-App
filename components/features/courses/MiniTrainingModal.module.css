@@ -1,0 +1,264 @@
+/* Full-Screen Modal Overlay */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--spacing-xs);
+  overflow-y: auto;
+}
+
+.modalContent {
+  position: relative;
+  width: 100%;
+  max-width: 428px;
+  max-height: 100vh;
+  background: var(--color-bg-dark);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  margin-top: var(--spacing-xs);
+}
+
+.closeButton {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: var(--radius-full);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background 0.2s;
+  z-index: 10;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  min-height: auto;
+  position: relative;
+  z-index: 10000;
+}
+
+.errorContainer {
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+  padding-right: var(--spacing-xl); /* Space for close button */
+  padding-top: var(--spacing-xs);
+}
+
+.modalTitle {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.completedIcon {
+  color: var(--color-status-success);
+  flex-shrink: 0;
+}
+
+.modalDescription {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  margin-bottom: var(--spacing-xs);
+}
+
+.videoContainer {
+  width: 100%;
+  margin-bottom: var(--spacing-xs);
+  position: relative;
+  background: #000;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.youtubePlayer {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.youtubeOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  pointer-events: auto; /* Overlay is now clickable to start video */
+}
+
+
+.videoPlayer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.videoThumbnail {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Progress Timer Overlay - Same as main training */
+.progressTimerOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 60%, transparent 100%);
+  z-index: 2;
+}
+
+.progressTimerHeader {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.timerLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.progressTimerBar {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-full);
+  overflow: visible;
+}
+
+.progressTimerFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary-purple), var(--color-primary-indigo));
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.quizUnlockMarker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.quizUnlockMarker.unlocked {
+  opacity: 0.7;
+}
+
+.markerDot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-star-gold);
+  border: 1px solid var(--color-bg-dark);
+  border-radius: var(--radius-full);
+  margin: 0 auto;
+  box-shadow: 0 0 6px rgba(251, 191, 36, 0.5);
+}
+
+.markerLine {
+  width: 1px;
+  height: 12px;
+  background: var(--color-star-gold);
+  margin: 1px auto 0;
+  opacity: 0.6;
+}
+
+/* Quiz Button Section - Right below video */
+.quizButtonSection {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  padding-top: var(--spacing-xs);
+  padding-bottom: var(--spacing-xs);
+  background: var(--color-bg-dark);
+}
+
+.quizButton {
+  width: 100%;
+  margin-bottom: 0;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.quizButton.quizUnlocked {
+  background: var(--color-status-success);
+  border-color: var(--color-status-success);
+  color: white;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.2);
+  animation: quizGlow 2s ease-in-out infinite alternate;
+}
+
+.quizButton.quizUnlocked:hover {
+  background: rgba(16, 185, 129, 0.9);
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.6), 0 0 50px rgba(16, 185, 129, 0.3);
+  transform: translateY(-1px);
+}
+
+@keyframes quizGlow {
+  from {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.2);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.6), 0 0 60px rgba(16, 185, 129, 0.3);
+  }
+}
+
+.quizHint {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+

@@ -1,0 +1,144 @@
+/* Netflix-Style Courses View - Mobile-First Design (320px-428px) */
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding-bottom: var(--spacing-xl);
+}
+
+.courseRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+}
+
+.courseRowHeader {
+  padding: 0 var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
+}
+
+.courseRowTitle {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.horizontalScrollWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.horizontalScroll {
+  display: flex;
+  gap: var(--spacing-md);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  padding: 0 var(--spacing-md);
+  padding-bottom: var(--spacing-xs);
+  /* Add padding for scroll arrows */
+  scroll-padding-left: var(--spacing-md);
+  scroll-padding-right: var(--spacing-md);
+}
+
+.horizontalScroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.scrollArrowLeft,
+.scrollArrowRight {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  z-index: 10;
+  transition: all var(--transition-normal) ease;
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.scrollArrowLeft:hover,
+.scrollArrowRight:hover {
+  background: rgba(0, 0, 0, 0.95);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.scrollArrowLeft:active,
+.scrollArrowRight:active {
+  transform: translateY(-50%) scale(0.9);
+}
+
+.scrollArrowLeft:focus,
+.scrollArrowRight:focus {
+  outline: 2px solid var(--color-primary-purple);
+  outline-offset: 2px;
+}
+
+.scrollArrowLeft {
+  left: var(--spacing-xs);
+}
+
+.scrollArrowRight {
+  right: var(--spacing-xs);
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  min-height: 300px;
+  text-align: center;
+  width: 100%;
+}
+
+.emptyContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  max-width: 300px;
+}
+
+.emptyMessage {
+  font-size: 1.125rem; /* 18px */
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.emptySubmessage {
+  font-size: 0.875rem; /* 14px */
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.emptyTrainingMessage {
+  padding: var(--spacing-md);
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem; /* 14px */
+}
+

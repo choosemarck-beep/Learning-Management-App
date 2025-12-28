@@ -1,0 +1,47 @@
+/* Lesson Video Page Client - Mobile-First Design (320px-428px) */
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+.backButton {
+  flex-shrink: 0;
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+}
+
+.titleSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.courseLabel {
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600;
+  color: var(--color-primary-purple);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.title {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+

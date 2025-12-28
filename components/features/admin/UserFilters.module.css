@@ -1,0 +1,43 @@
+/* UserFilters Component - Admin Dashboard */
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  width: 100%;
+}
+
+.searchInput {
+  width: 100%;
+}
+
+.selectFilters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+/* Desktop styles for admin pages */
+@media (min-width: 768px) {
+  .filters {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+
+  .searchInput {
+    flex: 1;
+  }
+
+  .selectFilters {
+    flex-direction: row;
+    flex: 0 0 auto;
+    gap: var(--spacing-md);
+  }
+
+  .selectFilters > select {
+    min-width: 180px;
+  }
+}
+

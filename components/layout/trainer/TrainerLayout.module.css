@@ -1,0 +1,43 @@
+/* Trainer Layout - Desktop Layout */
+
+.layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  background: transparent;
+  position: relative;
+  overflow: hidden; /* Ensure background doesn't overflow */
+  margin: 0;
+  padding: 0;
+  max-width: none;
+}
+
+/* Ensure galaxy background is visible */
+.layout > canvas {
+  position: fixed !important;
+  z-index: 0 !important;
+}
+
+.mainContent {
+  flex: 1;
+  margin-left: 89px; /* Collapsed sidebar width - fixed, doesn't change (increased by 25px) */
+  display: flex;
+  flex-direction: column;
+  width: calc(100vw - 89px);
+  min-height: 100vh;
+  height: 100vh;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  padding: 0; /* Remove ALL padding to magnetize containers */
+  overflow: hidden; /* No scrolling in desktop view */
+  position: relative;
+  z-index: 1;
+  height: 100vh; /* Full height since header is no longer fixed */
+}
+

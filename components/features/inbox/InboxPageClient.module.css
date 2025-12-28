@@ -1,0 +1,108 @@
+/* Inbox Page Client - Mobile-First Design (320px-428px) */
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-xs);
+}
+
+.title {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.unreadBadge {
+  background: var(--color-status-error);
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600;
+}
+
+.tabs {
+  display: flex;
+  gap: var(--spacing-xs);
+  justify-content: space-around;
+  width: 100%;
+  padding: 0;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: opacity var(--transition-normal) ease;
+  position: relative;
+  flex: 1;
+  min-width: 44px; /* Touch target minimum */
+  min-height: 44px; /* Touch target minimum */
+  max-width: 80px; /* Prevent tabs from getting too wide */
+}
+
+.tab:hover {
+  opacity: 0.7;
+  color: var(--color-text-primary);
+}
+
+.tab.active {
+  opacity: 1;
+  color: var(--color-primary-purple);
+}
+
+.badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--color-status-error);
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem; /* 10px */
+  font-weight: 600;
+  border: 2px solid var(--color-background-dark);
+}
+
+.content {
+  flex: 1;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  min-height: 200px;
+}
+
+.loading p {
+  font-size: 0.875rem; /* 14px */
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+

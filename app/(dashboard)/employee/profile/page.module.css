@@ -1,0 +1,50 @@
+/* Employee Profile Page - Mobile-First Design (320px-428px) */
+/* Single Unified Container with Glassmorphism */
+
+.container {
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  padding: var(--spacing-md);
+  padding-bottom: 80px;
+}
+
+.profileContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  /* Glassmorphism: Semi-transparent background with blur */
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-md);
+  gap: var(--spacing-md);
+  overflow: hidden;
+}
+
+.headerSection {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.tabsSection {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+

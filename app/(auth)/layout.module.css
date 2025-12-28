@@ -1,0 +1,21 @@
+/* Auth Layout - Mobile-First Design (320px-428px) */
+
+.container {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start; /* Changed from center to flex-start to prevent vertical centering */
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-md); /* Reduced top/bottom padding */
+  background-color: transparent; /* Background handled by GalaxyBackground */
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+}
+
+.content {
+  width: 100%;
+  max-width: 428px;
+}
+

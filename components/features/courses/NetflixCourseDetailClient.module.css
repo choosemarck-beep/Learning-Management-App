@@ -1,0 +1,219 @@
+/* Netflix Course Detail Page - Mobile-First Design (320px-428px) */
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-bg-dark);
+}
+
+.header {
+  position: relative;
+  width: 100%;
+  margin-bottom: var(--spacing-lg);
+}
+
+.backButton {
+  position: absolute;
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+  z-index: 20;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+}
+
+.backButton:active {
+  transform: scale(0.9);
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.heroSection {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--color-bg-dark-secondary);
+}
+
+.heroImageContainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.heroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.heroPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-purple) 0%,
+    var(--color-primary-indigo) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+}
+
+.heroPlaceholderContent {
+  text-align: center;
+}
+
+.heroTitle {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.heroInfo {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--spacing-md);
+  background: linear-gradient(
+    to top,
+    rgba(15, 23, 42, 0.95) 0%,
+    rgba(15, 23, 42, 0.8) 50%,
+    transparent 100%
+  );
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.courseTitle {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+  line-height: 1.3;
+}
+
+.courseDescription {
+  font-size: 0.875rem; /* 14px */
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.courseMeta {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.xpBadge {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 600;
+  color: var(--color-star-gold);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(251, 191, 36, 0.15);
+  border-radius: var(--radius-md);
+}
+
+.progressBadge {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+}
+
+.progressBarContainer {
+  width: 100%;
+  margin-top: var(--spacing-xs);
+}
+
+.progressBar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-primary-purple);
+  transition: width var(--transition-normal) ease;
+  border-radius: var(--radius-full);
+}
+
+.trainingsSection {
+  width: 100%;
+  padding: 0 var(--spacing-md);
+}
+
+.trainingsRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+  margin-bottom: var(--spacing-lg);
+}
+
+.rowHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+  padding: 0 var(--spacing-xs);
+}
+
+.rowTitle {
+  font-size: 1.25rem; /* 20px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.moduleCount {
+  font-size: 0.875rem; /* 14px */
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.emptyState {
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.emptyMessage {
+  font-size: 1rem; /* 16px */
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+

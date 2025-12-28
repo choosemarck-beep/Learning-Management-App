@@ -1,0 +1,54 @@
+/* Profile Info Tab - Mobile-First Design (320px-428px) */
+
+.card {
+  width: 100%;
+  margin: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardTitle {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.compactBody {
+  padding: var(--spacing-xs) !important;
+  margin-bottom: 0 !important;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.infoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.infoLabel {
+  font-size: 0.625rem; /* 10px */
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.infoValue {
+  font-size: 0.8125rem; /* 13px */
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
