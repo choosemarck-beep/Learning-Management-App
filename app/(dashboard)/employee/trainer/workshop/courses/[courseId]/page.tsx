@@ -44,7 +44,14 @@ export default async function CourseEditorPage({
     },
     include: {
       trainings: {
-        include: {
+        select: {
+          id: true,
+          title: true,
+          shortDescription: true,
+          videoUrl: true,
+          category: true,
+          order: true,
+          isPublished: true,
           quiz: {
             select: {
               id: true,
