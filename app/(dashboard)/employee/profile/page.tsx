@@ -10,14 +10,17 @@ import { ProfileWorkTab } from "@/components/features/profile/ProfileWorkTab";
 import { ProfileStatsTab } from "@/components/features/profile/ProfileStatsTab";
 import styles from "./page.module.css";
 
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
-  searchParams: { id?: string };
+  searchParams: Promise<{ id?: string }>;
 }
 
 export default async function EmployeeProfilePage({
   searchParams,
 }: PageProps) {
   const currentUser = await getCurrentUser();
+  const resolvedSearchParams = await searchParams;
 
   if (!currentUser) {
     redirect("/login");
@@ -30,9 +33,9 @@ export default async function EmployeeProfilePage({
   // If admin is viewing, use the id from query params
   if (
     (currentUser.role === "ADMIN" || currentUser.role === "SUPER_ADMIN") &&
-    searchParams.id
+    resolvedSearchParams.id
   ) {
-    targetUserId = searchParams.id;
+    targetUserId = resolvedSearchParams.id;
     isViewingOwnProfile = false;
   } else if (
     currentUser.role === "EMPLOYEE" ||

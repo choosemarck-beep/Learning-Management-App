@@ -4,15 +4,19 @@ import { getCurrentUser } from "@/lib/auth/utils";
 import { QuizResultsClient } from "@/components/features/quiz/QuizResultsClient";
 import styles from "./page.module.css";
 
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
-  params: { taskId: string };
-  searchParams: { score?: string; xpEarned?: string };
+  params: Promise<{ taskId: string }>;
+  searchParams: Promise<{ score?: string; xpEarned?: string }>;
 }
 
 export default async function QuizResultsPage({
   params,
   searchParams,
 }: PageProps) {
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
@@ -22,9 +26,9 @@ export default async function QuizResultsPage({
   return (
     <div className={styles.container}>
       <QuizResultsClient
-        taskId={params.taskId}
-        score={searchParams.score ? parseInt(searchParams.score) : null}
-        xpEarned={searchParams.xpEarned ? parseInt(searchParams.xpEarned) : null}
+        taskId={resolvedParams.taskId}
+        score={resolvedSearchParams.score ? parseInt(resolvedSearchParams.score) : null}
+        xpEarned={resolvedSearchParams.xpEarned ? parseInt(resolvedSearchParams.xpEarned) : null}
       />
     </div>
   );

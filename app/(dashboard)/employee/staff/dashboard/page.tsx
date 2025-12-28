@@ -10,6 +10,8 @@ import { DashboardCoursesSection } from "@/components/features/dashboard/Dashboa
 import { TrainerAnnouncementsSection } from "@/components/features/dashboard/TrainerAnnouncementsSection";
 import styles from "./page.module.css";
 
+export const dynamic = 'force-dynamic';
+
 export default async function StaffDashboardPage() {
   const user = await getCurrentUser();
 
