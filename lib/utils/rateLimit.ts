@@ -6,7 +6,7 @@
  * This implementation uses a simple Map-based store suitable for development
  */
 
-interface RateLimitConfig {
+export interface RateLimitConfig {
   maxRequests: number;
   windowMs: number; // Time window in milliseconds
 }
