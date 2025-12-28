@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
 
+export const dynamic = 'force-dynamic';
+
 // GET - Fetch splash screen image URL (public endpoint)
 export async function GET(request: NextRequest) {
   try {

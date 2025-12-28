@@ -22,7 +22,8 @@ const TOTAL_STEPS = 4;
 const signupSchema = z
   .object({
     // Step 1: Personal Information
-    name: z.string().min(2, "Name must be at least 2 characters"),
+    firstName: z.string().min(1, "First name is required").min(2, "First name must be at least 2 characters"),
+    lastName: z.string().min(1, "Last name is required").min(2, "Last name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
     phone: z
       .string()
@@ -99,7 +100,7 @@ export default function SignupPage() {
 
     switch (step) {
       case 1:
-        fieldsToValidate = ["name", "email", "phone"];
+        fieldsToValidate = ["firstName", "lastName", "email", "phone"];
         break;
       case 2:
         fieldsToValidate = ["employeeNumber", "hireType", "companyId"];

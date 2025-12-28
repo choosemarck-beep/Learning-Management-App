@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
 
+export const dynamic = 'force-dynamic';
+
 // GET - Fetch all mandatory trainings with user progress
 export async function GET(request: NextRequest) {
   try {

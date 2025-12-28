@@ -5,6 +5,8 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 
+export const dynamic = 'force-dynamic';
+
 // GET - Fetch all carousel images (admin)
 export async function GET(request: NextRequest) {
   try {

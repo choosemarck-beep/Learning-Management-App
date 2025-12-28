@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma/client";
 import { announcementSchema } from "@/lib/validation/schemas";
 import { z } from "zod";
 
+export const dynamic = 'force-dynamic';
+
 // GET - Fetch all announcements (admin)
 export async function GET(request: NextRequest) {
   try {

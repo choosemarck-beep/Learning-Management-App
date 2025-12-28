@@ -1,0 +1,171 @@
+/* Forgot Password Page - Mobile-First Design (320px-428px) */
+
+.container {
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.loginSection {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  min-height: auto;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-md);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  border: none;
+}
+
+.carousel {
+  margin-bottom: var(--spacing-sm);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+  align-items: center;
+  transition: height 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  text-align: center;
+  margin: 0 0 var(--spacing-sm) 0;
+  font-family: var(--font-glacial);
+}
+
+.description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: center;
+  line-height: 1.6;
+  margin: 0 0 var(--spacing-md) 0;
+  padding: 0 var(--spacing-sm);
+  font-family: var(--font-glacial);
+}
+
+.inputGroup {
+  width: 100%;
+  max-width: 320px;
+  align-self: center;
+}
+
+.submitButton {
+  width: fit-content;
+  min-width: fit-content;
+  padding-left: calc(1rem + 5px) !important;
+  padding-right: calc(1rem + 5px) !important;
+  margin-top: var(--spacing-xs);
+  margin-left: auto;
+  margin-right: auto;
+  min-height: var(--touch-target-min);
+  font-weight: var(--font-weight-semibold);
+}
+
+.signupLink {
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid rgba(203, 213, 225, 0.1);
+  text-align: center;
+}
+
+.backToLoginText {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary-purple);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+  transition: color var(--transition-normal) ease;
+  display: inline-block;
+  padding: var(--spacing-xs);
+  font-family: var(--font-glacial);
+}
+
+.backToLoginText:hover {
+  color: var(--color-primary-indigo);
+  text-decoration: underline;
+}
+
+.backToLoginText:focus-visible {
+  outline: 2px solid var(--color-primary-purple);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Success State */
+.successContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-md) 0;
+}
+
+.emailHighlight {
+  color: var(--color-primary-purple);
+  font-weight: var(--font-weight-semibold);
+  word-break: break-all;
+}
+
+.helperText {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-top: var(--spacing-xs);
+  padding: 0 var(--spacing-sm);
+  font-family: var(--font-glacial);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+  max-width: 320px;
+  margin-top: var(--spacing-md);
+}
+
+.backButton {
+  width: 100%;
+  min-height: var(--touch-target-min);
+}
+
+.resendLink {
+  background: transparent;
+  border: none;
+  color: var(--color-primary-purple);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  cursor: pointer;
+  text-decoration: underline;
+  padding: var(--spacing-xs);
+  font-family: var(--font-glacial);
+  transition: color var(--transition-normal) ease;
+}
+
+.resendLink:hover {
+  color: var(--color-primary-indigo);
+}
+
+.resendLink:focus-visible {
+  outline: 2px solid var(--color-primary-purple);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+

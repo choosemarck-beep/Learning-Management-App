@@ -5,6 +5,8 @@ import bcrypt from "bcryptjs";
 import { themeUpdateSchema } from "@/lib/validation/schemas";
 import { z } from "zod";
 
+export const dynamic = 'force-dynamic';
+
 // GET - Fetch current theme settings
 export async function GET(request: NextRequest) {
   try {

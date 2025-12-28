@@ -3,6 +3,8 @@ import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
 import { UserRole } from "@prisma/client";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser();

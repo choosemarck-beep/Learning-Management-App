@@ -36,6 +36,8 @@ model User {
   positionId                      String?
   area                            String?
   region                          String?
+  passwordResetToken              String?
+  passwordResetTokenExpires       DateTime?
   activityLogs                    ActivityLog[]                @relation("ActivityLogUser")
   announcements                   Announcement[]               @relation("AnnouncementTrainer")
   approvalRequestsAdmin           ApprovalRequest[]            @relation("ApprovalRequestAdmin")

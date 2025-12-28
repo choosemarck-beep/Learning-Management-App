@@ -5,6 +5,8 @@ import { writeFile, mkdir, unlink } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 
+export const dynamic = 'force-dynamic';
+
 // GET - Fetch splash screen settings
 export async function GET(request: NextRequest) {
   try {

@@ -10,6 +10,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { IntroCarousel } from "@/components/features/IntroCarousel";
 import styles from "./page.module.css";
 
@@ -101,9 +102,8 @@ function LoginForm() {
           </div>
 
           <div className={styles.inputGroup}>
-            <Input
+            <PasswordInput
               label="Password"
-              type="password"
               placeholder="Enter your password"
               required
               error={errors.password?.message}
@@ -120,6 +120,12 @@ function LoginForm() {
           >
             {isLoading ? "Signing you in..." : "Sign In"}
           </Button>
+
+          <div className={styles.forgotPasswordLink}>
+            <Link href="/forgot-password" className={styles.forgotPasswordText}>
+              Forgot Password?
+            </Link>
+          </div>
         </form>
 
         <div className={styles.signupLink}>

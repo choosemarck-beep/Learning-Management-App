@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/Input";
 import styles from "./PersonalInfoStep.module.css";
 
 export interface PersonalInfoFormData {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string;
 }
@@ -25,17 +26,27 @@ export const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
       
       <div className={styles.fields}>
         <Input
-          label="Full Name"
+          label="First Name"
           type="text"
-          placeholder="Enter your full name"
+          placeholder="Enter your first name"
           required
-          {...register("name")}
+          error={errors.firstName?.message}
+          {...register("firstName")}
+        />
+        <Input
+          label="Last Name"
+          type="text"
+          placeholder="Enter your last name"
+          required
+          error={errors.lastName?.message}
+          {...register("lastName")}
         />
         <Input
           label="Email"
           type="email"
           placeholder="Enter your email address"
           required
+          error={errors.email?.message}
           {...register("email")}
         />
         <Input
@@ -43,6 +54,7 @@ export const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
           type="tel"
           placeholder="09123456789 or +639123456789"
           required
+          error={errors.phone?.message}
           {...register("phone")}
         />
       </div>

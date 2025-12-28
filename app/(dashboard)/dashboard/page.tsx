@@ -7,6 +7,8 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Flame } from "lucide-react";
 import styles from "./page.module.css";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   try {
     const user = await getCurrentUser();

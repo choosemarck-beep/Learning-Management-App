@@ -59,6 +59,35 @@
   align-self: center; /* Center the inputs */
 }
 
+.forgotPasswordLink {
+  width: 100%;
+  max-width: 320px;
+  align-self: center;
+  text-align: center;
+  margin-top: var(--spacing-sm);
+}
+
+.forgotPasswordText {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-weight: var(--font-weight-regular);
+  transition: color var(--transition-normal) ease;
+  display: inline-block;
+  padding: var(--spacing-xs);
+}
+
+.forgotPasswordText:hover {
+  color: var(--color-primary-purple);
+  text-decoration: underline;
+}
+
+.forgotPasswordText:focus-visible {
+  outline: 2px solid var(--color-primary-purple);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
 /* Info Message - Positive Framing */
 .infoMessage {
   padding: var(--spacing-md); /* Consistent padding using 8px grid */

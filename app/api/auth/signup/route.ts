@@ -7,7 +7,8 @@ import { checkRateLimit, getClientIP, RATE_LIMIT_CONFIGS } from "@/lib/utils/rat
 
 const signupSchema = z.object({
   // Step 1: Personal Information
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  firstName: z.string().min(1, "First name is required").min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(1, "Last name is required").min(2, "Last name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number must be at least 10 characters"),
   // Step 2: Employee Details
@@ -69,7 +70,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = signupSchema.parse(body);
     const {
-      name,
+      firstName,
+      lastName,
       email,
       phone,
       password,
@@ -81,6 +83,9 @@ export async function POST(request: NextRequest) {
       branch,
       hireDate,
     } = validatedData;
+
+    // Combine firstName and lastName into name for database
+    const name = `${firstName.trim()} ${lastName.trim()}`.trim();
 
     // Check if user already exists by email
     const existingUserByEmail = await prisma.user.findUnique({
