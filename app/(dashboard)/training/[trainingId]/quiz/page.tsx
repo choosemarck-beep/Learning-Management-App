@@ -61,6 +61,7 @@ export default async function TrainingQuizPage({ params }: PageProps) {
             allowRetake: true,
             maxAttempts: true,
             questions: true,
+            questionsToShow: true,
           },
         },
         trainingProgress: {
