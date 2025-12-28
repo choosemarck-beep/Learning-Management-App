@@ -117,11 +117,11 @@ export async function PUT(request: NextRequest) {
 
     // Filter to only valid training IDs that belong to this trainer
     const validTrainingIds = trainings.map((t) => t.id);
-    const invalidTrainingIds = finalTrainingIds.filter((id) => !validTrainingIds.includes(id));
+    const invalidTrainingIds = finalTrainingIds.filter((id: string) => !validTrainingIds.includes(id));
 
     // Filter to only valid course IDs that belong to this trainer
     const validCourseIds = courses.map((c) => c.id);
-    const invalidCourseIds = finalCourseIds.filter((id) => !validCourseIds.includes(id));
+    const invalidCourseIds = finalCourseIds.filter((id: string) => !validCourseIds.includes(id));
 
     // If there are invalid IDs, log them but continue with valid ones
     if (invalidTrainingIds.length > 0) {
