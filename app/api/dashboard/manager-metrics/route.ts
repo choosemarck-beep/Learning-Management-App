@@ -14,6 +14,23 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Fetch full user data to get branch, area, region fields
+    const userData = await prisma.user.findUnique({
+      where: { id: currentUser.id },
+      select: {
+        branch: true,
+        area: true,
+        region: true,
+      },
+    });
+
+    if (!userData) {
+      return NextResponse.json(
+        { success: false, error: "User not found" },
+        { status: 404 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const role = searchParams.get("role") as UserRole;
 
@@ -35,7 +52,7 @@ export async function GET(request: NextRequest) {
       teamMembers = await prisma.user.findMany({
         where: {
           role: "EMPLOYEE",
-          branch: currentUser.branch,
+          branch: userData.branch,
           status: "APPROVED",
         },
         include: {
@@ -51,7 +68,7 @@ export async function GET(request: NextRequest) {
       teamMembers = await prisma.user.findMany({
         where: {
           role: "BRANCH_MANAGER",
-          area: currentUser.area,
+          area: userData.area,
           status: "APPROVED",
         },
         include: {
@@ -67,7 +84,7 @@ export async function GET(request: NextRequest) {
       teamMembers = await prisma.user.findMany({
         where: {
           role: "AREA_MANAGER",
-          region: currentUser.region,
+          region: userData.region,
           status: "APPROVED",
         },
         include: {
