@@ -123,6 +123,15 @@ export const PhotoListManagement: React.FC<PhotoListManagementProps> = ({
     }
   };
 
+  const handleReorder = async (id: string, direction: "up" | "down") => {
+    try {
+      await onReorder(id, direction);
+      toast.success(`Photo moved ${direction}`);
+    } catch (error) {
+      toast.error("Failed to reorder photo");
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this photo?")) return;
 
