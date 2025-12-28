@@ -41,7 +41,7 @@ interface DashboardStats {
 type DisplayedTraining = TrainingStat & {
   id: string;
   title: string;
-  course?: { id: string; title: string } | undefined;
+  course: { id: string; title: string } | undefined;
 };
 
 interface TrainerDashboardClientProps {
