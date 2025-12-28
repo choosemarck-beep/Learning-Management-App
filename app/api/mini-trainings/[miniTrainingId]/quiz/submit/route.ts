@@ -99,7 +99,7 @@ export async function POST(
           } else {
             return {
               id: option.id || `opt-${question.id || `q-${index}`}-${index}`,
-              text: option.text || option.label || String(option),
+              text: option.text || String(option),
             };
           }
         });
@@ -120,11 +120,11 @@ export async function POST(
         attemptNumber
       );
       // Convert randomized questions to format expected by scoring logic
-      questions = randomized.map((q) => ({
+      questions = randomized.map((q: { id: string; type: string; question: string; options: Array<{ id: string; text: string }>; correctAnswer: number | string; points: number; explanation?: string }) => ({
         id: q.id,
         type: q.type,
         question: q.question,
-        options: q.options.map(opt => ({
+        options: q.options.map((opt: { id: string; text: string }) => ({
           id: opt.id,
           text: opt.text,
         })),
@@ -180,7 +180,7 @@ export async function POST(
         if (userOption) {
           userAnswerText = typeof userOption === 'string' 
             ? userOption 
-            : (userOption.text || userOption.label || String(userOption));
+            : (userOption.text || String(userOption));
         } else {
           // Try to find by index if userAnswer is an ID pattern
           const optionIndex = question.options.findIndex((opt: any, idx: number) => {
@@ -192,7 +192,7 @@ export async function POST(
           
           if (optionIndex >= 0) {
             const opt = question.options[optionIndex];
-            userAnswerText = typeof opt === 'string' ? opt : (opt.text || opt.label || String(opt));
+            userAnswerText = typeof opt === 'string' ? opt : (opt.text || String(opt));
           }
         }
       }
@@ -202,14 +202,14 @@ export async function POST(
       if (correctOption) {
         correctAnswerText = typeof correctOption === 'string'
           ? correctOption
-          : (correctOption.text || correctOption.label || String(correctOption));
+          : (correctOption.text || String(correctOption));
       } else if (typeof question.correctAnswer === 'number' && question.options) {
         // Index-based answer
         const correctOpt = question.options[question.correctAnswer];
         if (correctOpt) {
           correctAnswerText = typeof correctOpt === 'string'
             ? correctOpt
-            : (correctOpt.text || correctOpt.label || String(correctOpt));
+            : (correctOpt.text || String(correctOpt));
         }
       }
 

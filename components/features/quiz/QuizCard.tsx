@@ -66,11 +66,11 @@ const defaultTestData: Question[] = [
 // Helper function to convert legacy quiz format to QuizCard format
 const convertLegacyQuestions = (legacyQuestions: LegacyQuizQuestion[]): Question[] => {
   return legacyQuestions
-    .filter((q) => q && q.question && q.options && Array.isArray(q.options) && q.options.length >= 2) // Filter out invalid questions
-    .map((q, index) => {
+    .filter((q: LegacyQuizQuestion) => q && q.question && q.options && Array.isArray(q.options) && q.options.length >= 2) // Filter out invalid questions
+    .map((q: LegacyQuizQuestion, index: number) => {
       // Normalize options - handle missing or undefined options
       const options = q.options || [];
-      const normalizedOptions = options.map((option, optIndex) => {
+      const normalizedOptions = options.map((option: { id: string; text: string } | string, optIndex: number) => {
         const optionText = typeof option === 'string' ? option : (option?.text || String(option));
         return optionText;
       });
@@ -82,14 +82,14 @@ const convertLegacyQuestions = (legacyQuestions: LegacyQuizQuestion[]): Question
     } else if (typeof q.correctAnswer === 'string' && options.length > 0) {
       // Try to find option by ID or text
       const firstOption = options[0];
-      correctIndex = normalizedOptions.findIndex(opt => 
+      correctIndex = normalizedOptions.findIndex((opt: string) => 
         opt === q.correctAnswer || 
         (typeof firstOption !== 'string' && (firstOption as any)?.id === q.correctAnswer)
       );
     }
 
     // Create answer options with rationale
-    const answerOptions = normalizedOptions.map((text, optIndex) => {
+    const answerOptions = normalizedOptions.map((text: string, optIndex: number) => {
       const isCorrect = optIndex === correctIndex;
       // Use question explanation as rationale, or default message
       const rationale = q.explanation || (isCorrect 

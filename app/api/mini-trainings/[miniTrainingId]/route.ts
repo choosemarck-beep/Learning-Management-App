@@ -94,7 +94,7 @@ export async function GET(
               } else {
                 return {
                   id: option.id || `opt-${question.id || `q-${index}`}-${index}`,
-                  text: option.text || option.label || String(option),
+                  text: option.text || String(option),
                 };
               }
             });
@@ -116,11 +116,11 @@ export async function GET(
             attemptNumber
           );
           // Convert randomized questions to expected format
-          parsedQuestions = randomized.map((q) => ({
+          parsedQuestions = randomized.map((q: { id: string; type: string; question: string; options: Array<{ id: string; text: string }> }) => ({
             id: q.id,
             type: q.type,
             question: q.question,
-            options: q.options.map(opt => ({
+            options: q.options.map((opt: { id: string; text: string }) => ({
               id: opt.id,
               text: opt.text,
             })),

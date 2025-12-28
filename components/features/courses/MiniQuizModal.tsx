@@ -284,7 +284,7 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
                 <h3 className={styles.question}>{currentQuestion.question}</h3>
 
                 <div className={styles.options}>
-                  {currentQuestion.options && Array.isArray(currentQuestion.options) && currentQuestion.options.map((option, optionIndex) => {
+                  {currentQuestion.options && Array.isArray(currentQuestion.options) && currentQuestion.options.map((option: QuizOption | string, optionIndex: number) => {
                     // Handle both string options and object options
                     // String format: ["Option 1", "Option 2"] (from trainer form)
                     // Object format: [{id: "opt1", text: "Option 1"}, ...] (transformed format)
