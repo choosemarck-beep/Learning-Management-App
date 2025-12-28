@@ -186,7 +186,7 @@ export const CourseEditorClient: React.FC<CourseEditorClientProps> = ({ course: 
 
     setIsLoading(true);
     try {
-      const training = course.trainings.find(t => t.id === pendingTrainingPublish.trainingId);
+      const training = course.trainings?.find(t => t.id === pendingTrainingPublish.trainingId);
       if (!training) {
         toast.error("Training not found");
         setIsLoading(false);
