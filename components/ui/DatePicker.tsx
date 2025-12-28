@@ -112,12 +112,14 @@ export const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
         <div className={styles.datePickerContainer}>
           <input
             ref={(node) => {
+              // Update the forwarded ref
               if (typeof ref === "function") {
                 ref(node);
               } else if (ref) {
-                ref.current = node;
+                (ref as React.MutableRefObject<HTMLInputElement | null>).current = node;
               }
-              inputRef.current = node;
+              // Update the internal ref
+              (inputRef as React.MutableRefObject<HTMLInputElement | null>).current = node;
             }}
             id={inputId}
             type="date"
