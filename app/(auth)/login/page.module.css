@@ -45,7 +45,7 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm); /* Reduced from md to sm for tighter spacing */
+  gap: 10px; /* Maximum 10px spacing between form elements */
   width: 100%;
   align-items: center; /* Center form elements */
   /* Smooth height transitions */
@@ -134,12 +134,43 @@
   margin-right: auto; /* Center horizontally */
   min-height: var(--touch-target-min); /* 44px minimum touch target */
   font-weight: 600; /* Medium weight - clear hierarchy */
+  margin-bottom: 10px; /* 10px spacing to forgot password link */
+}
+
+.forgotPasswordLink {
+  width: 100%;
+  max-width: 320px;
+  align-self: center;
+  text-align: center;
+  margin-top: -10px; /* Move 10px upwards */
+  margin-bottom: 10px; /* 10px spacing to signup link section */
+}
+
+.forgotPasswordText {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-weight: var(--font-weight-regular);
+  transition: color var(--transition-normal) ease;
+  display: inline-block;
+  padding: var(--spacing-xs);
+}
+
+.forgotPasswordText:hover {
+  color: var(--color-primary-purple);
+  text-decoration: underline;
+}
+
+.forgotPasswordText:focus-visible {
+  outline: 2px solid var(--color-primary-purple);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
 /* Signup Link Section */
 .signupLink {
-  margin-top: var(--spacing-sm); /* Reduced from md to sm */
-  padding-top: var(--spacing-sm); /* Reduced from md to sm */
+  margin-top: 0; /* Remove top margin since forgot password has bottom margin */
+  padding-top: 10px; /* 10px padding for the border-top spacing */
   border-top: 1px solid rgba(203, 213, 225, 0.1);
   text-align: center;
 }
