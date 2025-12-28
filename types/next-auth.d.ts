@@ -18,7 +18,7 @@ declare module "next-auth" {
     email: string;
     name: string;
     avatar: string | null;
-    role: "SUPER_ADMIN" | "ADMIN" | "BRANCH_MANAGER" | "EMPLOYEE";
+    role: "SUPER_ADMIN" | "ADMIN" | "REGIONAL_MANAGER" | "AREA_MANAGER" | "BRANCH_MANAGER" | "EMPLOYEE" | "TRAINER";
     employeeNumber?: string | null;
   }
 }
@@ -29,7 +29,7 @@ declare module "next-auth/jwt" {
     email: string;
     name: string;
     avatar: string | null;
-    role: "SUPER_ADMIN" | "ADMIN" | "BRANCH_MANAGER" | "EMPLOYEE";
+    role: "SUPER_ADMIN" | "ADMIN" | "REGIONAL_MANAGER" | "AREA_MANAGER" | "BRANCH_MANAGER" | "EMPLOYEE" | "TRAINER";
     employeeNumber?: string | null;
   }
 }
