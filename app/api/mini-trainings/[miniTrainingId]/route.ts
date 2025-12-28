@@ -116,7 +116,7 @@ export async function GET(
             attemptNumber
           );
           // Convert randomized questions to expected format
-          parsedQuestions = randomized.map((q: { id: string; type: string; question: string; options: Array<{ id: string; text: string }> }) => ({
+          parsedQuestions = randomized.map((q: { id: string; type: string; question: string; options: Array<{ id: string; text: string }>; correctAnswer?: number | string; points?: number; explanation?: string }) => ({
             id: q.id,
             type: q.type,
             question: q.question,
