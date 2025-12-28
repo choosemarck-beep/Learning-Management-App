@@ -22,11 +22,34 @@ export const authConfig: NextAuthConfig = {
         try {
           const { email, password } = loginSchema.parse(credentials);
 
+          // Normalize email to lowercase for case-insensitive lookup
+          const normalizedEmail = email.toLowerCase().trim();
+          // Trim password to remove any accidental whitespace
+          const trimmedPassword = password.trim();
+
+          console.log("Login attempt:", { email: normalizedEmail, passwordLength: trimmedPassword.length });
+
           const user = await prisma.user.findUnique({
-            where: { email },
+            where: { email: normalizedEmail },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              password: true,
+              status: true,
+              role: true,
+              avatar: true,
+              employeeNumber: true,
+            },
           });
 
-          if (!user || !user.password) {
+          if (!user) {
+            console.error("Login attempt failed: User not found", { email: normalizedEmail });
+            return null;
+          }
+
+          if (!user.password) {
+            console.error("Login attempt failed: User has no password", { userId: user.id, email: normalizedEmail });
             return null;
           }
 
@@ -44,14 +67,27 @@ export const authConfig: NextAuthConfig = {
             );
             // Set a custom property that we can check
             (error as any).code = user.status === "PENDING" ? "PENDING_APPROVAL" : "ACCOUNT_REJECTED";
+            console.error("Login attempt failed: Account not approved", { 
+              userId: user.id, 
+              email: normalizedEmail, 
+              status: user.status 
+            });
             throw error;
           }
 
-          const isPasswordValid = await bcrypt.compare(password, user.password);
+          const isPasswordValid = await bcrypt.compare(trimmedPassword, user.password);
 
           if (!isPasswordValid) {
+            console.error("Login attempt failed: Invalid password", { 
+              userId: user.id, 
+              email: normalizedEmail,
+              passwordLength: trimmedPassword.length,
+              passwordHashPrefix: user.password.substring(0, 10) + "..."
+            });
             return null;
           }
+
+          console.log("Login successful", { userId: user.id, email: normalizedEmail, role: user.role });
 
           return {
             id: user.id,
@@ -63,7 +99,7 @@ export const authConfig: NextAuthConfig = {
           };
         } catch (error) {
           // Re-throw approval errors so they can be handled in login page
-          if (error instanceof Error && error.message.includes("APPROVAL")) {
+          if (error instanceof Error && (error.message.includes("APPROVAL") || error.message.includes("REJECTED"))) {
             throw error;
           }
           console.error("Auth error:", error);
