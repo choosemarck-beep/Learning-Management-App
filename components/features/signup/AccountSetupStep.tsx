@@ -111,15 +111,31 @@ export const AccountSetupStep: React.FC<AccountSetupStepProps> = ({
 
       <div className={styles.fields}>
         <div className={styles.passwordField}>
-          <Input
-            ref={passwordInputRef}
-            label="Password"
-            type="password"
-            placeholder="Create a secure password"
-            required
-            onFocus={handlePasswordFocus}
-            {...register("password")}
-          />
+          {(() => {
+            const registerProps = register("password");
+            const { ref: registerRef, ...registerRest } = registerProps;
+            return (
+              <Input
+                label="Password"
+                type="password"
+                placeholder="Create a secure password"
+                required
+                onFocus={handlePasswordFocus}
+                {...registerRest}
+                ref={(el) => {
+                  // Merge refs: set both the register ref and our ref
+                  if (registerRef) {
+                    if (typeof registerRef === "function") {
+                      registerRef(el);
+                    } else if (registerRef) {
+                      registerRef.current = el;
+                    }
+                  }
+                  passwordInputRef.current = el;
+                }}
+              />
+            );
+          })()}
         </div>
         <div className={styles.passwordField}>
           <Input
