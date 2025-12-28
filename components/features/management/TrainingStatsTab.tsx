@@ -106,7 +106,7 @@ export const TrainingStatsTab: React.FC<TrainingStatsTabProps> = ({
                             ? "success"
                             : completionRate >= 50
                             ? "default"
-                            : "outline"
+                            : "warning"
                         }
                       >
                         {completionRate.toFixed(0)}% Complete
