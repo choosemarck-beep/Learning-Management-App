@@ -288,7 +288,7 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
                   <div className={styles.reorderControls}>
                     <button
                       className={styles.reorderButton}
-                      onClick={() => handleMoveUp(index)}
+                      onClick={() => handleMoveUp(index, "training")}
                       disabled={index === 0}
                       aria-label="Move up"
                       title="Move up"
@@ -297,7 +297,7 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
                     </button>
                     <button
                       className={styles.reorderButton}
-                      onClick={() => handleMoveDown(index)}
+                      onClick={() => handleMoveDown(index, "training")}
                       disabled={index === displayedTrainings.length - 1}
                       aria-label="Move down"
                       title="Move down"
