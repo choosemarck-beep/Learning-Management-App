@@ -42,7 +42,6 @@ export async function sendEmail({
       console.error("❌ Email sending error:", {
         message: error.message,
         name: error.name,
-        statusCode: error.statusCode,
       });
       // Don't expose internal error details to client
       throw new Error("Failed to send email. Please try again later.");
