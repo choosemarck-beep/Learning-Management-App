@@ -262,7 +262,7 @@ export const PhotoListManagement: React.FC<PhotoListManagementProps> = ({
               ) : (
                 <div className={styles.emptySlot}>
                   <input
-                    ref={(el) => (fileInputRefs.current[idx] = el)}
+                    ref={(el) => { fileInputRefs.current[idx] = el; }}
                     type="file"
                     accept="image/*"
                     onChange={(e) => handleFileChange(e, idx)}
