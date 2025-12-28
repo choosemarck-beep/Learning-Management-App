@@ -22,6 +22,7 @@ interface QuizResult {
   correctAnswer: string;
   isCorrect: boolean;
   options: Array<{ id: string; text: string; isCorrect: boolean }>;
+  explanation?: string;
 }
 
 interface QuizResultsClientProps {
