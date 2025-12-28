@@ -1109,7 +1109,7 @@ const MiniQuizBuilderWrapper: React.FC<{
                     value={questionsToShow || ""}
                     onChange={(e) => setQuestionsToShow(e.target.value ? parseInt(e.target.value) : null)}
                     placeholder="Show all questions"
-                    helpText="Leave empty to show all questions. Set a number to randomly select that many questions per attempt (helps prevent cheating)."
+                    helperText="Leave empty to show all questions. Set a number to randomly select that many questions per attempt (helps prevent cheating)."
                   />
                 </div>
               </div>
