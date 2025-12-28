@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from "react-hook-form";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -17,8 +17,8 @@ export interface EmployeeDetailsFormData {
 export interface EmployeeDetailsStepProps {
   register: UseFormRegister<any>;
   errors: FieldErrors<EmployeeDetailsFormData>;
-  watch: (name: string) => any;
-  setValue: (name: string, value: any) => void;
+  watch: UseFormWatch<any>;
+  setValue: UseFormSetValue<any>;
 }
 
 interface Position {

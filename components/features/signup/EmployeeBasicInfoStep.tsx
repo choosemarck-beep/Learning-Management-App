@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { UseFormRegister, FieldErrors, UseFormWatch } from "react-hook-form";
+import { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue } from "react-hook-form";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import styles from "./EmployeeBasicInfoStep.module.css";
@@ -16,7 +16,7 @@ export interface EmployeeBasicInfoStepProps {
   register: UseFormRegister<any>;
   errors: FieldErrors<EmployeeBasicInfoFormData>;
   watch: UseFormWatch<any>;
-  setValue: (name: string, value: any) => void;
+  setValue: UseFormSetValue<any>;
 }
 
 interface Company {
