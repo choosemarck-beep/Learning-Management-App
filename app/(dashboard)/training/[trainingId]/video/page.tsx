@@ -87,6 +87,7 @@ export default async function TrainingVideoPage({ params }: PageProps) {
               allowRetake: true,
               maxAttempts: true,
               questions: true,
+              questionsToShow: true,
             },
           },
           miniTrainings: {
