@@ -36,6 +36,16 @@ export default async function StaffDashboardNewPage() {
     }
   }
 
+  // Fetch full user data from database to get onboardingCompleted
+  const userData = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: {
+      onboardingCompleted: true,
+    },
+  });
+
+  const onboardingCompleted = userData?.onboardingCompleted || false;
+
   // Fetch carousel images
   const carouselImages = await prisma.carouselImage.findMany({
     where: { isActive: true },
@@ -47,8 +57,6 @@ export default async function StaffDashboardNewPage() {
       description: true,
     },
   });
-
-  const onboardingCompleted = user.onboardingCompleted || false;
 
   // Determine dashboard route based on role
   const getDashboardRoute = () => {
