@@ -107,10 +107,11 @@ export async function GET(
         });
 
         // Apply randomization if questionsToShow is set
-        if (miniTraining.miniQuiz.questionsToShow && parsedQuestions.length > 0) {
+        const questionsToShow = miniTraining.miniQuiz?.questionsToShow;
+        if (questionsToShow && parsedQuestions.length > 0) {
           const randomized = randomizeQuizQuestions(
             parsedQuestions,
-            miniTraining.miniQuiz.questionsToShow,
+            questionsToShow,
             user.id,
             attemptNumber
           );
