@@ -114,6 +114,7 @@ export const AccountSetupStep: React.FC<AccountSetupStepProps> = ({
           {(() => {
             const registerProps = register("password");
             const { ref: registerRef, ...registerRest } = registerProps;
+            const registerRefTyped = registerRef as React.Ref<HTMLInputElement> | undefined;
             return (
               <Input
                 label="Password"
@@ -124,11 +125,11 @@ export const AccountSetupStep: React.FC<AccountSetupStepProps> = ({
                 {...registerRest}
                 ref={(el) => {
                   // Merge refs: set both the register ref and our ref
-                  if (registerRef) {
-                    if (typeof registerRef === "function") {
-                      registerRef(el);
-                    } else if (registerRef) {
-                      registerRef.current = el;
+                  if (registerRefTyped) {
+                    if (typeof registerRefTyped === "function") {
+                      registerRefTyped(el);
+                    } else if (registerRefTyped) {
+                      (registerRefTyped as React.MutableRefObject<HTMLInputElement | null>).current = el;
                     }
                   }
                   passwordInputRef.current = el;
