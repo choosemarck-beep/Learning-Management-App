@@ -46,17 +46,43 @@ export default async function StaffDashboardNewPage() {
 
   const onboardingCompleted = userData?.onboardingCompleted || false;
 
-  // Fetch carousel images
-  const carouselImages = await prisma.carouselImage.findMany({
-    where: { isActive: true },
-    orderBy: { order: "asc" },
-    select: {
-      id: true,
-      imageUrl: true,
-      title: true,
-      description: true,
-    },
-  });
+  // Fetch carousel settings and data with error handling
+  let mode: "PHOTO_CAROUSEL" | "VIDEO" = "PHOTO_CAROUSEL";
+  let videoUrl: string | null = null;
+  let carouselImages: Array<{
+    id: string;
+    imageUrl: string;
+    title: string | null;
+    description: string | null;
+  }> = [];
+
+  try {
+    const carouselSettings = await prisma.carouselSettings.findFirst();
+    if (carouselSettings) {
+      mode = carouselSettings.mode || "PHOTO_CAROUSEL";
+      videoUrl = carouselSettings.videoUrl || null;
+    }
+
+    // Fetch carousel images (only for photo carousel mode, limit to 4)
+    if (mode === "PHOTO_CAROUSEL") {
+      carouselImages = await prisma.carouselImage.findMany({
+        where: { isActive: true },
+        orderBy: { order: "asc" },
+        take: 4,
+        select: {
+          id: true,
+          imageUrl: true,
+          title: true,
+          description: true,
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching carousel data:", error);
+    // Use defaults if there's an error
+    mode = "PHOTO_CAROUSEL";
+    carouselImages = [];
+  }
 
   // Determine dashboard route based on role
   const getDashboardRoute = () => {
@@ -83,9 +109,13 @@ export default async function StaffDashboardNewPage() {
       />
 
       {/* Carousel Header */}
-      {carouselImages.length > 0 && (
-        <CarouselHeader images={carouselImages} />
-      )}
+      {(mode === "VIDEO" && videoUrl) || (mode === "PHOTO_CAROUSEL" && carouselImages.length > 0) ? (
+        <CarouselHeader
+          mode={mode}
+          images={carouselImages}
+          videoUrl={videoUrl}
+        />
+      ) : null}
 
       {/* Metrics Section */}
       <MetricsSection />
