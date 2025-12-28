@@ -29,8 +29,6 @@ export interface LegacyQuizQuestion {
   explanation?: string;
 }
 
-export type { LegacyQuizQuestion };
-
 interface QuizCardProps {
   questions?: Question[];
   // Support for legacy quiz format
