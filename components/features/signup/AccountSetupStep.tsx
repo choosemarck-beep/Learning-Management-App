@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { UseFormRegister, FieldErrors, UseFormWatch } from "react-hook-form";
 import toast from "react-hot-toast";
 import { Input } from "@/components/ui/Input";
@@ -33,7 +33,7 @@ export const AccountSetupStep: React.FC<AccountSetupStepProps> = ({
 }) => {
   const password = watch("password") || "";
   const confirmPassword = watch("confirmPassword") || "";
-  const passwordInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement | null>(null);
   const criteriaShownRef = useRef(false);
   const lastPasswordRef = useRef<string>("");
   const lastConfirmPasswordRef = useRef<string>("");
