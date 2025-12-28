@@ -288,7 +288,7 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
                     // Handle both string options and object options
                     // String format: ["Option 1", "Option 2"] (from trainer form)
                     // Object format: [{id: "opt1", text: "Option 1"}, ...] (transformed format)
-                    const optionText = typeof option === 'string' ? option : (option.text || option.label || String(option));
+                    const optionText = typeof option === 'string' ? option : (option.text || String(option));
                     const optionId = typeof option === 'string' 
                       ? `opt-${currentQuestion.id}-${optionIndex}` 
                       : (option.id || `opt-${currentQuestion.id}-${optionIndex}`);
