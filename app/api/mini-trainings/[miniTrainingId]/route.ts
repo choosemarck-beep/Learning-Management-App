@@ -132,13 +132,13 @@ export async function GET(
 
         miniQuizData = {
           ...miniQuizData,
-          questions: parsedQuestions,
+          questions: JSON.stringify(parsedQuestions),
         };
       } catch (error) {
         console.error("Error parsing/randomizing mini-quiz questions:", error);
         miniQuizData = {
           ...miniQuizData,
-          questions: [],
+          questions: "[]",
         };
       }
     }

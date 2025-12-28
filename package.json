@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3000",
     "dev:tunnel": "ngrok http 3000",
-    "dev:cloudflare": "./cloudflared tunnel --url http://localhost:3000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

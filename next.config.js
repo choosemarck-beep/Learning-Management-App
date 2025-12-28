@@ -12,16 +12,12 @@ const nextConfig = {
     domains: [],
     formats: ['image/avif', 'image/webp'],
   },
-  // Allow external connections
+  // Allow external connections for development
   experimental: {
     serverActions: {
       allowedOrigins: [
-        '192.168.1.4:3000', 
         'localhost:3000',
-        'wallet-boston-symptoms-eagle.trycloudflare.com',
-        'https://wallet-boston-symptoms-eagle.trycloudflare.com',
-        // Cloudflare Pages URLs (will be added after deployment)
-        '*.pages.dev',
+        // Vercel URLs will be automatically allowed
       ],
     },
   },
