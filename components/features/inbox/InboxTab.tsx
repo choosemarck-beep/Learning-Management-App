@@ -23,7 +23,7 @@ interface InboxItem {
 
 interface InboxTabProps {
   items: InboxItem[];
-  onMarkAsRead?: (id: string, type?: "notification" | "message") => void;
+  onMarkAsRead?: (id: string, type?: "notification" | "message" | "announcement") => void;
   emptyMessage: string;
 }
 
