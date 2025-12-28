@@ -150,7 +150,7 @@ export const TeamMembersTab: React.FC<TeamMembersTabProps> = ({
                       <div className={styles.memberNameRow}>
                         <h3 className={styles.memberName}>{member.name}</h3>
                         {member.status === "RESIGNED" && (
-                          <Badge variant="outline" className={styles.resignedBadge}>
+                          <Badge variant="error" className={styles.resignedBadge}>
                             Resigned
                           </Badge>
                         )}
