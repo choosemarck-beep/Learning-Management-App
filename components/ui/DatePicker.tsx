@@ -76,7 +76,11 @@ export const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
     // Handle button click - open date picker
     const handleButtonClick = () => {
       if (inputRef.current) {
-        inputRef.current.showPicker?.() || inputRef.current.focus();
+        if (inputRef.current.showPicker) {
+          inputRef.current.showPicker();
+        } else {
+          inputRef.current.focus();
+        }
       }
     };
 
