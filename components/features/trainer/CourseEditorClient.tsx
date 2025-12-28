@@ -26,7 +26,6 @@ interface Course {
     title: string;
     shortDescription: string | null;
     videoUrl: string | null;
-    category: string | null;
     order: number;
     isPublished: boolean;
     quiz: {
@@ -343,9 +342,6 @@ export const CourseEditorClient: React.FC<CourseEditorClientProps> = ({ course: 
                         <div className={styles.trainingHeader}>
                           <div className={styles.trainingNumber}>#{index + 1}</div>
                           <div className={styles.trainingTitleGroup}>
-                            {training.category && (
-                              <div className={styles.trainingCategory}>{training.category}</div>
-                            )}
                             <h4 className={styles.trainingTitle}>{training.title}</h4>
                           </div>
                           <Button

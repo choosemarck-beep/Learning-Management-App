@@ -49,7 +49,6 @@ export default async function CourseEditorPage({
           title: true,
           shortDescription: true,
           videoUrl: true,
-          category: true,
           order: true,
           isPublished: true,
           quiz: {
