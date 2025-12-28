@@ -98,38 +98,6 @@ export const QuizResultsClient: React.FC<QuizResultsClientProps> = ({
     }
   };
 
-    // If we have score and xpEarned from URL params, use them
-    if (initialScore !== null && initialXpEarned !== null) {
-      setScore(initialScore);
-      setXpEarned(initialXpEarned);
-    }
-
-    // Try to fetch detailed results from API
-    try {
-      const response = await fetch(`/api/tasks/${taskId}/results`);
-      const data = await response.json();
-
-      if (data.success && data.data.results) {
-        setResults(data.data.results);
-        if (data.data.score !== undefined) setScore(data.data.score);
-        if (data.data.xpEarned !== undefined) setXpEarned(data.data.xpEarned);
-      } else {
-        // Fallback to URL params
-        setResults([]);
-        if (initialScore === null) setScore(0);
-        if (initialXpEarned === null) setXpEarned(0);
-      }
-    } catch (error) {
-      console.error("Error fetching quiz results:", error);
-      // Use URL params if available, otherwise use placeholders
-      if (initialScore === null) setScore(0);
-      if (initialXpEarned === null) setXpEarned(0);
-      setResults([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const getScoreMessage = (score: number) => {
     if (score >= 90) return "Excellent! Outstanding performance!";
     if (score >= 75) return "Great job! Well done!";
