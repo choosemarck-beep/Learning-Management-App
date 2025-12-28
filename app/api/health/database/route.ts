@@ -37,6 +37,13 @@ export async function GET() {
       return NextResponse.json(diagnostics, { status: 500 });
     }
 
+    // Check if Railway proxy URL (requires SSL)
+    const isRailwayProxy = dbUrl.includes(".proxy.rlwy.net") || dbUrl.includes(".railway.app");
+    if (isRailwayProxy && !dbUrl.includes("?sslmode=")) {
+      diagnostics.details.railwayProxy = true;
+      diagnostics.details.sslWarning = "Railway proxy URLs typically require SSL. If connection fails, add ?sslmode=require to DATABASE_URL";
+    }
+
     // Test database connection with a simple query
     const startTime = Date.now();
     
@@ -79,12 +86,18 @@ export async function GET() {
     // Provide helpful error messages based on common issues
     if (error.code === "P1001") {
       diagnostics.details.help = "Cannot reach database server. Check if Railway database is running and not paused.";
+      const dbUrl = process.env.DATABASE_URL || "";
+      if (dbUrl.includes(".proxy.rlwy.net") && !dbUrl.includes("?sslmode=")) {
+        diagnostics.details.sslFix = "Railway proxy requires SSL. Try adding ?sslmode=require to your DATABASE_URL";
+      }
     } else if (error.code === "P1000") {
       diagnostics.details.help = "Authentication failed. Check if DATABASE_URL credentials are correct.";
     } else if (error.code === "P1003") {
       diagnostics.details.help = "Database does not exist. Check if the database name in DATABASE_URL is correct.";
     } else if (error.code === "ENOTFOUND" || error.code === "ECONNREFUSED") {
       diagnostics.details.help = "Cannot resolve database hostname. Check if Railway database host is correct.";
+    } else if (error.message?.includes("SSL") || error.message?.includes("ssl")) {
+      diagnostics.details.help = "SSL connection required. Railway proxy connections need SSL. Add ?sslmode=require to DATABASE_URL";
     }
 
     return NextResponse.json(diagnostics, { status: 500 });
