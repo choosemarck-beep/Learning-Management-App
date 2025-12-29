@@ -24,9 +24,9 @@ type LoginFormData = z.infer<typeof loginSchema>;
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // Default to staff dashboard instead of legacy /dashboard route
-  // The middleware will redirect to the correct role-based dashboard
-  const callbackUrl = searchParams.get("callbackUrl") || "/employee/staff/dashboard";
+  // Default to /dashboard - middleware will redirect to correct role-based dashboard
+  // This prevents redirect loops when user role doesn't match the hardcoded dashboard route
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const [isLoading, setIsLoading] = useState(false);
 
   // Show toast for URL message parameter (fallback for direct URL access)
@@ -99,10 +99,9 @@ function LoginForm() {
       // Only proceed if there's no error AND ok is true
       if (result?.ok && !result?.error) {
         console.log("Login successful, redirecting to:", callbackUrl);
-        // Small delay to ensure session is set before redirect
-        await new Promise(resolve => setTimeout(resolve, 100));
-        router.push(callbackUrl);
-        router.refresh();
+        // Use window.location for a hard redirect to ensure session is fully set
+        // This prevents redirect loops with middleware
+        window.location.href = callbackUrl;
       } else {
         console.error("Unexpected login result:", result);
         toast.error("Something went wrong. Please try again in a moment.");
