@@ -364,8 +364,39 @@ export default async function TrainerDashboardPage() {
       stack: error instanceof Error ? error.stack : undefined,
       errorType: error instanceof Error ? error.constructor.name : typeof error,
     });
-    // Re-throw error to be caught by error.tsx boundary
-    throw error;
+    
+    // Check if it's a Next.js redirect error - let those through
+    if (error && typeof error === 'object' && 'digest' in error && typeof (error as any).digest === 'string' && (error as any).digest?.includes('NEXT_REDIRECT')) {
+      // This is a Next.js redirect - let it through
+      throw error;
+    }
+    
+    // For other errors, show error UI instead of throwing to prevent redirect loops
+    return (
+      <div className={styles.container}>
+        <div style={{ padding: "var(--spacing-lg)", textAlign: "center" }}>
+          <h2 style={{ color: "var(--color-error)", marginBottom: "var(--spacing-md)" }}>
+            Dashboard Error
+          </h2>
+          <p style={{ color: "var(--color-text-secondary)", marginBottom: "var(--spacing-md)" }}>
+            {error instanceof Error ? error.message : "An unexpected error occurred while loading the dashboard."}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              padding: "var(--spacing-sm) var(--spacing-md)",
+              background: "var(--color-primary-purple)",
+              color: "white",
+              border: "none",
+              borderRadius: "var(--radius-md)",
+              cursor: "pointer",
+            }}
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
   }
 }
 
