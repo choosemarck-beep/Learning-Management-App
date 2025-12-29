@@ -12,7 +12,8 @@ export const Footer = React.forwardRef<HTMLElement, FooterProps>(
     return (
       <footer ref={ref} className={cn(styles.footer, className)} {...props}>
         <div className={styles.container}>
-          <div className={styles.links}>
+          {/* TODO: Add about, privacy, and terms routes when implemented */}
+          {/* <div className={styles.links}>
             <Link href="/about" className={styles.link}>
               About
             </Link>
@@ -24,7 +25,7 @@ export const Footer = React.forwardRef<HTMLElement, FooterProps>(
             <Link href="/terms" className={styles.link}>
               Terms
             </Link>
-          </div>
+          </div> */}
           <div className={styles.copyright}>
             © {currentYear} Ahoy Learning. All rights reserved.
           </div>

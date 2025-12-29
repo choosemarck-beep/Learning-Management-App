@@ -19,8 +19,9 @@ interface NavigationProps {
 const defaultLinks: NavLink[] = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/courses", label: "Courses" },
-  { href: "/leaderboard", label: "Leaderboard" },
-  { href: "/achievements", label: "Achievements" },
+  // TODO: Add leaderboard and achievements routes when implemented
+  // { href: "/leaderboard", label: "Leaderboard" },
+  // { href: "/achievements", label: "Achievements" },
 ];
 
 export const Navigation: React.FC<NavigationProps> = ({
