@@ -83,6 +83,18 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"training" | "course">("training");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Log component initialization for debugging
+  useEffect(() => {
+    console.log("[TrainerDashboardClient] Component initialized:", {
+      statsCount: initialStats?.trainingStats?.length || 0,
+      trainingPreferencesCount: initialTrainingPreferences?.length || 0,
+      coursePreferencesCount: initialCoursePreferences?.length || 0,
+      allTrainingsCount: allTrainings?.length || 0,
+      allCoursesCount: allCourses?.length || 0,
+    });
+  }, []);
 
   // Get trainings currently on dashboard
   const displayedTrainings = trainingPreferences
@@ -123,13 +135,37 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
 
   const fetchStats = useCallback(async () => {
     try {
+      console.log("[TrainerDashboardClient] Fetching stats...");
       const response = await fetch("/api/trainer/dashboard/stats");
+      
+      if (!response.ok) {
+        console.error("[TrainerDashboardClient] Stats API error:", {
+          status: response.status,
+          statusText: response.statusText,
+        });
+        setError(`Failed to fetch stats: ${response.status}`);
+        return;
+      }
+
       const data = await response.json();
+      console.log("[TrainerDashboardClient] Stats fetched:", {
+        success: data.success,
+        statsCount: data.data?.trainingStats?.length || 0,
+      });
+
       if (data.success) {
         setStats(data.data);
+        setError(null);
+      } else {
+        console.error("[TrainerDashboardClient] Stats API returned error:", data.error);
+        setError(data.error || "Failed to fetch stats");
       }
     } catch (error) {
-      console.error("Error fetching stats:", error);
+      console.error("[TrainerDashboardClient] Error fetching stats:", {
+        error,
+        message: error instanceof Error ? error.message : String(error),
+      });
+      setError("Failed to fetch stats. Please refresh the page.");
     }
   }, []);
 
@@ -234,11 +270,23 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
 
   // Sync allTrainingsList and allCoursesList with props when they change
   useEffect(() => {
-    setAllTrainingsList(allTrainings);
+    console.log("[TrainerDashboardClient] Updating trainings list:", allTrainings?.length || 0);
+    if (Array.isArray(allTrainings)) {
+      setAllTrainingsList(allTrainings);
+    } else {
+      console.error("[TrainerDashboardClient] Invalid allTrainings prop:", typeof allTrainings);
+      setError("Invalid trainings data received");
+    }
   }, [allTrainings]);
 
   useEffect(() => {
-    setAllCoursesList(allCourses);
+    console.log("[TrainerDashboardClient] Updating courses list:", allCourses?.length || 0);
+    if (Array.isArray(allCourses)) {
+      setAllCoursesList(allCourses);
+    } else {
+      console.error("[TrainerDashboardClient] Invalid allCourses prop:", typeof allCourses);
+      setError("Invalid courses data received");
+    }
   }, [allCourses]);
 
   // Refresh stats periodically
@@ -247,14 +295,39 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
     return () => clearInterval(interval);
   }, [fetchStats]);
 
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <Card>
+          <CardBody>
+            <p className={styles.emptyMessage} style={{ color: "var(--color-error)" }}>
+              {error}
+            </p>
+            <Button
+              onClick={() => {
+                setError(null);
+                window.location.reload();
+              }}
+              variant="primary"
+              style={{ marginTop: "var(--spacing-md)" }}
+            >
+              Refresh Page
+            </Button>
+          </CardBody>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       {/* Overall Completion Rate Card */}
       <div className={styles.completionRateSection}>
         <CompletionRateCard
-          overallCompletionRate={stats.overallCompletionRate}
-          totalAssigned={stats.totalAssigned}
-          totalCompleted={stats.totalCompleted}
+          overallCompletionRate={stats?.overallCompletionRate ?? 0}
+          totalAssigned={stats?.totalAssigned ?? 0}
+          totalCompleted={stats?.totalCompleted ?? 0}
         />
       </div>
 

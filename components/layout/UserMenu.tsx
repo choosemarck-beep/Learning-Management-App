@@ -67,7 +67,11 @@ export const UserMenu: React.FC<UserMenuProps> = ({
 
   const handleLogout = async () => {
     onClose();
-    await signOut({ callbackUrl: "/login" });
+    // Use absolute URL to prevent redirecting to localhost
+    const loginUrl = typeof window !== "undefined" 
+      ? `${window.location.origin}/login`
+      : "/login";
+    await signOut({ callbackUrl: loginUrl });
   };
 
   const [mounted, setMounted] = useState(false);

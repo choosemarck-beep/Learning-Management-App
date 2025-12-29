@@ -276,17 +276,47 @@ export const UsersTable: React.FC<UsersTableProps> = ({
         params.append("status", statusFilter);
       }
 
-      const response = await fetch(`/api/admin/users?${params.toString()}`);
+      const url = `/api/admin/users?${params.toString()}`;
+      console.log("[UsersTable] Fetching users from:", url);
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        console.error("[UsersTable] API error:", {
+          status: response.status,
+          statusText: response.statusText,
+          url,
+        });
+        toast.error(`Failed to fetch users: ${response.status} ${response.statusText}`);
+        return;
+      }
+
       const data = await response.json();
+      console.log("[UsersTable] API response:", {
+        success: data.success,
+        userCount: data.data?.length || 0,
+        pagination: data.pagination,
+      });
 
       if (data.success) {
-        setUsers(data.data);
+        if (Array.isArray(data.data)) {
+          setUsers(data.data);
+          console.log("[UsersTable] Users set successfully:", data.data.length);
+        } else {
+          console.error("[UsersTable] Invalid data format - expected array, got:", typeof data.data);
+          toast.error("Invalid response format from server");
+        }
       } else {
+        console.error("[UsersTable] API returned error:", data.error);
         toast.error(data.error || "Failed to fetch users");
       }
     } catch (error) {
-      console.error("Error fetching users:", error);
-      toast.error("Failed to fetch users");
+      console.error("[UsersTable] Error fetching users:", {
+        error,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      toast.error("Failed to fetch users. Please check your connection and try again.");
     } finally {
       setIsLoading(false);
     }

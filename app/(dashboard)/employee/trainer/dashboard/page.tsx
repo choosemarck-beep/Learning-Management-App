@@ -254,6 +254,15 @@ export default async function TrainerDashboardPage() {
     trainingStats,
   };
 
+  // Log data being passed to client component for debugging
+  console.log("[TrainerDashboardPage] Rendering dashboard with:", {
+    statsCount: initialStats.trainingStats.length,
+    trainingIdsCount: trainingIds.length,
+    courseIdsCount: courseIds.length,
+    allTrainingsCount: allTrainings.length,
+    allCoursesCount: allCourses.length,
+  });
+
   return (
     <TrainerLayout
       userName={user.name}

@@ -19,7 +19,11 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   userAvatar,
 }) => {
   const handleLogout = async () => {
-    await signOut({ callbackUrl: "/login" });
+    // Use absolute URL to prevent redirecting to localhost
+    const loginUrl = typeof window !== "undefined" 
+      ? `${window.location.origin}/login`
+      : "/login";
+    await signOut({ callbackUrl: loginUrl });
   };
 
   return (

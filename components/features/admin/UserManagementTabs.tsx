@@ -198,6 +198,7 @@ export const UserManagementTabs: React.FC<UserManagementTabsProps> = ({
       <div className={styles.tableContainer}>
         <UsersTable
           key={`${activeTab}-${refreshKey}`}
+          initialUsers={initialUsers}
           statusFilter={activeTab}
           currentTab={activeTab}
           onRefresh={handleRefresh}
