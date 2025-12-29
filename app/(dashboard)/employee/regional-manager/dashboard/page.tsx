@@ -142,7 +142,7 @@ export default async function RegionalManagerDashboardPage() {
   const courses = userData.courseProgresses.map((cp) => ({
     id: cp.course.id,
     title: cp.course.title,
-    description: cp.course.description,
+    description: cp.course.description || "",
     thumbnail: cp.course.thumbnail,
     totalXP: cp.course.totalXP,
     progress: cp.progress,

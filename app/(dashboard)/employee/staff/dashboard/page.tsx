@@ -133,16 +133,16 @@ export default async function StaffDashboardPage() {
     }
   }
 
-  // Prepare courses data
-  const courses = userData.courseProgresses.map((cp) => ({
-    id: cp.course.id,
-    title: cp.course.title,
-    description: cp.course.description,
-    thumbnail: cp.course.thumbnail,
-    totalXP: cp.course.totalXP,
-    progress: cp.progress,
-    isCompleted: cp.isCompleted,
-  }));
+    // Prepare courses data
+    const courses = userData.courseProgresses.map((cp) => ({
+      id: cp.course.id,
+      title: cp.course.title,
+      description: cp.course.description || "",
+      thumbnail: cp.course.thumbnail,
+      totalXP: cp.course.totalXP,
+      progress: cp.progress,
+      isCompleted: cp.isCompleted,
+    }));
 
   return (
     <div className={styles.container}>
