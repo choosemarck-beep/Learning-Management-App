@@ -98,14 +98,58 @@ function LoginForm() {
 
       // Only proceed if there's no error AND ok is true
       if (result?.ok && !result?.error) {
-        console.log("Login successful, redirecting to:", callbackUrl);
-        // Small delay to ensure session cookie is fully set before navigation
-        // This prevents middleware from seeing null session due to timing
-        await new Promise(resolve => setTimeout(resolve, 100));
-        // Use Next.js router to ensure session is properly loaded
-        // This ensures the session cookie is available when middleware runs
-        await router.push(callbackUrl);
-        router.refresh(); // Refresh server components to load session
+        // Wait for session to be available before redirecting
+        // This ensures middleware can read the session and redirect correctly
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Fetch the session to get user role for direct redirect
+        // This avoids the /dashboard -> role-based redirect loop
+        try {
+          const sessionResponse = await fetch("/api/auth/session");
+          const session = await sessionResponse.json();
+          const userRole = session?.user?.role;
+          
+          // Determine redirect URL based on role
+          let redirectUrl = callbackUrl;
+          if (callbackUrl === "/dashboard" || !callbackUrl) {
+            // Map role to dashboard URL
+            switch (userRole) {
+              case "SUPER_ADMIN":
+                redirectUrl = "/super-admin/dashboard";
+                break;
+              case "ADMIN":
+                redirectUrl = "/admin/dashboard";
+                break;
+              case "REGIONAL_MANAGER":
+                redirectUrl = "/employee/regional-manager/dashboard";
+                break;
+              case "AREA_MANAGER":
+                redirectUrl = "/employee/area-manager/dashboard";
+                break;
+              case "BRANCH_MANAGER":
+                redirectUrl = "/employee/branch-manager/dashboard";
+                break;
+              case "EMPLOYEE":
+                redirectUrl = "/employee/staff/dashboard";
+                break;
+              case "TRAINER":
+                redirectUrl = "/employee/trainer/dashboard";
+                break;
+              default:
+                redirectUrl = "/employee/staff/dashboard";
+            }
+          }
+          
+          console.log("Login successful, redirecting to:", redirectUrl, "for role:", userRole);
+          // Use window.location for a hard redirect to ensure clean navigation
+          window.location.href = redirectUrl;
+        } catch (sessionError) {
+          console.error("Error fetching session after login:", sessionError);
+          // Fallback: use callbackUrl and let middleware handle it
+          console.log("Fallback: redirecting to:", callbackUrl);
+          await router.push(callbackUrl);
+          router.refresh();
+        }
       } else {
         console.error("Unexpected login result:", result);
         toast.error("Something went wrong. Please try again in a moment.");
