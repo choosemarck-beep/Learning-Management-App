@@ -19,11 +19,15 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   userAvatar,
 }) => {
   const handleLogout = async () => {
-    // Use absolute URL to prevent redirecting to localhost
-    const loginUrl = typeof window !== "undefined" 
-      ? `${window.location.origin}/login`
-      : "/login";
-    await signOut({ callbackUrl: loginUrl });
+    // Use absolute URL based on current origin to prevent redirecting to localhost
+    // This ensures it works in both development and production
+    if (typeof window !== "undefined") {
+      const loginUrl = `${window.location.origin}/login`;
+      await signOut({ callbackUrl: loginUrl });
+    } else {
+      // Fallback for SSR (shouldn't happen, but safe)
+      await signOut({ callbackUrl: "/login" });
+    }
   };
 
   return (

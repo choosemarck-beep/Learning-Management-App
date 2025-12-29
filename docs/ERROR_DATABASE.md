@@ -445,6 +445,65 @@ try {
 
 ---
 
+#### Error: Logout redirects to localhost instead of production URL
+**Symptoms:**
+- After logout, user is redirected to `http://localhost:3000/` instead of production URL
+- Happens regardless of account type
+- Issue persists in production (Vercel)
+
+**Common Causes:**
+- NextAuth `signOut` page config set to `"/"` instead of `"/login"`
+- `callbackUrl` not using absolute URL with current origin
+- NextAuth using `NEXTAUTH_URL` environment variable which might be set to localhost
+
+**Solution:**
+- Update NextAuth config: `signOut: "/login"` instead of `signOut: "/"`
+- Always use `window.location.origin` for `callbackUrl` in logout handlers
+- Ensure `callbackUrl` is an absolute URL: `${window.location.origin}/login`
+- Add proper window check before accessing `window.location.origin`
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - NextAuth config
+pages: {
+  signIn: "/login",
+  signOut: "/", // This can cause redirect issues
+}
+
+// ✅ CORRECT - NextAuth config
+pages: {
+  signIn: "/login",
+  signOut: "/login", // Redirect to login after logout
+}
+
+// ❌ WRONG - Logout handler
+const handleLogout = async () => {
+  await signOut({ callbackUrl: "/login" }); // Relative URL
+};
+
+// ✅ CORRECT - Logout handler
+const handleLogout = async () => {
+  if (typeof window !== "undefined") {
+    const loginUrl = `${window.location.origin}/login`; // Absolute URL
+    await signOut({ callbackUrl: loginUrl });
+  } else {
+    await signOut({ callbackUrl: "/login" }); // Fallback
+  }
+};
+```
+
+**Files Fixed:**
+- `lib/auth/config.ts` - Updated `signOut` page to `/login`
+- `components/layout/UserMenu.tsx` - Updated logout handler to use absolute URL
+- `components/features/admin/UserProfileDropdown.tsx` - Updated logout handler to use absolute URL
+
+**Prevention:**
+- Always use `window.location.origin` for absolute URLs in client-side code
+- Update NextAuth page configs to use explicit routes instead of root `/`
+- Test logout functionality in both development and production environments
+
+---
+
 ## Revision History
 
 - **2024-01-XX**: Created error database
@@ -452,4 +511,5 @@ try {
 - **2024-01-XX**: Added duplicate response variable error
 - **2024-01-XX**: Added syntax error (missing try block) error
 - **2024-01-XX**: Added Server Components render error (production error hiding)
+- **2024-01-XX**: Added logout redirect to localhost error and solution
 

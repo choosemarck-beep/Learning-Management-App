@@ -172,7 +172,7 @@ export const authConfig: NextAuthConfig = {
   },
   pages: {
     signIn: "/login",
-    signOut: "/",
+    signOut: "/login", // Redirect to login page after logout
   },
   session: {
     strategy: "jwt",
