@@ -232,21 +232,49 @@ export async function GET(request: NextRequest) {
 
 #### Error: "Module build failed: Unexpected token"
 **Symptoms:**
-- Build fails with "Unexpected token 'div'. Expected jsx identifier"
+- Build fails with "Unexpected token 'div'/'header'. Expected jsx identifier"
 - Syntax error in JSX/TSX files
+- Error occurs during Vercel build
 
 **Common Causes:**
 - Missing closing tags
 - Incorrect ternary operator syntax
 - JSX structure issues
+- Multiple JSX elements in ternary without React Fragment wrapper
+- Missing fragment wrapper when returning multiple elements from conditional
 
 **Solution:**
 - Check for matching opening/closing tags
 - Verify ternary operator syntax: `condition ? <Component1 /> : <Component2 />`
+- **When returning multiple elements from ternary, wrap in React Fragment**: `condition ? <>...</> : <Component />`
 - Ensure proper JSX structure
+- Use `<>...</>` or `<React.Fragment>...</React.Fragment>` for multiple elements
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - multiple elements without fragment
+{userAvatar ? (
+  <img src={userAvatar} alt={userName} />
+  <div className="placeholder">...</div>
+) : (
+  <span>Initial</span>
+)}
+
+// ✅ CORRECT - wrap multiple elements in fragment
+{userAvatar ? (
+  <>
+    <img src={userAvatar} alt={userName} />
+    <div className="placeholder">...</div>
+  </>
+) : (
+  <span>Initial</span>
+)}
+```
 
 **Files Fixed:**
 - `components/features/courses/TrainingVideoPageClient.tsx` - Fixed ternary operator structure
+- `components/layout/admin/AdminHeader.tsx` - Added React Fragment wrapper for multiple elements in ternary
+- `components/layout/trainer/TrainerHeader.tsx` - Added React Fragment wrapper for multiple elements in ternary
 
 ---
 
