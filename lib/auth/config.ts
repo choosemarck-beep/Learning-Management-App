@@ -53,11 +53,9 @@ export const authConfig: NextAuthConfig = {
             return null;
           }
 
-          // Check if user is approved
+          // Check if user is approved BEFORE password validation
+          // This ensures users get the approval message, not "wrong credentials"
           if (user.status !== "APPROVED") {
-            // Return null to reject login, but we'll handle the error message in login page
-            // by checking the user status separately if needed
-            // For now, we'll use a custom error code that NextAuth can pass through
             const error = new Error(
               user.status === "PENDING"
                 ? "PENDING_APPROVAL"
@@ -65,8 +63,9 @@ export const authConfig: NextAuthConfig = {
                 ? "ACCOUNT_REJECTED"
                 : "ACCOUNT_NOT_APPROVED"
             );
-            // Set a custom property that we can check
+            // Set a custom property that we can check in the error handler
             (error as any).code = user.status === "PENDING" ? "PENDING_APPROVAL" : "ACCOUNT_REJECTED";
+            (error as any).status = user.status;
             console.error("Login attempt failed: Account not approved", { 
               userId: user.id, 
               email: normalizedEmail, 
