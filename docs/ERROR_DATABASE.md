@@ -279,6 +279,65 @@ export async function GET(request: NextRequest) {
 
 ---
 
+#### Error: "Cannot find name 'unlink'" or "Cannot find name 'join'" or "Cannot find name 'existsSync'"
+**Symptoms:**
+- Build fails with "Cannot find name 'unlink'/'join'/'existsSync'"
+- TypeScript error about undefined filesystem functions
+- Occurs after migrating from local filesystem to cloud storage
+
+**Common Causes:**
+- Leftover filesystem code after migrating to Cloudinary/S3
+- Missing import statements for filesystem functions
+- Old cleanup code still trying to delete local files
+- DELETE handlers still using filesystem operations
+
+**Solution:**
+- Remove all filesystem operations (`unlink`, `join`, `existsSync`, `writeFile`, `mkdir`)
+- Replace with cloud storage deletion functions
+- Remove filesystem imports if no longer needed
+- Update DELETE handlers to use cloud storage deletion
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - using filesystem operations after Cloudinary migration
+import { unlink, join } from "fs/promises";
+import { existsSync } from "fs";
+
+if (settings?.imageUrl) {
+  const imagePath = join(process.cwd(), "public", settings.imageUrl);
+  if (existsSync(imagePath)) {
+    await unlink(imagePath); // ERROR: unlink not imported or not needed
+  }
+}
+
+// ✅ CORRECT - use Cloudinary deletion
+import { deleteFromCloudinary, extractPublicIdFromUrl } from "@/lib/cloudinary/config";
+
+if (settings?.imageUrl) {
+  const publicId = extractPublicIdFromUrl(settings.imageUrl);
+  if (publicId) {
+    try {
+      await deleteFromCloudinary(publicId, 'image');
+    } catch (error) {
+      console.error("Error deleting from Cloudinary (non-critical):", error);
+    }
+  }
+}
+```
+
+**Files Fixed:**
+- `app/api/admin/logo/route.ts` - Removed `unlink` calls, replaced with Cloudinary deletion
+- `app/api/admin/splash-screen/route.ts` - Removed `unlink` calls, replaced with Cloudinary deletion
+
+**Prevention:**
+- When migrating from filesystem to cloud storage, search for all filesystem operations
+- Remove all `unlink`, `writeFile`, `mkdir`, `join`, `existsSync` calls
+- Replace with cloud storage equivalents
+- Update both POST and DELETE handlers
+- Remove unused filesystem imports
+
+---
+
 ### 3. Database Errors
 
 #### Error: "Prisma Client not generated"

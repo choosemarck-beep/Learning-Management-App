@@ -184,11 +184,15 @@ export async function POST(request: NextRequest) {
       console.log("Updated logo settings:", settings);
     } catch (error) {
       console.error("Error updating database:", error);
-      // Try to delete the file we just created
+      // If database update fails, try to delete from Cloudinary
       try {
-        await unlink(filepath);
+        const publicId = extractPublicIdFromUrl(imageUrl);
+        if (publicId) {
+          await deleteFromCloudinary(publicId, 'image');
+          console.log(`[Logo] Cleaned up uploaded image from Cloudinary: ${publicId}`);
+        }
       } catch (deleteError) {
-        console.error("Error cleaning up file:", deleteError);
+        console.error("[Logo] Error cleaning up Cloudinary image (non-critical):", deleteError);
       }
       return NextResponse.json(
         { success: false, error: "Failed to update database" },
@@ -239,19 +243,21 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Wrap Prisma queries and file operations in try-catch
+    // Wrap Prisma queries in try-catch
     try {
       // Get existing settings
       const settings = await prisma.appLogoSettings.findFirst();
 
       if (settings?.imageUrl) {
-        // Delete the image file
-        const imagePath = join(process.cwd(), "public", settings.imageUrl);
-        if (existsSync(imagePath)) {
+        // Delete the image from Cloudinary
+        const publicId = extractPublicIdFromUrl(settings.imageUrl);
+        if (publicId) {
           try {
-            await unlink(imagePath);
+            await deleteFromCloudinary(publicId, 'image');
+            console.log(`[Logo] Deleted logo from Cloudinary: ${publicId}`);
           } catch (error) {
-            console.error("Error deleting image:", error);
+            console.error("[Logo] Error deleting from Cloudinary (non-critical):", error);
+            // Continue even if deletion fails
           }
         }
 
