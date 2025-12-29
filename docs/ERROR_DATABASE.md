@@ -339,6 +339,49 @@ if (settings?.imageUrl) {
 
 ---
 
+#### Error: "Interface incorrectly extends interface - Types of property 'src' are incompatible"
+**Symptoms:**
+- Build fails with "Type 'null' is not assignable to type 'string | undefined'"
+- TypeScript error when extending `ImgHTMLAttributes` with custom `src` type
+- Interface conflict between base interface and custom prop type
+
+**Common Causes:**
+- Extending `ImgHTMLAttributes<HTMLImageElement>` and overriding `src` to allow `null`
+- Base interface only allows `string | undefined` for `src`
+- Type incompatibility when trying to allow `null` values
+
+**Solution:**
+- Use `Omit` to exclude the conflicting property from base interface
+- Then add it back with the correct type
+- This allows custom types while preserving other HTML attributes
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - type conflict
+interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+  src: string | null | undefined; // ERROR: conflicts with base interface
+  alt: string;
+}
+
+// ✅ CORRECT - use Omit to exclude src, then add it back
+interface SafeImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src'> {
+  src: string | null | undefined; // Now allowed
+  alt: string;
+}
+```
+
+**Files Fixed:**
+- `components/ui/SafeImage.tsx` - Used `Omit` to exclude `src` from base interface, then added with custom type
+
+**Prevention:**
+- When migrating from filesystem to cloud storage, search for all filesystem operations
+- Remove all `unlink`, `writeFile`, `mkdir`, `join`, `existsSync` calls
+- Replace with cloud storage equivalents
+- Update both POST and DELETE handlers
+- Remove unused filesystem imports
+
+---
+
 ### 3. Database Errors
 
 #### Error: "Prisma Client not generated"

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Image as ImageIcon } from "lucide-react";
 import styles from "./SafeImage.module.css";
 
-interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface SafeImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src'> {
   src: string | null | undefined;
   alt: string;
   fallbackIcon?: React.ReactNode;
