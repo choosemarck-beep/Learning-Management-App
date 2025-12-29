@@ -83,18 +83,18 @@ export default async function TrainerDashboardPage() {
     let allTrainings: Array<{
       id: string;
       title: string;
-      course: { id: string; title: string } | null;
+      course?: { id: string; title: string };
     }> = [];
     let allCourses: Array<{
       id: string;
       title: string;
-      description: string | null;
+      description: string;
       thumbnail: string | null;
       _count: { trainings: number };
     }> = [];
     let preferences: { trainingIds: string[]; courseIds: string[] } | null = null;
     try {
-      [allTrainings, allCourses, preferences] = await Promise.all([
+      const [rawTrainings, rawCourses, rawPreferences] = await Promise.all([
         // Fetch all trainings created by this trainer (from courses)
         prisma.training.findMany({
           where: {
@@ -145,6 +145,24 @@ export default async function TrainerDashboardPage() {
           },
         }),
       ]);
+
+      // Convert null to undefined for course (to match component interface)
+      allTrainings = rawTrainings.map((training) => ({
+        id: training.id,
+        title: training.title,
+        course: training.course || undefined,
+      }));
+
+      // Convert null description to empty string (to match component interface)
+      allCourses = rawCourses.map((course) => ({
+        id: course.id,
+        title: course.title,
+        description: course.description || "",
+        thumbnail: course.thumbnail,
+        _count: course._count,
+      }));
+
+      preferences = rawPreferences;
     } catch (dbError) {
       console.error("Error fetching trainer dashboard data:", dbError);
       // Use empty defaults if database query fails
