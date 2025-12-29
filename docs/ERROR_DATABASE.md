@@ -1235,6 +1235,72 @@ if (search) {
 - Validate query parameters before building where clause
 - Use TypeScript types for where clause to catch errors early
 - Test API routes with various filter combinations
+- **CRITICAL**: After adding fields to Prisma schema, always run `npx prisma db push` or create a migration to sync the database
+- **Schema-Database Sync**: Prisma validates the entire model schema against the database, even when using `select` - missing columns will cause errors
+
+---
+
+#### Error: "P2022 - Column does not exist in database" (Prisma Schema-Database Mismatch)
+**Symptoms:**
+- API returns 500 error with Prisma error code `P2022`
+- Error message: `The column 'User.passwordResetToken' does not exist in the current database`
+- Prisma schema has fields that don't exist in the actual database
+- Error occurs even when using `select` (not selecting those fields)
+
+**Common Causes:**
+- Prisma schema was updated to add new fields (e.g., `passwordResetToken`, `passwordResetTokenExpires`)
+- Database migration was not run to add these columns
+- Database schema is out of sync with Prisma schema
+- Prisma client was regenerated but database wasn't updated
+
+**Solution:**
+1. **Sync Database Schema** (Development):
+   ```bash
+   # Navigate to project folder
+   cd "/Users/marck.baldorado/Documents/Learning Management"
+   
+   # Push schema changes to database (adds missing columns)
+   npx prisma db push
+   
+   # Regenerate Prisma client
+   npx prisma generate
+   ```
+
+2. **Create Migration** (Production/Version Control):
+   ```bash
+   # Create a migration for the schema changes
+   npx prisma migrate dev --name add_password_reset_fields
+   
+   # This will:
+   # - Create a migration file
+   # - Apply it to the database
+   # - Regenerate Prisma client
+   ```
+
+3. **Verify Schema Sync**:
+   ```bash
+   # Check if schema is in sync
+   npx prisma db pull
+   # This will show if there are differences
+   ```
+
+**Important Notes:**
+- **Prisma validates the entire model schema**, not just selected fields
+- Even if you use `select` and don't select the missing fields, Prisma will still validate the schema
+- Always run `npx prisma db push` or create a migration after adding fields to `schema.prisma`
+- For production, use migrations (`prisma migrate dev`) instead of `db push`
+
+**Files Affected:**
+- `prisma/schema.prisma` - Schema definition
+- Database - Missing columns need to be added
+- `app/api/admin/users/route.ts` - Queries will fail until schema is synced
+
+**Prevention:**
+- Always run `npx prisma db push` or `npx prisma migrate dev` after modifying `schema.prisma`
+- Use migrations for production deployments
+- Verify schema sync before deploying to production
+- Document schema changes in migration files
+- Test database operations after schema changes
 
 ---
 

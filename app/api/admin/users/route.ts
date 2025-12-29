@@ -115,6 +115,7 @@ export async function GET(request: NextRequest) {
 
       // Fetch users with related data
       // Use select at top level instead of include to avoid Prisma validation issues
+      // Note: We don't select passwordResetToken fields to avoid errors if they don't exist in DB yet
       users = await prisma.user.findMany({
         where,
         select: {
@@ -132,6 +133,8 @@ export async function GET(request: NextRequest) {
           createdAt: true,
           updatedAt: true,
           approvedAt: true,
+          // Explicitly exclude passwordResetToken fields if they don't exist in DB
+          // These will be added via migration
           company: {
             select: {
               id: true,
