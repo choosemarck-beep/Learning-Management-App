@@ -21,51 +21,62 @@ import { Shield } from "lucide-react";
 import styles from "./page.module.css";
 
 export default async function SuperAdminDashboardPage() {
-  const user = await getCurrentUser();
+  try {
+    const user = await getCurrentUser();
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  // Role check - only SUPER_ADMIN can access
-  if (user.role !== "SUPER_ADMIN") {
-    if (user.role === "ADMIN") {
-      redirect("/admin/dashboard");
-    } else {
-      redirect("/employee/profile");
+    if (!user) {
+      redirect("/login");
     }
-  }
 
-  // Fetch all users for initial render
-  const allUsers = await prisma.user.findMany({
-    include: {
-      company: {
-        select: {
-          id: true,
-          name: true,
-          type: true,
-        },
-      },
-      position: {
-        select: {
-          id: true,
-          title: true,
-          role: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+    // Role check - only SUPER_ADMIN can access
+    if (user.role !== "SUPER_ADMIN") {
+      if (user.role === "ADMIN") {
+        redirect("/admin/dashboard");
+      } else {
+        redirect("/employee/profile");
+      }
+    }
 
-  // Get total counts for stats
-  const [totalUsers, rejectedUsers, pendingUsers, adminCount] = await Promise.all([
-    prisma.user.count(),
-    prisma.user.count({ where: { status: "REJECTED" } }),
-    prisma.user.count({ where: { status: "PENDING" } }),
-    prisma.user.count({ where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } } }),
-  ]);
+    // Fetch all users for initial render with error handling
+    let allUsers, totalUsers, rejectedUsers, pendingUsers, adminCount;
+    try {
+      [allUsers, totalUsers, rejectedUsers, pendingUsers, adminCount] = await Promise.all([
+        prisma.user.findMany({
+          include: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+              },
+            },
+            position: {
+              select: {
+                id: true,
+                title: true,
+                role: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        }),
+        // Get total counts for stats
+        prisma.user.count(),
+        prisma.user.count({ where: { status: "REJECTED" } }),
+        prisma.user.count({ where: { status: "PENDING" } }),
+        prisma.user.count({ where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } } }),
+      ]);
+    } catch (dbError) {
+      console.error("Error fetching super admin dashboard data:", dbError);
+      // Use empty defaults if database query fails
+      allUsers = [];
+      totalUsers = 0;
+      rejectedUsers = 0;
+      pendingUsers = 0;
+      adminCount = 0;
+    }
 
   return (
     <AdminLayout
@@ -108,5 +119,9 @@ export default async function SuperAdminDashboardPage() {
       </div>
     </AdminLayout>
   );
+  } catch (error) {
+    console.error("Error in SuperAdminDashboardPage:", error);
+    redirect("/login");
+  }
 }
 

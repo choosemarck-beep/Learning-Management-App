@@ -20,66 +20,75 @@ import { AdminDashboardClient } from "@/components/features/admin/AdminDashboard
 import styles from "./page.module.css";
 
 export default async function AdminDashboardPage() {
-  const user = await getCurrentUser();
+  try {
+    const user = await getCurrentUser();
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  // Role check - only ADMIN and SUPER_ADMIN can access
-  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
-    if (user.role === "REGIONAL_MANAGER") {
-      redirect("/employee/regional-manager/dashboard");
-    } else if (user.role === "AREA_MANAGER") {
-      redirect("/employee/area-manager/dashboard");
-    } else if (user.role === "BRANCH_MANAGER") {
-      redirect("/employee/branch-manager/dashboard");
-    } else if (user.role === "EMPLOYEE") {
-      redirect("/employee/staff/dashboard");
-    } else if (user.role === "TRAINER") {
-      redirect("/employee/trainer/dashboard");
-    } else {
+    if (!user) {
       redirect("/login");
     }
-  }
 
-  // Fetch all users for initial render
-  const allUsers = await prisma.user.findMany({
-    include: {
-      company: {
-        select: {
-          id: true,
-          name: true,
-          type: true,
-        },
-      },
-      position: {
-        select: {
-          id: true,
-          title: true,
-          role: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+    // Role check - only ADMIN and SUPER_ADMIN can access
+    if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
+      if (user.role === "REGIONAL_MANAGER") {
+        redirect("/employee/regional-manager/dashboard");
+      } else if (user.role === "AREA_MANAGER") {
+        redirect("/employee/area-manager/dashboard");
+      } else if (user.role === "BRANCH_MANAGER") {
+        redirect("/employee/branch-manager/dashboard");
+      } else if (user.role === "EMPLOYEE") {
+        redirect("/employee/staff/dashboard");
+      } else if (user.role === "TRAINER") {
+        redirect("/employee/trainer/dashboard");
+      } else {
+        redirect("/login");
+      }
+    }
 
-  // Fetch companies for trainer creation (positions no longer needed - default to Trainer)
-  const companies = await prisma.company.findMany({
-    where: { isActive: true },
-    select: { id: true, name: true },
-    orderBy: { name: "asc" },
-  });
-
-  // Get total counts for stats
-  const [totalUsers, rejectedUsers, pendingUsers] =
-    await Promise.all([
-      prisma.user.count(),
-      prisma.user.count({ where: { status: "REJECTED" } }),
-      prisma.user.count({ where: { status: "PENDING" } }),
-    ]);
+    // Fetch all users for initial render with error handling
+    let allUsers, companies, totalUsers, rejectedUsers, pendingUsers;
+    try {
+      [allUsers, companies, totalUsers, rejectedUsers, pendingUsers] = await Promise.all([
+        prisma.user.findMany({
+          include: {
+            company: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+              },
+            },
+            position: {
+              select: {
+                id: true,
+                title: true,
+                role: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        }),
+        // Fetch companies for trainer creation (positions no longer needed - default to Trainer)
+        prisma.company.findMany({
+          where: { isActive: true },
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+        }),
+        // Get total counts for stats
+        prisma.user.count(),
+        prisma.user.count({ where: { status: "REJECTED" } }),
+        prisma.user.count({ where: { status: "PENDING" } }),
+      ]);
+    } catch (dbError) {
+      console.error("Error fetching admin dashboard data:", dbError);
+      // Use empty defaults if database query fails
+      allUsers = [];
+      companies = [];
+      totalUsers = 0;
+      rejectedUsers = 0;
+      pendingUsers = 0;
+    }
 
   return (
     <AdminLayout
@@ -101,4 +110,8 @@ export default async function AdminDashboardPage() {
       />
     </AdminLayout>
   );
+  } catch (error) {
+    console.error("Error in AdminDashboardPage:", error);
+    redirect("/login");
+  }
 }
