@@ -51,38 +51,52 @@ export default async function Page() {
 
 ---
 
-#### Error: "Duplicate response variable declarations"
+#### Error: "Duplicate variable declarations"
 **Symptoms:**
-- Build fails with "the name `response` is defined multiple times"
-- Multiple `const response = NextResponse.json(...)` declarations in same scope
+- Build fails with "the name `variableName` is defined multiple times"
+- Multiple `const variableName = ...` declarations in same scope
+- Common with: `response`, `onboardingCompleted`, and other variables
 
 **Common Causes:**
-- Refactoring left duplicate code
-- Copy-paste errors
-- Multiple response declarations in try-catch blocks
+- Refactoring left duplicate code (old declaration not removed)
+- Copy-paste errors during code restructuring
+- Variable declared both outside and inside try-catch blocks
+- Variable declared before and after validation checks
 
 **Solution:**
-- Remove duplicate `response` variable declarations
-- Keep only one response declaration per code path
-- Ensure response is declared once and reused
+- Remove duplicate variable declarations
+- Keep only one declaration per variable in the correct scope
+- When moving code into try-catch blocks, remove old declarations outside
+- Ensure variable is declared once in the appropriate location
 
 **Example Fix:**
 ```typescript
 // ❌ WRONG - duplicate declarations
-const response = NextResponse.json({ success: true });
+const onboardingCompleted = userData.onboardingCompleted || false;
 // ... code ...
-const response = NextResponse.json({ success: true }); // ERROR: duplicate
+// Final validation before render
+const onboardingCompleted = userData.onboardingCompleted || false; // ERROR: duplicate
 
 // ✅ CORRECT - single declaration
-const response = NextResponse.json({ success: true });
-// ... code ...
-// Reuse the same response variable
+// Final validation before render
+const onboardingCompleted = userData.onboardingCompleted || false;
+// Use the variable
 ```
 
 **Files Fixed:**
-- `app/api/admin/users/[userId]/approve/route.ts`
-- `app/api/admin/users/[userId]/reject/route.ts`
-- `app/api/admin/users/[userId]/reset-password/route.ts`
+- `app/api/admin/users/[userId]/approve/route.ts` - duplicate `response`
+- `app/api/admin/users/[userId]/reject/route.ts` - duplicate `response`
+- `app/api/admin/users/[userId]/reset-password/route.ts` - duplicate `response`
+- `app/(dashboard)/employee/staff/dashboard/page.tsx` - duplicate `onboardingCompleted`
+- `app/(dashboard)/employee/branch-manager/dashboard/page.tsx` - duplicate `onboardingCompleted`
+- `app/(dashboard)/employee/area-manager/dashboard/page.tsx` - duplicate `onboardingCompleted`
+- `app/(dashboard)/employee/regional-manager/dashboard/page.tsx` - duplicate `onboardingCompleted`
+
+**Prevention:**
+- When refactoring code, always check for old variable declarations before adding new ones
+- Use search/replace carefully to avoid leaving duplicate code
+- Review entire function scope when moving variables into try-catch blocks
+- Use linter to catch duplicate declarations before committing
 
 ---
 

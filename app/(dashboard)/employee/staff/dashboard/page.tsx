@@ -165,9 +165,7 @@ export default async function StaffDashboardPage() {
       throw new Error("User data not found in database");
     }
 
-  const onboardingCompleted = userData.onboardingCompleted || false;
-
-  // Fetch carousel settings and data with error handling
+    // Fetch carousel settings and data with error handling
   let mode: "PHOTO_CAROUSEL" | "VIDEO" = "PHOTO_CAROUSEL";
   let videoUrl: string | null = null;
   let carouselImages: Array<{
