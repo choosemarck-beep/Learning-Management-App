@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import { Copy } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Copy, ChevronRight, ChevronLeft, Check } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { ProgressIndicator } from "@/components/features/signup/ProgressIndicator";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 import styles from "./CreateTrainerModal.module.css";
 
 export interface CreateTrainerModalProps {
@@ -22,6 +24,8 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
   onSuccess,
   companies = [],
 }) => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 2;
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -36,6 +40,23 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
     password: string;
   } | null>(null);
   const credentialsContainerRef = useRef<HTMLDivElement>(null);
+  const stepContentRef = useRef<HTMLDivElement>(null);
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        name: "",
+        email: "",
+        employeeNumber: "",
+        phone: "",
+        companyId: "",
+      });
+      setErrors({});
+      setCurrentStep(1);
+      setGeneratedCredentials(null);
+    }
+  }, [isOpen]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -48,27 +69,53 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
     }
   };
 
-  const validateForm = () => {
+  const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    }
+    if (step === 1) {
+      if (!formData.name.trim()) {
+        newErrors.name = "Name is required";
+      } else if (formData.name.trim().length < 2) {
+        newErrors.name = "Name must be at least 2 characters";
+      }
 
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email address";
+      if (!formData.email.trim()) {
+        newErrors.email = "Email is required";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        newErrors.email = "Please enter a valid email address";
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleNext = () => {
+    if (validateStep(currentStep) && currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      // Show first error as toast
+      const firstErrorKey = Object.keys(errors)[0];
+      if (firstErrorKey && errors[firstErrorKey]) {
+        toast.error(errors[firstErrorKey]);
+      } else {
+        toast.error("Please fill in all required fields");
+      }
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    // Final validation
+    if (!validateStep(1)) {
+      setCurrentStep(1);
       return;
     }
 
@@ -91,16 +138,14 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
       const data = await response.json();
 
       if (data.success) {
-        // Show credentials modal instead of closing
         setGeneratedCredentials({
           email: formData.email.trim().toLowerCase(),
           password: data.password,
         });
-        toast.success("Trainer created successfully! Please copy the credentials.");
+        toast.success("Trainer account created successfully!");
       } else {
-        toast.error(data.error || "Failed to create trainer");
+        toast.error(data.error || "Failed to create trainer account");
         if (data.details) {
-          // Handle validation errors
           const validationErrors: Record<string, string> = {};
           data.details.forEach((err: any) => {
             if (err.path && err.path.length > 0) {
@@ -108,11 +153,15 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
             }
           });
           setErrors(validationErrors);
+          // Go back to step 1 if there are errors in required fields
+          if (validationErrors.name || validationErrors.email) {
+            setCurrentStep(1);
+          }
         }
       }
     } catch (error) {
       console.error("Error creating trainer:", error);
-      toast.error("Failed to create trainer. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -128,6 +177,7 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
         companyId: "",
       });
       setErrors({});
+      setCurrentStep(1);
       setGeneratedCredentials(null);
       onClose();
     }
@@ -135,14 +185,15 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
 
   const handleCloseCredentials = () => {
     setGeneratedCredentials(null);
-      setFormData({
-        name: "",
-        email: "",
-        employeeNumber: "",
-        phone: "",
-        companyId: "",
-      });
+    setFormData({
+      name: "",
+      email: "",
+      employeeNumber: "",
+      phone: "",
+      companyId: "",
+    });
     setErrors({});
+    setCurrentStep(1);
     onClose();
     onSuccess?.();
   };
@@ -154,7 +205,6 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
     }
 
     try {
-      // Dynamically import html2canvas (lazy load)
       let html2canvas;
       try {
         html2canvas = (await import("html2canvas")).default;
@@ -166,12 +216,11 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
       
       const canvas = await html2canvas(credentialsContainerRef.current, {
         backgroundColor: null,
-        scale: 2, // Higher quality
+        scale: 2,
         logging: false,
         useCORS: true,
       });
 
-      // Convert canvas to blob
       canvas.toBlob(async (blob) => {
         if (!blob) {
           toast.error("Failed to create image");
@@ -179,16 +228,14 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
         }
 
         try {
-          // Copy image to clipboard
           await navigator.clipboard.write([
             new ClipboardItem({
               [blob.type]: blob,
             }),
           ]);
-          toast.success("Credentials copied as image! You can paste it anywhere.");
+          toast.success("Credentials copied as image!");
         } catch (error) {
           console.error("Error copying image:", error);
-          // Fallback: download the image
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
@@ -197,7 +244,7 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
           link.click();
           document.body.removeChild(link);
           URL.revokeObjectURL(url);
-          toast.success("Image downloaded! You can send this file to the trainer.");
+          toast.success("Image downloaded!");
         }
       }, "image/png");
     } catch (error) {
@@ -206,125 +253,235 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
     }
   };
 
-  return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title="Create Trainer Account"
-      showCloseButton={true}
-      closeOnBackdropClick={!isLoading}
-      className={styles.modal}
-    >
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.formGroup}>
-          <Input
-            label="Full Name"
-            name="name"
-            type="text"
-            value={formData.name}
-            onChange={handleChange}
-            error={errors.name}
-            required
-            disabled={isLoading}
-          />
-        </div>
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className={styles.stepContent} ref={stepContentRef}>
+            <div className={styles.stepHeader}>
+              <h3 className={styles.stepTitle}>Essential Information</h3>
+              <p className={styles.stepDescription}>
+                Let's start with the basic details needed to create the trainer account.
+              </p>
+            </div>
 
-        <div className={styles.formGroup}>
-          <Input
-            label="Email"
-            name="email"
-            type="email"
-            value={formData.email}
-            onChange={handleChange}
-            error={errors.email}
-            required
-            disabled={isLoading}
-          />
-        </div>
+            <div className={styles.fieldsGroup}>
+              <div className={styles.formField}>
+                <Input
+                  label="Full Name"
+                  name="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleChange}
+                  error={errors.name}
+                  required
+                  disabled={isLoading}
+                  placeholder="Enter trainer's full name"
+                  helperText="This will be displayed on their profile"
+                />
+              </div>
 
-        <div className={styles.formGroup}>
-          <Input
-            label="Employee Number (Optional)"
-            name="employeeNumber"
-            type="text"
-            value={formData.employeeNumber}
-            onChange={handleChange}
-            error={errors.employeeNumber}
-            disabled={isLoading}
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <Input
-            label="Phone (Optional)"
-            name="phone"
-            type="tel"
-            value={formData.phone}
-            onChange={handleChange}
-            error={errors.phone}
-            disabled={isLoading}
-          />
-        </div>
-
-        {companies.length > 0 && (
-          <div className={styles.formGroup}>
-            <Select
-              label="Company (Optional)"
-              name="companyId"
-              value={formData.companyId}
-              onChange={handleChange}
-              error={errors.companyId}
-              disabled={isLoading}
-            >
-              <option value="">Select a company</option>
-              {companies.map((company) => (
-                <option key={company.id} value={company.id}>
-                  {company.name}
-                </option>
-              ))}
-            </Select>
+              <div className={styles.formField}>
+                <Input
+                  label="Email Address"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  error={errors.email}
+                  required
+                  disabled={isLoading}
+                  placeholder="trainer@example.com"
+                  helperText="Used for login and account notifications"
+                />
+              </div>
+            </div>
           </div>
-        )}
+        );
 
+      case 2:
+        return (
+          <div className={styles.stepContent} ref={stepContentRef}>
+            <div className={styles.stepHeader}>
+              <h3 className={styles.stepTitle}>Additional Details</h3>
+              <p className={styles.stepDescription}>
+                These fields are optional but help organize trainer information.
+              </p>
+            </div>
 
-        <div className={styles.actions}>
-          <Button
-            type="button"
-            variant="ghost"
-            size="lg"
-            onClick={handleClose}
-            disabled={isLoading}
-            className={styles.cancelButton}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            size="lg"
-            isLoading={isLoading}
-            className={styles.submitButton}
-          >
-            Create Trainer
-          </Button>
-        </div>
-      </form>
+            <div className={styles.fieldsGroup}>
+              <div className={styles.formField}>
+                <Input
+                  label="Employee Number"
+                  name="employeeNumber"
+                  type="text"
+                  value={formData.employeeNumber}
+                  onChange={handleChange}
+                  error={errors.employeeNumber}
+                  disabled={isLoading}
+                  placeholder="Optional employee identifier"
+                  helperText="Leave blank if not applicable"
+                />
+              </div>
+
+              <div className={styles.formField}>
+                <Input
+                  label="Phone Number"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  error={errors.phone}
+                  disabled={isLoading}
+                  placeholder="Optional contact number"
+                  helperText="For internal communication purposes"
+                />
+              </div>
+
+              {companies.length > 0 && (
+                <div className={styles.formField}>
+                  <Select
+                    label="Company"
+                    name="companyId"
+                    value={formData.companyId}
+                    onChange={handleChange}
+                    error={errors.companyId}
+                    disabled={isLoading}
+                  >
+                    <option value="">Select a company (optional)</option>
+                    {companies.map((company) => (
+                      <option key={company.id} value={company.id}>
+                        {company.name}
+                      </option>
+                    ))}
+                  </Select>
+                  <p className={styles.helperText}>
+                    Associate this trainer with a specific company
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <>
+      <Modal
+        isOpen={isOpen && !generatedCredentials}
+        onClose={handleClose}
+        title="Create Trainer Account"
+        showCloseButton={true}
+        closeOnBackdropClick={!isLoading}
+        className={styles.modal}
+      >
+        <form onSubmit={handleSubmit} className={styles.form}>
+          {/* Progress Indicator */}
+          <div className={styles.progressSection}>
+            <ProgressIndicator
+              currentStep={currentStep}
+              totalSteps={totalSteps}
+              className={styles.progressIndicator}
+            />
+          </div>
+
+          {/* Step Content with Animation */}
+          <div className={styles.stepContainer}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentStep}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                className={styles.stepWrapper}
+              >
+                {renderStepContent()}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Navigation Buttons */}
+          <div className={styles.actions}>
+            {currentStep > 1 ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="lg"
+                onClick={handleBack}
+                disabled={isLoading}
+                className={styles.backButton}
+              >
+                <ChevronLeft size={18} />
+                Back
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                size="lg"
+                onClick={handleClose}
+                disabled={isLoading}
+                className={styles.cancelButton}
+              >
+                Cancel
+              </Button>
+            )}
+
+            {currentStep < totalSteps ? (
+              <Button
+                type="button"
+                variant="primary"
+                size="lg"
+                onClick={handleNext}
+                disabled={isLoading}
+                className={styles.nextButton}
+              >
+                Continue
+                <ChevronRight size={18} />
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                isLoading={isLoading}
+                className={styles.submitButton}
+              >
+                <Check size={18} />
+                Create Trainer
+              </Button>
+            )}
+          </div>
+        </form>
+      </Modal>
 
       {/* Credentials Display Modal */}
       {generatedCredentials && (
         <Modal
           isOpen={true}
           onClose={handleCloseCredentials}
-          title="Trainer Credentials"
+          title="Trainer Account Created"
           showCloseButton={false}
           className={styles.credentialsModal}
         >
           <div className={styles.credentialsContent}>
-            <div ref={credentialsContainerRef} className={styles.credentialsContainer}>
-              <p className={styles.credentialsWarning}>
-                Please copy these credentials. The password will not be shown again.
+            <div className={styles.successMessage}>
+              <div className={styles.successIcon}>
+                <Check size={32} />
+              </div>
+              <h3 className={styles.successTitle}>Account Created Successfully!</h3>
+              <p className={styles.successDescription}>
+                Please copy these credentials and share them securely with the trainer.
+                The password will not be shown again.
               </p>
+            </div>
 
+            <div ref={credentialsContainerRef} className={styles.credentialsContainer}>
               <div className={styles.credentialField}>
                 <label className={styles.credentialLabel}>Email (Login)</label>
                 <div className={styles.credentialValue}>
@@ -362,7 +519,6 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
           </div>
         </Modal>
       )}
-    </Modal>
+    </>
   );
 };
-

@@ -1,44 +1,170 @@
-/* Create Trainer Modal - Desktop-Optimized */
+/* Create Trainer Modal - Professional Multi-Step Design */
 
 .modal {
-  max-width: 500px;
+  max-width: 560px;
   width: 100%;
 }
 
 .form {
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-sm) 0;
+}
+
+/* Progress Section */
+.progressSection {
+  padding: var(--spacing-md) 0 var(--spacing-sm);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.progressIndicator {
+  margin: 0 auto;
+}
+
+/* Step Container */
+.stepContainer {
+  min-height: 320px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stepWrapper {
+  width: 100%;
+}
+
+.stepContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-md) 0;
+}
+
+/* Step Header */
+.stepHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
+}
+
+.stepTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.stepDescription {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Fields Group */
+.fieldsGroup {
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-md);
 }
 
-.formGroup {
+.formField {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
 }
 
+.helperText {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+  padding-left: var(--spacing-xs);
+}
+
+/* Actions */
 .actions {
   display: flex;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(139, 92, 246, 0.2);
 }
 
 .cancelButton,
+.backButton,
+.nextButton,
+.submitButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  min-height: 44px;
+}
+
+.backButton {
+  max-width: 120px;
+}
+
+.nextButton,
 .submitButton {
   flex: 1;
 }
 
 /* Credentials Modal Styles */
 .credentialsModal {
-  max-width: 500px;
+  max-width: 520px;
   width: 100%;
 }
 
 .credentialsContent {
-  padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-sm) 0;
+}
+
+/* Success Message */
+.successMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-md);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-lg);
+}
+
+.successIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-status-success), #059669);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-primary);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.successTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.successDescription {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  max-width: 420px;
 }
 
 .credentialsContainer {
@@ -47,81 +173,57 @@
   border: 2px solid rgba(139, 92, 246, 0.3);
   border-radius: var(--radius-lg);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.credentialsWarning {
-  padding: var(--spacing-md);
-  background: rgba(251, 191, 36, 0.1);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
-  margin-bottom: var(--spacing-lg);
-  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
 }
 
 .credentialField {
-  margin-bottom: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
 }
 
 .credentialLabel {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .credentialValue {
   display: flex;
   align-items: center;
   padding: var(--spacing-md);
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: var(--radius-md);
+  transition: border-color var(--transition-normal) ease;
+}
+
+.credentialValue:focus-within {
+  border-color: var(--color-primary-purple);
+  outline: none;
 }
 
 .credentialCode {
   flex: 1;
   font-family: "Courier New", monospace;
-  font-size: 0.875rem;
+  font-size: var(--font-size-base);
   color: var(--color-text-primary);
   background: transparent;
   border: none;
   padding: 0;
   word-break: break-all;
-}
-
-.copyButton {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: var(--color-primary-purple);
-  color: white;
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-normal) ease;
-  flex-shrink: 0;
-}
-
-.copyButton:hover {
-  background: var(--color-primary-blue);
-  transform: translateY(-1px);
-}
-
-.copyButton:active {
-  transform: translateY(0);
+  line-height: 1.6;
 }
 
 .credentialsActions {
   display: flex;
   gap: var(--spacing-md);
   justify-content: flex-end;
-  margin-top: var(--spacing-md);
+  margin-top: var(--spacing-sm);
 }
 
 .copyImageButton {
@@ -133,4 +235,19 @@
 
 .doneButton {
   min-width: 120px;
+}
+
+/* Responsive adjustments for desktop */
+@media (min-width: 768px) {
+  .modal {
+    max-width: 600px;
+  }
+
+  .stepContainer {
+    min-height: 360px;
+  }
+
+  .stepTitle {
+    font-size: var(--font-size-2xl);
+  }
 }
