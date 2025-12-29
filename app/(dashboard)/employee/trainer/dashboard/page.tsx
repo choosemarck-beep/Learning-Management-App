@@ -9,8 +9,11 @@ import styles from "./page.module.css";
 export const dynamic = 'force-dynamic';
 
 export default async function TrainerDashboardPage() {
+  console.log("[TrainerDashboardPage] Page component started");
   try {
+    console.log("[TrainerDashboardPage] Getting current user...");
     const user = await getCurrentUser();
+    console.log("[TrainerDashboardPage] User retrieved:", { id: user?.id, role: user?.role });
 
     if (!user) {
       redirect("/login");
@@ -261,7 +264,19 @@ export default async function TrainerDashboardPage() {
     courseIdsCount: courseIds.length,
     allTrainingsCount: allTrainings.length,
     allCoursesCount: allCourses.length,
+    userId: user.id,
+    userRole: user.role,
   });
+
+  // Ensure all required data is present before rendering
+  if (!initialStats || !Array.isArray(allTrainings) || !Array.isArray(allCourses)) {
+    console.error("[TrainerDashboardPage] Missing required data:", {
+      hasInitialStats: !!initialStats,
+      allTrainingsIsArray: Array.isArray(allTrainings),
+      allCoursesIsArray: Array.isArray(allCourses),
+    });
+    throw new Error("Failed to load dashboard data");
+  }
 
   return (
     <TrainerLayout
@@ -283,8 +298,14 @@ export default async function TrainerDashboardPage() {
     </TrainerLayout>
   );
   } catch (error) {
-    console.error("Error in TrainerDashboardPage:", error);
-    redirect("/login");
+    console.error("[TrainerDashboardPage] Error in TrainerDashboardPage:", {
+      error,
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+    });
+    // Re-throw error to be caught by error.tsx boundary
+    throw error;
   }
 }
 

@@ -87,13 +87,32 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
 
   // Log component initialization for debugging
   useEffect(() => {
-    console.log("[TrainerDashboardClient] Component initialized:", {
+    console.log("[TrainerDashboardClient] Component mounted and initialized:", {
       statsCount: initialStats?.trainingStats?.length || 0,
       trainingPreferencesCount: initialTrainingPreferences?.length || 0,
       coursePreferencesCount: initialCoursePreferences?.length || 0,
       allTrainingsCount: allTrainings?.length || 0,
       allCoursesCount: allCourses?.length || 0,
+      hasStats: !!initialStats,
+      hasTrainingPreferences: Array.isArray(initialTrainingPreferences),
+      hasCoursePreferences: Array.isArray(initialCoursePreferences),
+      hasAllTrainings: Array.isArray(allTrainings),
+      hasAllCourses: Array.isArray(allCourses),
     });
+    
+    // Check for any undefined or null critical props
+    if (!initialStats) {
+      console.error("[TrainerDashboardClient] CRITICAL: initialStats is missing!");
+      setError("Dashboard stats are missing. Please refresh the page.");
+    }
+    if (!Array.isArray(allTrainings)) {
+      console.error("[TrainerDashboardClient] CRITICAL: allTrainings is not an array!", typeof allTrainings);
+      setError("Trainings data is invalid. Please refresh the page.");
+    }
+    if (!Array.isArray(allCourses)) {
+      console.error("[TrainerDashboardClient] CRITICAL: allCourses is not an array!", typeof allCourses);
+      setError("Courses data is invalid. Please refresh the page.");
+    }
   }, []);
 
   // Get trainings currently on dashboard
