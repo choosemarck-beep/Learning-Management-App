@@ -58,14 +58,26 @@ export default async function BranchManagerDashboardPage() {
 
   const onboardingCompleted = userData.onboardingCompleted || false;
 
-  // Fetch carousel settings and data
-  const carouselSettings = await prisma.carouselSettings.findFirst();
-  const mode = carouselSettings?.mode || "PHOTO_CAROUSEL";
-  const videoUrl = carouselSettings?.videoUrl || null;
+  // Fetch carousel settings and data with error handling
+  let mode: "PHOTO_CAROUSEL" | "VIDEO" = "PHOTO_CAROUSEL";
+  let videoUrl: string | null = null;
+  let carouselImages: Array<{
+    id: string;
+    imageUrl: string;
+    title: string | null;
+    description: string | null;
+  }> = [];
 
-  // Fetch carousel images (only for photo carousel mode, limit to 4)
-  const carouselImages = mode === "PHOTO_CAROUSEL"
-    ? await prisma.carouselImage.findMany({
+  try {
+    const carouselSettings = await prisma.carouselSettings.findFirst();
+    if (carouselSettings) {
+      mode = carouselSettings.mode || "PHOTO_CAROUSEL";
+      videoUrl = carouselSettings.videoUrl || null;
+    }
+
+    // Fetch carousel images (only for photo carousel mode, limit to 4)
+    if (mode === "PHOTO_CAROUSEL") {
+      carouselImages = await prisma.carouselImage.findMany({
         where: { isActive: true },
         orderBy: { order: "asc" },
         take: 4,
@@ -75,8 +87,28 @@ export default async function BranchManagerDashboardPage() {
           title: true,
           description: true,
         },
-      })
-    : [];
+      });
+    }
+  } catch (error) {
+    // If carouselSettings model doesn't exist yet, default to photo carousel
+    console.error("Error fetching carousel settings:", error);
+    // Try to fetch images anyway
+    try {
+      carouselImages = await prisma.carouselImage.findMany({
+        where: { isActive: true },
+        orderBy: { order: "asc" },
+        take: 4,
+        select: {
+          id: true,
+          imageUrl: true,
+          title: true,
+          description: true,
+        },
+      });
+    } catch (imageError) {
+      console.error("Error fetching carousel images:", imageError);
+    }
+  }
 
   // Prepare courses data
   const courses = userData.courseProgresses.map((cp) => ({

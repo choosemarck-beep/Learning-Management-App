@@ -13,7 +13,15 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getCurrentUser();
+  // Get user for navigation, but don't block rendering if there's an error
+  // Individual pages will handle authentication
+  let user;
+  try {
+    user = await getCurrentUser();
+  } catch (error) {
+    console.error("Error getting user in layout:", error);
+    // Continue rendering - pages will handle auth
+  }
 
   return (
     <>
