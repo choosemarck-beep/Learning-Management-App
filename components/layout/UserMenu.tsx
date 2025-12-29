@@ -67,14 +67,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({
 
   const handleLogout = async () => {
     onClose();
-    // Use absolute URL based on current origin to prevent redirecting to localhost
-    // This ensures it works in both development and production
+    // Sign out without redirect to bypass NextAuth's NEXTAUTH_URL dependency
+    await signOut({ redirect: false });
+    
+    // Hard redirect to login using current origin (works in both dev and production)
     if (typeof window !== "undefined") {
-      const loginUrl = `${window.location.origin}/login`;
-      await signOut({ callbackUrl: loginUrl });
-    } else {
-      // Fallback for SSR (shouldn't happen, but safe)
-      await signOut({ callbackUrl: "/login" });
+      window.location.href = `${window.location.origin}/login`;
     }
   };
 

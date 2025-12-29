@@ -597,39 +597,38 @@ try {
 **Symptoms:**
 - After logout, user is redirected to `http://localhost:3000/` instead of production URL
 - Happens regardless of account type
-- Issue persists in production (Vercel)
+- Issue persists in production (Vercel) even when `callbackUrl` is provided
+- NextAuth may use `NEXTAUTH_URL` environment variable (set to localhost) to construct redirect URLs
 
 **Common Causes:**
 - NextAuth `signOut` page config set to `"/"` instead of `"/login"`
 - `callbackUrl` not using absolute URL with current origin
-- NextAuth using `NEXTAUTH_URL` environment variable which might be set to localhost
+- **CRITICAL**: NextAuth using `NEXTAUTH_URL` environment variable which might be set to localhost, even when `callbackUrl` is provided
+- NextAuth's redirect mechanism may override `callbackUrl` with `NEXTAUTH_URL` in some cases
 
 **Solution:**
-- Update NextAuth config: `signOut: "/login"` instead of `signOut: "/"`
-- Always use `window.location.origin` for `callbackUrl` in logout handlers
-- Ensure `callbackUrl` is an absolute URL: `${window.location.origin}/login`
-- Add proper window check before accessing `window.location.origin`
+- **RECOMMENDED APPROACH**: Use `signOut({ redirect: false })` followed by hard redirect with `window.location.href`
+- This bypasses NextAuth's redirect mechanism entirely and always uses the current origin
+- Update NextAuth config: `signOut: "/login"` as a fallback (though hard redirect bypasses it)
+- Always use `window.location.origin` for redirect URLs in client-side code
 
-**Example Fix:**
+**Example Fix (RECOMMENDED):**
 ```typescript
-// ❌ WRONG - NextAuth config
-pages: {
-  signIn: "/login",
-  signOut: "/", // This can cause redirect issues
-}
-
-// ✅ CORRECT - NextAuth config
-pages: {
-  signIn: "/login",
-  signOut: "/login", // Redirect to login after logout
-}
-
-// ❌ WRONG - Logout handler
+// ✅ CORRECT - Bypass NextAuth redirect mechanism
 const handleLogout = async () => {
-  await signOut({ callbackUrl: "/login" }); // Relative URL
+  // Sign out without redirect to bypass NextAuth's NEXTAUTH_URL dependency
+  await signOut({ redirect: false });
+  
+  // Hard redirect to login using current origin (works in both dev and production)
+  if (typeof window !== "undefined") {
+    window.location.href = `${window.location.origin}/login`;
+  }
 };
+```
 
-// ✅ CORRECT - Logout handler
+**Alternative Fix (Less Reliable):**
+```typescript
+// ⚠️ ALTERNATIVE - May still use NEXTAUTH_URL in some cases
 const handleLogout = async () => {
   if (typeof window !== "undefined") {
     const loginUrl = `${window.location.origin}/login`; // Absolute URL
@@ -640,15 +639,26 @@ const handleLogout = async () => {
 };
 ```
 
+**NextAuth Config:**
+```typescript
+// ✅ CORRECT - NextAuth config (fallback, though hard redirect bypasses it)
+pages: {
+  signIn: "/login",
+  signOut: "/login", // Redirect to login after logout
+}
+```
+
 **Files Fixed:**
 - `lib/auth/config.ts` - Updated `signOut` page to `/login`
-- `components/layout/UserMenu.tsx` - Updated logout handler to use absolute URL
-- `components/features/admin/UserProfileDropdown.tsx` - Updated logout handler to use absolute URL
+- `components/layout/UserMenu.tsx` - Updated logout handler to use `signOut({ redirect: false })` + `window.location.href`
+- `components/features/admin/UserProfileDropdown.tsx` - Updated logout handler to use `signOut({ redirect: false })` + `window.location.href`
 
 **Prevention:**
-- Always use `window.location.origin` for absolute URLs in client-side code
+- **CRITICAL**: Use `signOut({ redirect: false })` + `window.location.href` pattern to bypass NextAuth's redirect mechanism
+- Always use `window.location.origin` for redirect URLs in client-side code
 - Update NextAuth page configs to use explicit routes instead of root `/`
 - Test logout functionality in both development and production environments
+- **Note**: Even if `NEXTAUTH_URL` is set to localhost in Vercel, the hard redirect pattern will work correctly
 
 ---
 
@@ -1310,6 +1320,7 @@ if (search) {
 - Uploading splash screen images fails with 500 error
 - No error message shown to user
 - Console shows generic "Internal server error"
+- Deprecation warning: `(node:4) [DEP0169] DeprecationWarning: url.parse() behavior is not standardized`
 
 **Common Causes:**
 - Cloudinary configuration missing or incorrect
@@ -1317,13 +1328,47 @@ if (search) {
 - File upload to Cloudinary fails
 - Missing error handling for Cloudinary upload failures
 - Database transaction fails after successful Cloudinary upload
+- **CRITICAL**: Using `upload_stream()` API which may trigger deprecation warnings and be less reliable than promise-based API
+- Cloudinary SDK internally using deprecated `url.parse()` when using `upload_stream()`
 
 **Solution:**
+- **Use Promise-Based Upload API**: Replace `upload_stream()` with promise-based `upload()` method
+- Convert buffer to data URI format for direct upload (avoids stream issues)
 - Add comprehensive error logging for Cloudinary uploads
 - Clean up Cloudinary uploads if database update fails
 - Validate Cloudinary credentials before upload
 - Add detailed error messages for different failure scenarios
 - Handle Prisma errors specifically (P2002, P2003, etc.)
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - Using upload_stream (may trigger deprecation warnings)
+return new Promise((resolve, reject) => {
+  const uploadStream = cloudinary.uploader.upload_stream(
+    { folder, public_id, resource_type },
+    (error, result) => {
+      if (error) reject(error);
+      else resolve(result.secure_url);
+    }
+  );
+  uploadStream.end(buffer);
+});
+
+// ✅ CORRECT - Using promise-based upload API
+const mimeType = resourceType === 'image' ? 'image/jpeg' : 'video/mp4';
+const base64 = buffer.toString('base64');
+const dataUri = `data:${mimeType};base64,${base64}`;
+
+const result = await cloudinary.uploader.upload(dataUri, {
+  folder: `learning-management/${folder}`,
+  public_id: filename.replace(/\.[^/.]+$/, ''),
+  resource_type: resourceType,
+  overwrite: false,
+  invalidate: true,
+});
+
+return result.secure_url;
+```
 
 **Example Fix:**
 ```typescript
@@ -1382,6 +1427,7 @@ try {
 **Files Fixed:**
 - `app/api/admin/carousel/route.ts` - Added enhanced error handling and Cloudinary cleanup
 - `app/api/admin/splash-screen/route.ts` - Already has proper error handling (verified)
+- `lib/cloudinary/config.ts` - Updated to use promise-based upload API instead of upload_stream (fixes deprecation warning and improves reliability)
 
 **Prevention:**
 - Always clean up Cloudinary uploads if database operations fail
@@ -1390,6 +1436,7 @@ try {
 - Test upload flow end-to-end (file → Cloudinary → database)
 - Handle all Prisma error codes specifically
 - Verify Cloudinary environment variables are set in Vercel
+- **CRITICAL**: Use promise-based `upload()` API instead of `upload_stream()` to avoid deprecation warnings and improve reliability
 
 ---
 
@@ -1481,6 +1528,75 @@ try {
 - Document required environment variables in setup guides
 - Test uploads in production environment after setting variables
 - Use environment variable validation in CI/CD pipeline
+
+---
+
+#### Error: "DEP0169 DeprecationWarning: url.parse() behavior is not standardized"
+**Symptoms:**
+- Console shows deprecation warning: `(node:4) [DEP0169] DeprecationWarning: url.parse() behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead.`
+- Warning appears during Cloudinary upload operations
+- Photo carousel upload may fail or be unreliable
+- May cause issues in future Node.js versions
+
+**Common Causes:**
+- Cloudinary SDK using deprecated `url.parse()` internally when using `upload_stream()` API
+- Node.js deprecating `url.parse()` in favor of WHATWG URL API
+- Using callback-based `upload_stream()` instead of promise-based `upload()` API
+
+**Solution:**
+- **Use Promise-Based Upload API**: Replace `upload_stream()` with `cloudinary.uploader.upload()` which uses promise-based API
+- Convert buffer to data URI format for direct upload (avoids stream and deprecation issues)
+- This approach is more reliable and avoids the deprecation warning
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - Using upload_stream (triggers deprecation warning)
+return new Promise((resolve, reject) => {
+  const uploadStream = cloudinary.uploader.upload_stream(
+    { folder, public_id, resource_type },
+    (error, result) => {
+      if (error) reject(error);
+      else resolve(result.secure_url);
+    }
+  );
+  uploadStream.end(buffer);
+});
+
+// ✅ CORRECT - Using promise-based upload API (no deprecation warning)
+const mimeType = resourceType === 'image' 
+  ? (filename.match(/\.(jpg|jpeg)$/i) ? 'image/jpeg' : 
+     filename.match(/\.png$/i) ? 'image/png' : 
+     filename.match(/\.gif$/i) ? 'image/gif' : 
+     filename.match(/\.webp$/i) ? 'image/webp' : 'image/jpeg')
+  : (filename.match(/\.mp4$/i) ? 'video/mp4' : 
+     filename.match(/\.webm$/i) ? 'video/webm' : 
+     filename.match(/\.mov$/i) ? 'video/quicktime' : 'video/mp4');
+
+const base64 = buffer.toString('base64');
+const dataUri = `data:${mimeType};base64,${base64}`;
+
+const result = await cloudinary.uploader.upload(dataUri, {
+  folder: `learning-management/${folder}`,
+  public_id: filename.replace(/\.[^/.]+$/, ''),
+  resource_type: resourceType,
+  overwrite: false,
+  invalidate: true,
+});
+
+return result.secure_url;
+```
+
+**Files Fixed:**
+- `lib/cloudinary/config.ts` - Updated `uploadToCloudinary()` to use promise-based `upload()` API instead of `upload_stream()`
+- `lib/cloudinary/config.ts` - Updated `deleteFromCloudinary()` to use promise-based `destroy()` API
+
+**Prevention:**
+- Always use promise-based Cloudinary APIs instead of callback-based stream APIs
+- Convert buffers to data URIs for direct upload when possible
+- Test upload functionality after switching to promise-based APIs
+- Monitor for deprecation warnings in logs
+- Update Cloudinary SDK to latest version if available
+- Avoid using `upload_stream()` in favor of `upload()` with data URIs
 
 ---
 

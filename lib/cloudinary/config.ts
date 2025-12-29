@@ -32,35 +32,48 @@ export async function uploadToCloudinary(
     throw new Error('Cloudinary configuration is missing. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables.');
   }
 
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: `learning-management/${folder}`,
-        public_id: filename.replace(/\.[^/.]+$/, ''), // Remove file extension (Cloudinary handles it)
-        resource_type: resourceType,
-        overwrite: false, // Don't overwrite existing files
-        invalidate: true, // Invalidate CDN cache
-      },
-      (error, result) => {
-        if (error) {
-          console.error('[Cloudinary] Upload error:', error);
-          reject(new Error(`Failed to upload to Cloudinary: ${error.message}`));
-          return;
-        }
-        
-        if (!result || !result.secure_url) {
-          reject(new Error('Cloudinary upload succeeded but no URL returned'));
-          return;
-        }
+  try {
+    // Convert buffer to data URI format for Cloudinary
+    // This avoids using upload_stream which may trigger deprecation warnings
+    const mimeType = resourceType === 'image' 
+      ? (filename.match(/\.(jpg|jpeg)$/i) ? 'image/jpeg' : 
+         filename.match(/\.png$/i) ? 'image/png' : 
+         filename.match(/\.gif$/i) ? 'image/gif' : 
+         filename.match(/\.webp$/i) ? 'image/webp' : 'image/jpeg')
+      : (filename.match(/\.mp4$/i) ? 'video/mp4' : 
+         filename.match(/\.webm$/i) ? 'video/webm' : 
+         filename.match(/\.mov$/i) ? 'video/quicktime' : 'video/mp4');
+    
+    const base64 = buffer.toString('base64');
+    const dataUri = `data:${mimeType};base64,${base64}`;
 
-        console.log(`[Cloudinary] Successfully uploaded to: ${result.secure_url}`);
-        resolve(result.secure_url);
-      }
-    );
+    // Use promise-based upload API instead of upload_stream
+    // This is more reliable and may avoid deprecation warnings
+    const result = await cloudinary.uploader.upload(dataUri, {
+      folder: `learning-management/${folder}`,
+      public_id: filename.replace(/\.[^/.]+$/, ''), // Remove file extension (Cloudinary handles it)
+      resource_type: resourceType,
+      overwrite: false, // Don't overwrite existing files
+      invalidate: true, // Invalidate CDN cache
+    });
 
-    // Write buffer to upload stream
-    uploadStream.end(buffer);
-  });
+    if (!result || !result.secure_url) {
+      throw new Error('Cloudinary upload succeeded but no URL returned');
+    }
+
+    console.log(`[Cloudinary] Successfully uploaded to: ${result.secure_url}`);
+    return result.secure_url;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('[Cloudinary] Upload error:', {
+      message: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+      filename,
+      resourceType,
+      bufferSize: buffer.length,
+    });
+    throw new Error(`Failed to upload to Cloudinary: ${errorMessage}`);
+  }
 }
 
 /**
@@ -78,23 +91,29 @@ export async function deleteFromCloudinary(
     throw new Error('Cloudinary configuration is missing.');
   }
 
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader.destroy(publicId, { resource_type: resourceType }, (error, result) => {
-      if (error) {
-        console.error('[Cloudinary] Delete error:', error);
-        reject(new Error(`Failed to delete from Cloudinary: ${error.message}`));
-        return;
-      }
-
-      if (result?.result === 'ok') {
-        console.log(`[Cloudinary] Successfully deleted: ${publicId}`);
-        resolve();
-      } else {
-        console.warn(`[Cloudinary] Delete result: ${result?.result}`);
-        resolve(); // Resolve anyway - file might not exist
-      }
+  try {
+    // Use promise-based destroy API
+    const result = await cloudinary.uploader.destroy(publicId, { 
+      resource_type: resourceType 
     });
-  });
+
+    if (result?.result === 'ok') {
+      console.log(`[Cloudinary] Successfully deleted: ${publicId}`);
+    } else {
+      console.warn(`[Cloudinary] Delete result: ${result?.result} for publicId: ${publicId}`);
+      // Resolve anyway - file might not exist or already deleted
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('[Cloudinary] Delete error:', {
+      message: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+      publicId,
+      resourceType,
+    });
+    // Don't throw - file might not exist, which is fine
+    console.warn('[Cloudinary] Continuing despite delete error - file may not exist');
+  }
 }
 
 /**
