@@ -688,6 +688,7 @@ BLOB_READ_WRITE_TOKEN="..."
 - **CRITICAL - Always Review Context Files**: All agents MUST automatically review and reference the following context files when working on any task:
   - **@.cursorrules** - Project rules, design system, UI/UX principles, workflow rules
   - **@docs/CONTEXTBIBLE.md** - Technical implementation rules, database schema, business logic, API structure, gamification calculations
+  - **@docs/ERROR_DATABASE.md** - Common errors and solutions, error prevention rules, troubleshooting patterns
 - **Context Tagging**: Agents should always tag these files in their responses when:
   - Starting a new task or feature
   - Making design decisions
@@ -695,21 +696,29 @@ BLOB_READ_WRITE_TOKEN="..."
   - Working with database schemas
   - Creating or modifying components
   - Making UI/UX changes
-- **Why This Matters**: These files contain critical project rules, design standards, and technical specifications that ensure consistency and prevent errors
-- **Review Before Implementation**: Always check both files before implementing features to ensure compliance with project standards
+  - **Encountering errors** - Always check ERROR_DATABASE.md first to see if we've fixed similar issues
+- **Why This Matters**: These files contain critical project rules, design standards, technical specifications, and proven error solutions that ensure consistency and prevent repeating mistakes
+- **Review Before Implementation**: Always check all context files before implementing features to ensure compliance with project standards
+- **Error Resolution Workflow**: When encountering an error:
+  1. Check `docs/ERROR_DATABASE.md` for similar errors and solutions
+  2. Apply the documented solution if available
+  3. If solution works, update ERROR_DATABASE.md with any improvements
+  4. If solution doesn't work or error is new, document the new error and solution in ERROR_DATABASE.md
 
 ## Related Rules Files
 
-**CRITICAL**: This project has THREE complementary rules files that MUST be followed:
+**CRITICAL**: This project has FOUR complementary rules files that MUST be followed:
 
 1. **`.cursorrules`** (this file) - Project overview, design system, UI/UX principles, workflow rules
 2. **`.uiuxrules.md`** - Universal UI/UX design principles, accessibility standards, interaction patterns, and continuously evolving design learnings
 3. **`.contextbible-rules.md`** - Technical implementation rules, database schema, business logic, API structure, gamification calculations
+4. **`docs/ERROR_DATABASE.md`** - Database of common errors and their solutions, error prevention rules, and troubleshooting patterns
 
-**All agents MUST reference ALL THREE files** when implementing features:
+**All agents MUST reference ALL FOUR files** when implementing features:
 - Use `.cursorrules` for project-specific design, UI/UX, and workflow guidance
 - Use `.uiuxrules.md` for universal UI/UX principles, accessibility standards, and design best practices
 - Use `.contextbible-rules.md` for technical specifications, database rules, business logic, and implementation patterns
+- Use `docs/ERROR_DATABASE.md` when encountering errors to check if we've fixed similar issues before and reference proven solutions
 
 The `.uiuxrules.md` file contains:
 - Foundational UI/UX principles (accessibility, cognitive load, Gestalt principles)
@@ -983,4 +992,237 @@ The application supports four distinct user roles with different access levels:
 - **MUST** add input length limits (max 500 chars for search queries)
 - **MUST** validate AI responses before using (JSON parsing, structure validation)
 - **MUST** implement fallback for invalid AI responses
+
+## Vercel Deployment Troubleshooting Guide
+
+### Common Vercel Errors & Solutions
+
+#### 1. Blank Page / Page Not Loading After Login
+**Symptoms**: 
+- User logs in successfully but dashboard shows blank page
+- Console shows throttling warnings about navigation
+- No error messages visible to user
+
+**Common Causes**:
+- Database connection failure (DATABASE_URL missing or incorrect)
+- Prisma client not generated during build
+- Server-side error causing silent failure
+- Redirect loop due to error handling
+
+**Solutions**:
+1. **Check Environment Variables in Vercel**:
+   - Go to Vercel Dashboard → Project → Settings → Environment Variables
+   - Verify `DATABASE_URL` exists and matches Railway connection string
+   - Ensure `DATABASE_URL` is set for Production, Preview, and Development
+   - For Railway databases, add `?sslmode=require` to DATABASE_URL if connection fails
+
+2. **Check Build Logs**:
+   - Go to Vercel Dashboard → Deployments → Latest Deployment → Build Logs
+   - Look for errors during `prisma generate` step
+   - Verify build command includes: `prisma generate && next build`
+
+3. **Check Function Logs**:
+   - Go to Vercel Dashboard → Deployments → Latest Deployment → Functions
+   - Check for runtime errors (database connection, Prisma errors)
+   - Look for error messages with stack traces
+
+4. **Verify Database Connection**:
+   - Check Railway dashboard to ensure database is running (not paused)
+   - Verify DATABASE_URL format: `postgresql://user:password@host:port/database?sslmode=require`
+   - Test connection locally with Railway DATABASE_URL
+
+5. **Improve Error Handling**:
+   - Add detailed console logging in server components
+   - Use structured error logging: `console.error("[ComponentName] Error:", { details })`
+   - Don't redirect on all errors - show user-friendly error messages for connection issues
+   - Log environment variable presence (without exposing values)
+
+#### 2. Database Connection Errors (P1001)
+**Symptoms**:
+- Error code: `P1001` in logs
+- "Can't reach database server" error
+- Page redirects to login on database errors
+
+**Solutions**:
+1. **Verify DATABASE_URL**:
+   - Get fresh DATABASE_URL from Railway dashboard
+   - Update Vercel environment variable
+   - For Railway proxy URLs, ensure `?sslmode=require` is appended
+
+2. **Check Railway Database Status**:
+   - Ensure database is not paused
+   - Check Railway logs for connection issues
+   - Verify database allows external connections
+
+3. **Redeploy After Changes**:
+   - After updating DATABASE_URL, trigger a new deployment
+   - Wait for build to complete
+   - Test connection again
+
+#### 3. Prisma Client Not Generated
+**Symptoms**:
+- "Prisma Client not generated" error
+- "Unknown argument" errors in Prisma queries
+- Build succeeds but runtime errors occur
+
+**Solutions**:
+1. **Verify Build Command**:
+   - Check Vercel project settings
+   - Build command must include: `prisma generate && next build`
+   - Or use: `npm run build` (which should run `prisma generate`)
+
+2. **Check package.json Scripts**:
+   - Verify `build` script includes Prisma generation
+   - Example: `"build": "prisma generate && next build"`
+
+3. **Regenerate Prisma Client**:
+   - If build doesn't generate client, add explicit step
+   - Or run `npx prisma generate` in build command
+
+#### 4. Environment Variables Not Available
+**Symptoms**:
+- `process.env.DATABASE_URL` is undefined
+- API routes fail with "missing environment variable"
+- Works locally but fails on Vercel
+
+**Solutions**:
+1. **Check Vercel Environment Variables**:
+   - Go to Project Settings → Environment Variables
+   - Verify variable names match exactly (case-sensitive)
+   - Ensure variables are set for correct environments (Production/Preview/Development)
+
+2. **Redeploy After Adding Variables**:
+   - Environment variables require new deployment
+   - Variables added after deployment won't be available until redeploy
+   - Trigger redeploy manually or push new commit
+
+3. **Verify Variable Names**:
+   - Use exact names: `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`
+   - Don't use `NEXT_PUBLIC_*` prefix for secrets (exposes to client)
+
+#### 5. Redirect Loops / Throttling Warnings
+**Symptoms**:
+- Browser console shows: "Throttling navigation to prevent browser from hanging"
+- Page keeps redirecting
+- Infinite redirect loop
+
+**Solutions**:
+1. **Check Middleware Logic**:
+   - Verify middleware doesn't create redirect loops
+   - Check role-based redirects don't conflict
+   - Ensure authenticated users aren't redirected back to login
+
+2. **Check Error Handling**:
+   - Don't redirect on all errors (causes loops)
+   - Show error messages instead of redirecting for connection issues
+   - Log errors before redirecting
+
+3. **Verify Session**:
+   - Check NextAuth session is properly set
+   - Ensure session cookie is available after login
+   - Add delay after login before redirect (100ms) to ensure cookie is set
+
+#### 6. Build Failures
+**Symptoms**:
+- Deployment fails during build
+- TypeScript errors
+- Missing dependencies
+
+**Solutions**:
+1. **Test Build Locally**:
+   - Run `npm run build` locally first
+   - Fix any TypeScript or build errors
+   - Ensure all dependencies are in `package.json`
+
+2. **Check Build Logs**:
+   - Review Vercel build logs for specific errors
+   - Look for missing modules, TypeScript errors, or syntax issues
+
+3. **Verify Dependencies**:
+   - Ensure all imports are available
+   - Check for missing type definitions
+   - Verify Node.js version compatibility
+
+### Debugging Checklist for Vercel Issues
+
+When troubleshooting Vercel deployment issues:
+
+1. **Check Environment Variables**:
+   - [ ] DATABASE_URL exists in Vercel
+   - [ ] DATABASE_URL matches Railway connection string
+   - [ ] DATABASE_URL includes `?sslmode=require` if using Railway proxy
+   - [ ] NEXTAUTH_SECRET is set
+   - [ ] NEXTAUTH_URL matches Vercel app URL
+
+2. **Check Build Process**:
+   - [ ] Build command includes `prisma generate`
+   - [ ] Build completes successfully
+   - [ ] No TypeScript errors in build logs
+   - [ ] All dependencies installed correctly
+
+3. **Check Runtime**:
+   - [ ] Function logs show no errors
+   - [ ] Database connection successful
+   - [ ] Prisma client generated correctly
+   - [ ] Session authentication working
+
+4. **Check Error Handling**:
+   - [ ] Errors are logged with context
+   - [ ] Database errors don't cause redirect loops
+   - [ ] User-friendly error messages for connection issues
+   - [ ] Proper error boundaries in place
+
+### Best Practices for Vercel Deployments
+
+1. **Error Logging**:
+   - Always log errors with context: `console.error("[ComponentName] Error:", { details })`
+   - Include environment info (without secrets): `{ hasDatabaseUrl: !!process.env.DATABASE_URL, nodeEnv: process.env.NODE_ENV }`
+   - Log before redirecting to help debug issues
+
+2. **Database Connection**:
+   - Always check DATABASE_URL exists before using Prisma
+   - Handle connection errors gracefully (show error, don't redirect)
+   - Use connection pooling for better performance
+
+3. **Environment Variables**:
+   - Never commit `.env` files
+   - Always set variables in Vercel dashboard
+   - Use different values for development and production
+   - Document required variables in README
+
+4. **Build Optimization**:
+   - Ensure Prisma generates during build
+   - Use `export const dynamic = 'force-dynamic'` for pages that need fresh data
+   - Optimize database queries to reduce function execution time
+
+5. **Testing Before Deploy**:
+   - Test build locally: `npm run build`
+   - Test with production DATABASE_URL locally
+   - Check for TypeScript errors
+   - Verify all environment variables are set
+
+### Quick Fix Commands
+
+```bash
+# Test build locally
+npm run build
+
+# Generate Prisma client
+npx prisma generate
+
+# Check environment variables (local)
+cat .env | grep DATABASE_URL
+
+# Test database connection
+npx prisma db push
+```
+
+### When to Ask for Help
+
+If you've tried all solutions and the issue persists:
+1. Check Vercel deployment logs for specific error messages
+2. Check Railway database logs for connection issues
+3. Verify all environment variables are correct
+4. Test database connection locally with Railway DATABASE_URL
+5. Check if issue is specific to Vercel or also occurs locally
 
