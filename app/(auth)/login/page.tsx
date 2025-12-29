@@ -99,6 +99,8 @@ function LoginForm() {
       // Only proceed if there's no error AND ok is true
       if (result?.ok && !result?.error) {
         console.log("Login successful, redirecting to:", callbackUrl);
+        // Small delay to ensure session is set before redirect
+        await new Promise(resolve => setTimeout(resolve, 100));
         router.push(callbackUrl);
         router.refresh();
       } else {
