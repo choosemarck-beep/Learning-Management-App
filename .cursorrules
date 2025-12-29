@@ -689,6 +689,7 @@ BLOB_READ_WRITE_TOKEN="..."
   - **@.cursorrules** - Project rules, design system, UI/UX principles, workflow rules
   - **@docs/CONTEXTBIBLE.md** - Technical implementation rules, database schema, business logic, API structure, gamification calculations
   - **@docs/ERROR_DATABASE.md** - Common errors and solutions, error prevention rules, troubleshooting patterns
+  - **@docs/ARCHITECTURE_DECISION.md** - Architecture decisions, service choices, cost breakdown, migration paths
 - **Context Tagging**: Agents should always tag these files in their responses when:
   - Starting a new task or feature
   - Making design decisions
@@ -707,18 +708,20 @@ BLOB_READ_WRITE_TOKEN="..."
 
 ## Related Rules Files
 
-**CRITICAL**: This project has FOUR complementary rules files that MUST be followed:
+**CRITICAL**: This project has FIVE complementary rules files that MUST be followed:
 
 1. **`.cursorrules`** (this file) - Project overview, design system, UI/UX principles, workflow rules
 2. **`.uiuxrules.md`** - Universal UI/UX design principles, accessibility standards, interaction patterns, and continuously evolving design learnings
 3. **`.contextbible-rules.md`** - Technical implementation rules, database schema, business logic, API structure, gamification calculations
 4. **`docs/ERROR_DATABASE.md`** - Database of common errors and their solutions, error prevention rules, and troubleshooting patterns
+5. **`docs/ARCHITECTURE_DECISION.md`** - Architecture decisions, service choices (Railway + Cloudinary), cost breakdown, and migration paths
 
-**All agents MUST reference ALL FOUR files** when implementing features:
+**All agents MUST reference ALL FIVE files** when implementing features:
 - Use `.cursorrules` for project-specific design, UI/UX, and workflow guidance
 - Use `.uiuxrules.md` for universal UI/UX principles, accessibility standards, and design best practices
 - Use `.contextbible-rules.md` for technical specifications, database rules, business logic, and implementation patterns
 - Use `docs/ERROR_DATABASE.md` when encountering errors to check if we've fixed similar issues before and reference proven solutions
+- Use `docs/ARCHITECTURE_DECISION.md` for architecture decisions, service choices, and infrastructure guidance
 
 The `.uiuxrules.md` file contains:
 - Foundational UI/UX principles (accessibility, cognitive load, Gestalt principles)
@@ -738,6 +741,13 @@ The `.contextbible-rules.md` file contains:
 - Component architecture patterns
 - Project structure and routing rules
 - Terminology and messaging rules
+
+The `docs/ARCHITECTURE_DECISION.md` file contains:
+- Current architecture: Railway (PostgreSQL) + Cloudinary (file storage) + Vercel (hosting)
+- Rationale for service choices and separation of concerns
+- Cost breakdown and comparison with alternatives
+- Migration paths if services need to change
+- Best practices for maintaining the architecture
 
 ## Admin Management Features
 
