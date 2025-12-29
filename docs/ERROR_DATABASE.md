@@ -504,6 +504,103 @@ const handleLogout = async () => {
 
 ---
 
+#### Error: Server Components render errors across multiple dashboard pages
+**Symptoms:**
+- Multiple dashboard pages showing "Server Components render error"
+- 500 Internal Server Error on dashboard pages
+- Error digest codes in production (e.g., `653041714`)
+- Errors occur on Staff, Branch Manager, Area Manager, Regional Manager, Admin, and Super Admin dashboards
+
+**Common Causes:**
+- Missing explicit field selection in Prisma queries
+- Non-serializable data passed to client components
+- Missing validation checks before render
+- Inadequate error handling causing redirect loops
+- Missing try-catch wrappers around main function body
+
+**Solution:**
+- **Systematic Fix Pattern**: Apply the same comprehensive fixes to all dashboard pages:
+  1. Wrap main function body in try-catch block
+  2. Add explicit `select` for all Prisma queries (especially `avatar` field)
+  3. Serialize all data before passing to client components (convert to primitives)
+  4. Validate `user.name` and `user.email` before render
+  5. Add enhanced error logging with userId, timestamp, error details
+  6. Show error UI instead of redirecting to prevent loops
+  7. Use graceful degradation for non-critical data
+
+**Files Fixed:**
+- `app/(dashboard)/employee/staff/dashboard/page.tsx` - Applied all fixes
+- `app/(dashboard)/employee/branch-manager/dashboard/page.tsx` - Applied all fixes
+- `app/(dashboard)/employee/area-manager/dashboard/page.tsx` - Applied all fixes
+- `app/(dashboard)/employee/regional-manager/dashboard/page.tsx` - Applied all fixes
+- `app/(dashboard)/admin/dashboard/page.tsx` - Applied data serialization and validation
+- `app/(dashboard)/super-admin/dashboard/page.tsx` - Applied data serialization and validation
+
+**Implementation Pattern:**
+```typescript
+export default async function DashboardPage() {
+  // 1. Get user with error handling (show UI, don't redirect)
+  let user;
+  try {
+    user = await getCurrentUser();
+  } catch (authError) {
+    return <ErrorUI message="Authentication error" />;
+  }
+
+  if (!user) {
+    return <ErrorUI message="Session not found" />;
+  }
+
+  // 2. Validate user properties
+  if (!user.name || !user.email) {
+    throw new Error("User data incomplete");
+  }
+
+  // 3. Fetch userData with explicit select
+  let userData;
+  try {
+    userData = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        id: true,
+        avatar: true, // Explicit selection
+        name: true,
+        // ... other required fields
+      },
+    });
+  } catch (dbError) {
+    console.error("[Dashboard] Error:", { userId: user.id, error: dbError });
+    throw new Error("Failed to load user data");
+  }
+
+  // 4. Serialize data before passing to client components
+  const serializableData = {
+    // Convert all to primitives: String(), Number(), Boolean()
+  };
+
+  // 5. Final validation before render
+  if (!userData || !user.name || !user.email) {
+    throw new Error("Missing required data");
+  }
+
+  // 6. Render with safe values
+  return <Component data={serializableData} />;
+} catch (error) {
+  // Enhanced error handling with digest tracking
+  // Show error UI instead of redirecting
+}
+```
+
+**Prevention:**
+- Always apply the same error handling pattern to all dashboard pages
+- Use explicit `select` in Prisma queries instead of relying on `include` defaults
+- Serialize all data before passing to client components
+- Validate required properties before render
+- Use graceful degradation for non-critical data failures
+- Show error UI instead of redirecting to prevent loops
+
+---
+
 ## Revision History
 
 - **2024-01-XX**: Created error database
@@ -512,4 +609,5 @@ const handleLogout = async () => {
 - **2024-01-XX**: Added syntax error (missing try block) error
 - **2024-01-XX**: Added Server Components render error (production error hiding)
 - **2024-01-XX**: Added logout redirect to localhost error and solution
+- **2024-01-XX**: Added systematic dashboard fixes pattern and applied to all dashboard pages
 
