@@ -993,6 +993,47 @@ The application supports four distinct user roles with different access levels:
 - **MUST** validate AI responses before using (JSON parsing, structure validation)
 - **MUST** implement fallback for invalid AI responses
 
+### Deployment URL Configuration (CRITICAL)
+- **NEVER use hardcoded localhost URLs** (`http://localhost:3000`) in production code
+- **CRITICAL**: Project uses Vercel (frontend/API), Railway (database), Cloudinary (media), and GitHub (version control)
+- **All URLs must be dynamic** and work in both development and production environments
+- **URL Construction Rules**:
+  1. **Client-Side (React Components)**:
+     - Use `window.location.origin` for absolute URLs: `${window.location.origin}/login`
+     - Always check `typeof window !== "undefined"` before accessing `window`
+     - Use relative paths (`/login`) when possible for internal navigation
+     - Example: `const loginUrl = typeof window !== "undefined" ? `${window.location.origin}/login` : "/login";`
+  2. **Server-Side (API Routes, Server Components)**:
+     - Use `process.env.NEXTAUTH_URL` from environment variables (set in Vercel)
+     - Fallback to request headers: `request.headers.get("origin")` or `request.headers.get("host")`
+     - Construct URL from headers: `const baseUrl = process.env.NEXTAUTH_URL || (request.headers.get("origin") || `https://${request.headers.get("host")}`);`
+     - Never use `"http://localhost:3000"` as fallback - use empty string or relative path instead
+  3. **NextAuth Configuration**:
+     - `NEXTAUTH_URL` must be set in Vercel environment variables for production
+     - Use `trustHost: true` in NextAuth config for Vercel deployments
+     - Sign-out redirects should use relative paths: `signOut: "/login"` (not `"/"`)
+  4. **Email Links (Resend, etc.)**:
+     - Always use `process.env.NEXTAUTH_URL` for email links
+     - Fallback to request origin, never hardcoded localhost
+     - Example: `const resetUrl = process.env.NEXTAUTH_URL ? `${process.env.NEXTAUTH_URL}/reset-password?token=${token}` : "/reset-password?token=${token}";`
+- **Common Mistakes to Avoid**:
+  - ❌ `const url = process.env.NEXTAUTH_URL || "http://localhost:3000";` (hardcoded localhost fallback)
+  - ❌ `callbackUrl: "http://localhost:3000/login"` (hardcoded URL)
+  - ❌ `redirect("http://localhost:3000/")` (hardcoded redirect)
+  - ✅ `const url = process.env.NEXTAUTH_URL || (request.headers.get("origin") || "");`
+  - ✅ `callbackUrl: typeof window !== "undefined" ? `${window.location.origin}/login` : "/login"`
+  - ✅ `redirect("/login")` (relative path)
+- **Testing**:
+  - Test logout/redirect functionality in both development and production
+  - Verify `NEXTAUTH_URL` is set correctly in Vercel environment variables
+  - Check that all redirects work on production domain (not localhost)
+- **Files That Must Follow This Rule**:
+  - All API routes (`app/api/**/*.ts`)
+  - All authentication handlers (`lib/auth/**/*.ts`)
+  - All logout handlers (`components/**/*.tsx` with `signOut` calls)
+  - All email sending functions
+  - All redirect logic in middleware and pages
+
 ## Vercel Deployment Troubleshooting Guide
 
 ### Common Vercel Errors & Solutions
@@ -1100,7 +1141,39 @@ The application supports four distinct user roles with different access levels:
    - Use exact names: `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`
    - Don't use `NEXT_PUBLIC_*` prefix for secrets (exposes to client)
 
-#### 5. Redirect Loops / Throttling Warnings
+#### 5. Logout Redirects to Localhost
+**Symptoms**:
+- After logout, user is redirected to `http://localhost:3000/` instead of production URL
+- Happens in production (Vercel) even though code looks correct
+- Logout handlers use `window.location.origin` but still redirects to localhost
+
+**Common Causes**:
+- `NEXTAUTH_URL` environment variable in Vercel is set to `http://localhost:3000`
+- NextAuth using `NEXTAUTH_URL` to construct redirect URLs even when `callbackUrl` is provided
+- Hardcoded localhost URLs in API routes or email functions
+
+**Solutions**:
+1. **Check NEXTAUTH_URL in Vercel**:
+   - Go to Vercel Dashboard → Project → Settings → Environment Variables
+   - Find `NEXTAUTH_URL` and verify it's set to your production URL: `https://your-app.vercel.app`
+   - If it's set to `http://localhost:3000`, update it to your Vercel URL
+   - Ensure it's set for Production, Preview, and Development environments
+
+2. **Verify Logout Handlers**:
+   - All logout handlers should use: `await signOut({ callbackUrl: typeof window !== "undefined" ? `${window.location.origin}/login` : "/login" });`
+   - NextAuth config should have: `signOut: "/login"` (not `"/"`)
+   - Check `components/layout/UserMenu.tsx` and `components/features/admin/UserProfileDropdown.tsx`
+
+3. **Check API Routes**:
+   - Verify no hardcoded `localhost:3000` in API routes
+   - Use `process.env.NEXTAUTH_URL` or request headers, never hardcoded localhost
+   - Check `app/api/auth/signup/route.ts` and `app/api/auth/forgot-password/route.ts`
+
+4. **Redeploy After Changes**:
+   - After updating `NEXTAUTH_URL`, trigger a new deployment
+   - Test logout functionality on production URL
+
+#### 6. Redirect Loops / Throttling Warnings
 **Symptoms**:
 - Browser console shows: "Throttling navigation to prevent browser from hanging"
 - Page keeps redirecting
@@ -1122,7 +1195,7 @@ The application supports four distinct user roles with different access levels:
    - Ensure session cookie is available after login
    - Add delay after login before redirect (100ms) to ensure cookie is set
 
-#### 6. Build Failures
+#### 7. Build Failures
 **Symptoms**:
 - Deployment fails during build
 - TypeScript errors
@@ -1152,7 +1225,8 @@ When troubleshooting Vercel deployment issues:
    - [ ] DATABASE_URL matches Railway connection string
    - [ ] DATABASE_URL includes `?sslmode=require` if using Railway proxy
    - [ ] NEXTAUTH_SECRET is set
-   - [ ] NEXTAUTH_URL matches Vercel app URL
+   - [ ] NEXTAUTH_URL is set to production URL (NOT localhost) - **CRITICAL for logout redirects**
+   - [ ] NEXTAUTH_URL matches Vercel app URL (e.g., `https://your-app.vercel.app`)
 
 2. **Check Build Process**:
    - [ ] Build command includes `prisma generate`

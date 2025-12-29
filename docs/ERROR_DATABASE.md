@@ -834,6 +834,96 @@ const imageUrl = blob.url; // Full URL to cloud storage
 
 ---
 
+#### Error: DatePicker hard to press on mobile and future dates not disabled
+**Symptoms:**
+- DatePicker input box is hard to press on mobile devices
+- Users have to press the edge to access the date picker
+- Future dates are not disabled in the date picker on mobile
+- Touch target is too small or hidden input interferes with button clicks
+
+**Common Causes:**
+- Hidden date input with `width: 0` and `height: 0` interferes with button touch events
+- Button overlay approach doesn't work well on mobile touch devices
+- `max` attribute not properly applied to visible mobile input
+- Z-index issues causing touch events to be intercepted by hidden input
+- Mobile browsers need direct access to native date input for better UX
+
+**Solution:**
+- **Mobile Detection**: Detect mobile devices (touch devices with screen width ≤768px)
+- **Show Native Input on Mobile**: On mobile, show the actual date input (not hidden) for direct touch access
+- **Keep Button Overlay on Desktop**: On desktop, keep the button overlay approach for better UX
+- **Proper max Attribute**: Ensure `max` attribute is set to today's date to disable future dates
+- **Larger Touch Target**: Increase min-height to 52px for better mobile touch targets
+- **Fix Z-Index**: Ensure button is above hidden input with proper z-index
+
+**Example Fix:**
+```typescript
+// ✅ CORRECT - Mobile detection and conditional rendering
+const [isMobile, setIsMobile] = useState(false);
+
+useEffect(() => {
+  const checkMobile = () => {
+    const isTouchDevice = 'ontouchstart' in window || 
+                         (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) ||
+                         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isSmallScreen = window.innerWidth <= 768;
+    setIsMobile(isTouchDevice && isSmallScreen);
+  };
+  
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
+  return () => window.removeEventListener('resize', checkMobile);
+}, []);
+
+// In JSX:
+<input
+  type="date"
+  className={isMobile ? styles.mobileInput : styles.hiddenInput}
+  max={maxDate} // Today's date to disable future dates
+  // ... other props
+/>
+{!isMobile && (
+  <button onClick={handleButtonClick}>
+    {/* Button overlay for desktop */}
+  </button>
+)}
+```
+
+**CSS Fix:**
+```css
+/* Mobile: Show actual date input for direct touch access */
+.mobileInput {
+  width: 100%;
+  padding: var(--spacing-md);
+  min-height: 52px; /* Large touch target */
+  -webkit-tap-highlight-color: rgba(139, 92, 246, 0.2);
+  touch-action: manipulation;
+  /* Native date input styling */
+  color-scheme: dark;
+}
+
+.mobileInput::-webkit-calendar-picker-indicator {
+  /* Larger touch target for calendar icon */
+  padding: 8px;
+  margin-left: 8px;
+}
+```
+
+**Files Fixed:**
+- `components/ui/DatePicker.tsx` - Added mobile detection and conditional rendering
+- `components/ui/DatePicker.module.css` - Added `.mobileInput` styles for visible mobile input
+- `components/features/signup/EmployeeDetailsStep.tsx` - Added explicit `max` prop to disable future dates
+
+**Prevention:**
+- Always test date pickers on actual mobile devices, not just desktop browser dev tools
+- Use native date inputs on mobile for better UX and touch accessibility
+- Ensure `max` attribute is always set for date fields that shouldn't allow future dates
+- Test touch targets are at least 44px (preferably 52px) on mobile
+- Use mobile detection to show appropriate UI for touch vs. mouse interactions
+- Never hide inputs that need direct touch access on mobile devices
+
+---
+
 ## Revision History
 
 - **2024-01-XX**: Created error database
@@ -844,4 +934,5 @@ const imageUrl = blob.url; // Full URL to cloud storage
 - **2024-01-XX**: Added logout redirect to localhost error and solution
 - **2024-01-XX**: Added systematic dashboard fixes pattern and applied to all dashboard pages
 - **2024-01-XX**: Added 404 image loading errors (Vercel serverless filesystem limitation)
+- **2024-01-XX**: Added DatePicker mobile touch issues and future dates not disabled error
 

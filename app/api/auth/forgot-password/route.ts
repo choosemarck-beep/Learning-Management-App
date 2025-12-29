@@ -46,8 +46,12 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Generate reset URL
-    const resetUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/reset-password?token=${resetToken}`;
+    // Generate reset URL - use NEXTAUTH_URL from environment (set in Vercel) or construct from request
+    // Never use hardcoded localhost - this breaks in production
+    const origin = request.headers.get("origin");
+    const host = request.headers.get("host");
+    const baseUrl = process.env.NEXTAUTH_URL || origin || (host ? `https://${host}` : "");
+    const resetUrl = baseUrl ? `${baseUrl}/reset-password?token=${resetToken}` : `/reset-password?token=${resetToken}`;
 
     // Send password reset email
     try {

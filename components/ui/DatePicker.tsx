@@ -24,6 +24,27 @@ export const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
     const hasError = !!error;
     const inputRef = useRef<HTMLInputElement>(null);
     const [displayValue, setDisplayValue] = useState<string>("");
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Detect mobile device on mount
+    useEffect(() => {
+      const checkMobile = () => {
+        // Check if device is mobile (touch device with small screen)
+        // For mobile-first design, we show native date input on mobile devices
+        const isTouchDevice = 'ontouchstart' in window || 
+                             (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) ||
+                             /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isSmallScreen = window.innerWidth <= 768;
+        setIsMobile(isTouchDevice && isSmallScreen);
+      };
+      
+      // Check immediately
+      checkMobile();
+      
+      // Also check on resize (though unlikely to change on mobile)
+      window.addEventListener('resize', checkMobile);
+      return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // Get today's date in YYYY-MM-DD format for max date validation
     const getTodayDate = (): string => {
@@ -123,7 +144,10 @@ export const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
             }}
             id={inputId}
             type="date"
-            className={cn(styles.hiddenInput)}
+            className={cn(
+              isMobile ? styles.mobileInput : styles.hiddenInput,
+              hasError && styles.inputError
+            )}
             value={value || ""}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
@@ -135,21 +159,23 @@ export const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
             required={required}
             {...props}
           />
-          <button
-            type="button"
-            onClick={handleButtonClick}
-            className={cn(
-              styles.dateButton,
-              hasError && styles.error,
-              !displayValue && styles.placeholder,
-              className
-            )}
-            aria-label={label || "Select date"}
-          >
-            <span className={styles.dateDisplay}>
-              {displayValue || "Select date"}
-            </span>
-          </button>
+          {!isMobile && (
+            <button
+              type="button"
+              onClick={handleButtonClick}
+              className={cn(
+                styles.dateButton,
+                hasError && styles.error,
+                !displayValue && styles.placeholder,
+                className
+              )}
+              aria-label={label || "Select date"}
+            >
+              <span className={styles.dateDisplay}>
+                {displayValue || "Select date"}
+              </span>
+            </button>
+          )}
         </div>
         {error && (
           <span id={`${inputId}-error`} className={styles.errorText} role="alert">

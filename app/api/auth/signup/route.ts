@@ -20,7 +20,21 @@ const signupSchema = z.object({
   positionId: z.string().min(1, "Please select a position"),
   department: z.string().min(1, "Department is required"),
   branch: z.string().min(1, "Branch is required"),
-  hireDate: z.string().min(1, "Hire date is required"),
+  hireDate: z
+    .string()
+    .min(1, "Hire date is required")
+    .refine(
+      (date) => {
+        if (!date) return false;
+        const selectedDate = new Date(date);
+        const today = new Date();
+        today.setHours(23, 59, 59, 999); // End of today
+        return selectedDate <= today;
+      },
+      {
+        message: "Hire date cannot be in the future",
+      }
+    ),
   // Step 3: Account Setup
   password: z
     .string()
@@ -155,8 +169,27 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Parse hire date
-    const parsedHireDate = hireDate ? new Date(hireDate) : null;
+    // Parse and validate hire date
+    let parsedHireDate: Date | null = null;
+    if (hireDate) {
+      parsedHireDate = new Date(hireDate);
+      // Validate date is not invalid
+      if (isNaN(parsedHireDate.getTime())) {
+        return NextResponse.json(
+          { error: "Invalid hire date format. Please select a valid date." },
+          { status: 400 }
+        );
+      }
+      // Validate date is not in the future
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      if (parsedHireDate > today) {
+        return NextResponse.json(
+          { error: "Hire date cannot be in the future." },
+          { status: 400 }
+        );
+      }
+    }
 
     // Create user with all employee fields
     const user = await prisma.user.create({
@@ -222,8 +255,18 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     if (error instanceof z.ZodError) {
+      // Return first validation error message for better UX
+      const firstError = error.errors[0];
+      const errorMessage = firstError?.message || "Please check all fields and try again.";
+      console.error("Signup validation error:", {
+        errors: error.errors,
+        firstError: firstError,
+      });
       return NextResponse.json(
-        { error: "Validation error", details: error.errors },
+        { 
+          error: errorMessage,
+          details: process.env.NODE_ENV === "development" ? error.errors : undefined
+        },
         { status: 400 }
       );
     }

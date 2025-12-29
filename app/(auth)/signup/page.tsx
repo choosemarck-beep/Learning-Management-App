@@ -172,7 +172,23 @@ export default function SignupPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        const errorMessage = result.error || "An error occurred. Please try again.";
+        // Show detailed error message from API
+        let errorMessage = result.error || "An error occurred. Please try again.";
+        
+        // If there are validation details, show the first error
+        if (result.details && Array.isArray(result.details) && result.details.length > 0) {
+          const firstError = result.details[0];
+          errorMessage = firstError.message || errorMessage;
+        }
+        
+        // Log full error for debugging
+        console.error("Signup error:", {
+          status: response.status,
+          error: result.error,
+          details: result.details,
+          fullResult: result,
+        });
+        
         toast.error(errorMessage);
         setIsLoading(false);
         return;

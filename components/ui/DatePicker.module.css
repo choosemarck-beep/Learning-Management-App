@@ -32,11 +32,14 @@
   width: 0;
   height: 0;
   overflow: hidden;
+  /* Ensure hidden input doesn't interfere with button clicks */
+  z-index: -1;
 }
 
-.dateButton {
+/* Mobile: Show actual date input for direct touch access */
+.mobileInput {
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-md);
   font-size: 1rem; /* 16px */
   font-family: var(--font-nunito);
   /* Glassmorphism: Semi-transparent background */
@@ -46,7 +49,65 @@
   border: none;
   border-radius: var(--radius-md);
   color: var(--color-text-primary);
-  min-height: var(--touch-target-min);
+  min-height: 52px; /* Large touch target for mobile */
+  transition: all var(--transition-normal) ease;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  /* Ensure full touch target */
+  -webkit-tap-highlight-color: rgba(139, 92, 246, 0.2);
+  touch-action: manipulation;
+  /* Mobile date input styling */
+  color-scheme: dark;
+}
+
+.mobileInput:focus {
+  outline: none;
+  box-shadow: 
+    0 0 0 3px rgba(139, 92, 246, 0.2),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.35);
+}
+
+.mobileInput::-webkit-calendar-picker-indicator {
+  filter: invert(1) sepia(1) saturate(5) hue-rotate(250deg);
+  cursor: pointer;
+  opacity: 0.8;
+  /* Larger touch target for calendar icon on mobile */
+  padding: 8px;
+  margin-left: 8px;
+}
+
+.mobileInput::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  filter: invert(1) sepia(1) saturate(5) hue-rotate(250deg) brightness(1.2);
+}
+
+.inputError {
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+    0 0 0 1px var(--color-status-error);
+}
+
+.inputError:focus {
+  box-shadow: 
+    0 0 0 3px rgba(239, 68, 68, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
+    0 0 0 1px var(--color-status-error);
+}
+
+.dateButton {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-md); /* Increased padding for easier touch */
+  font-size: 1rem; /* 16px */
+  font-family: var(--font-nunito);
+  /* Glassmorphism: Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  min-height: 52px; /* Increased from 44px for better touch target */
+  min-width: 100%; /* Ensure full width touch target */
   transition: all var(--transition-normal) ease;
   box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
   cursor: pointer;
@@ -54,6 +115,12 @@
   align-items: center;
   justify-content: flex-start;
   text-align: left;
+  /* Ensure button is above hidden input for touch events */
+  position: relative;
+  z-index: 1;
+  /* Improve touch responsiveness */
+  -webkit-tap-highlight-color: rgba(139, 92, 246, 0.2);
+  touch-action: manipulation;
 }
 
 .dateButton:hover {
