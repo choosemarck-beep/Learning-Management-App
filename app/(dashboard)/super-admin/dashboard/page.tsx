@@ -133,7 +133,21 @@ export default async function SuperAdminDashboardPage() {
       console.log("[SuperAdminDashboard] Fetching dashboard data for super admin:", user.id);
       [allUsers, totalUsers, rejectedUsers, pendingUsers, adminCount] = await Promise.all([
         prisma.user.findMany({
-          include: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            employeeNumber: true,
+            phone: true,
+            hireType: true,
+            department: true,
+            branch: true,
+            hireDate: true,
+            status: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true,
+            approvedAt: true,
             company: {
               select: {
                 id: true,

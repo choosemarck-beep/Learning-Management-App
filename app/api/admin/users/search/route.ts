@@ -340,9 +340,24 @@ export async function POST(request: NextRequest) {
     // Wrap Prisma queries in try-catch
     try {
       // Fetch matching users
+      // Use select at top level instead of include to avoid Prisma validation issues
       const users = await prisma.user.findMany({
         where,
-        include: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          employeeNumber: true,
+          phone: true,
+          hireType: true,
+          department: true,
+          branch: true,
+          hireDate: true,
+          status: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+          approvedAt: true,
           company: {
             select: {
               id: true,

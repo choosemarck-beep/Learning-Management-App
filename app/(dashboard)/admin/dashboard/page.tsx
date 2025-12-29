@@ -132,7 +132,21 @@ export default async function AdminDashboardPage() {
       console.log("[AdminDashboard] Fetching dashboard data for admin:", user.id);
       [allUsers, companies, totalUsers, rejectedUsers, pendingUsers] = await Promise.all([
         prisma.user.findMany({
-          include: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            employeeNumber: true,
+            phone: true,
+            hireType: true,
+            department: true,
+            branch: true,
+            hireDate: true,
+            status: true,
+            role: true,
+            createdAt: true,
+            updatedAt: true,
+            approvedAt: true,
             company: {
               select: {
                 id: true,
