@@ -6,6 +6,8 @@ import { ProfileBottomNav } from "@/components/layout/ProfileBottomNav";
 import { TrainingVideoPageClient } from "@/components/features/courses/TrainingVideoPageClient";
 import styles from "./page.module.css";
 
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ trainingId: string }>;
 }

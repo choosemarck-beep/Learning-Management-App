@@ -13,6 +13,8 @@ import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
 import { Card, CardHeader, CardBody } from "@/components/ui/Card";
 import { AdminLayout } from "@/components/layout/admin/AdminLayout";
+
+export const dynamic = 'force-dynamic';
 import { StatsCard } from "@/components/features/admin/StatsCard";
 import { UserManagementTabs } from "@/components/features/admin/UserManagementTabs";
 import { Shield } from "lucide-react";

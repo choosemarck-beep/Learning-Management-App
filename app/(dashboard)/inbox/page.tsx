@@ -5,6 +5,8 @@ import { ProfileBottomNav } from "@/components/layout/ProfileBottomNav";
 import { InboxPageClient } from "@/components/features/inbox/InboxPageClient";
 import styles from "./page.module.css";
 
+export const dynamic = 'force-dynamic';
+
 export default async function InboxPage() {
   const currentUser = await getCurrentUser();
 

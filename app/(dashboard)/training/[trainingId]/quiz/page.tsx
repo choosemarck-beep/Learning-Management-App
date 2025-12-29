@@ -7,6 +7,8 @@ import { TrainingQuizPageClient } from "@/components/features/courses/TrainingQu
 import { randomizeQuizQuestions } from "@/lib/utils/quizRandomization";
 import styles from "./page.module.css";
 
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ trainingId: string }>;
 }

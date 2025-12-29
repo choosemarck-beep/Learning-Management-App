@@ -6,6 +6,8 @@ import { TrainerLayout } from "@/components/layout/trainer/TrainerLayout";
 import { TrainerDashboardClient } from "@/components/features/trainer/TrainerDashboardClient";
 import styles from "./page.module.css";
 
+export const dynamic = 'force-dynamic';
+
 export default async function TrainerDashboardPage() {
   const user = await getCurrentUser();
 

@@ -13,6 +13,8 @@ import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
 import { Card, CardBody } from "@/components/ui/Card";
 import { AdminLayout } from "@/components/layout/admin/AdminLayout";
+
+export const dynamic = 'force-dynamic';
 import { StatsCard } from "@/components/features/admin/StatsCard";
 import { AdminDashboardClient } from "@/components/features/admin/AdminDashboardClient";
 import styles from "./page.module.css";
