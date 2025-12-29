@@ -99,9 +99,13 @@ function LoginForm() {
       // Only proceed if there's no error AND ok is true
       if (result?.ok && !result?.error) {
         console.log("Login successful, redirecting to:", callbackUrl);
-        // Use window.location for a hard redirect to ensure session is fully set
-        // This prevents redirect loops with middleware
-        window.location.href = callbackUrl;
+        // Small delay to ensure session cookie is fully set before navigation
+        // This prevents middleware from seeing null session due to timing
+        await new Promise(resolve => setTimeout(resolve, 100));
+        // Use Next.js router to ensure session is properly loaded
+        // This ensures the session cookie is available when middleware runs
+        await router.push(callbackUrl);
+        router.refresh(); // Refresh server components to load session
       } else {
         console.error("Unexpected login result:", result);
         toast.error("Something went wrong. Please try again in a moment.");
