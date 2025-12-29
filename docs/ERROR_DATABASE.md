@@ -354,6 +354,8 @@ function Component({ prop1, prop2, onKeyDown }: Props) {
 8. **Check for duplicate variable declarations** after refactoring
 9. **Ensure every `catch` has a matching `try`** block
 10. **Normalize email and trim password** in authentication
+11. **Never use local filesystem for user uploads** in serverless environments - use cloud storage
+12. **Always add `onError` handlers to image components** to show placeholders when images fail to load
 
 ## Error Logging Best Practices
 
@@ -615,6 +617,91 @@ export default async function DashboardPage() {
 
 ---
 
+### 6. Resource Loading Errors
+
+#### Error: "404 (Not Found)" for uploaded images (carousel, avatars, splash screen)
+**Symptoms:**
+- Console shows multiple `404 (Not Found)` errors for image resources
+- Images fail to load: `Failed to load resource: the server responded with a status of 404 ()`
+- Affects carousel images, avatar images, and splash screen images
+- URLs in database exist but files don't exist on server
+- Works locally but fails in production (Vercel)
+
+**Common Causes:**
+- **Vercel Serverless Limitation**: Vercel's filesystem is read-only except during build time
+- Files uploaded at runtime are saved to local filesystem but don't persist on Vercel
+- Files are written to `public/uploads/` but Vercel's serverless functions have ephemeral filesystems
+- Database stores relative paths like `/uploads/carousel/filename.png` but files don't exist in production
+- Files may have been deleted or never uploaded to persistent storage
+
+**Solution:**
+- **Use Cloud Storage**: Replace local filesystem storage with cloud storage service:
+  - **Vercel Blob Storage** (recommended for Vercel deployments)
+  - **AWS S3** (with CloudFront CDN)
+  - **Cloudinary** (image optimization included)
+  - **Supabase Storage** (if using Supabase)
+- **Update Upload Routes**: Modify all upload API routes to use cloud storage instead of local filesystem
+- **Migration Strategy**:
+  1. Set up cloud storage service
+  2. Update upload routes to save to cloud storage
+  3. Update image URLs in database to point to cloud storage URLs
+  4. Add fallback/placeholder images for missing resources
+- **Immediate Workaround**: 
+  - Add error handling in image components to show placeholder when image fails to load
+  - Use `onError` handlers on `<img>` tags to show default images
+  - Validate image URLs before rendering
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - saves to local filesystem (doesn't work on Vercel)
+const uploadsDir = join(process.cwd(), "public", "uploads", "carousel");
+await writeFile(filepath, buffer);
+const imageUrl = `/uploads/carousel/${filename}`;
+
+// ✅ CORRECT - use Vercel Blob Storage
+import { put } from '@vercel/blob';
+
+const blob = await put(`carousel/${filename}`, buffer, {
+  access: 'public',
+  contentType: file.type,
+});
+const imageUrl = blob.url; // Full URL to cloud storage
+
+// ✅ CORRECT - image component with error handling
+<img 
+  src={imageUrl || '/placeholder.png'} 
+  onError={(e) => {
+    e.currentTarget.src = '/placeholder.png';
+  }}
+  alt="Carousel image"
+/>
+```
+
+**Files Affected:**
+- `app/api/admin/carousel/route.ts` - Carousel image uploads
+- `app/api/user/upload-avatar/route.ts` - Avatar uploads
+- `app/api/admin/splash-screen/route.ts` - Splash screen uploads
+- `app/api/admin/carousel/video/route.ts` - Carousel video uploads
+- `app/api/trainer/courses/[courseId]/thumbnail/route.ts` - Course thumbnail uploads
+- `app/api/trainer/trainings/[trainingId]/thumbnail/route.ts` - Training thumbnail uploads
+
+**Prevention:**
+- **Never use local filesystem for user-uploaded content** in serverless environments
+- Always use cloud storage services for production deployments
+- Add image error handling in all image components
+- Validate image URLs exist before rendering
+- Use placeholder images for missing resources
+- Consider using Next.js `Image` component with `onError` handler
+
+**UI/UX Considerations:**
+- Show placeholder images when uploads fail to load
+- Display user-friendly error messages instead of broken image icons
+- Implement graceful degradation (show text/icon when image unavailable)
+- Add loading states for image uploads
+- Provide feedback when images fail to upload
+
+---
+
 ## Revision History
 
 - **2024-01-XX**: Created error database
@@ -624,4 +711,5 @@ export default async function DashboardPage() {
 - **2024-01-XX**: Added Server Components render error (production error hiding)
 - **2024-01-XX**: Added logout redirect to localhost error and solution
 - **2024-01-XX**: Added systematic dashboard fixes pattern and applied to all dashboard pages
+- **2024-01-XX**: Added 404 image loading errors (Vercel serverless filesystem limitation)
 
