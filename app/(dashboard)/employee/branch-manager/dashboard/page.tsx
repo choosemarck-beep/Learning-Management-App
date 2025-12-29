@@ -13,48 +13,55 @@ import { TrainerAnnouncementsSection } from "@/components/features/dashboard/Tra
 import styles from "./page.module.css";
 
 export default async function BranchManagerDashboardPage() {
-  const user = await getCurrentUser();
+  try {
+    const user = await getCurrentUser();
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  // Role check - only BRANCH_MANAGER can access
-  if (user.role !== "BRANCH_MANAGER") {
-    if (user.role === "EMPLOYEE") {
-      redirect("/employee/staff/dashboard");
-    } else if (user.role === "SUPER_ADMIN") {
-      redirect("/super-admin/dashboard");
-    } else if (user.role === "ADMIN") {
-      redirect("/admin/dashboard");
-    } else {
+    if (!user) {
       redirect("/login");
     }
-  }
 
-  // Fetch full user data from database
-  const userData = await prisma.user.findUnique({
-    where: { id: user.id },
-    include: {
-      courseProgresses: {
+    // Role check - only BRANCH_MANAGER can access
+    if (user.role !== "BRANCH_MANAGER") {
+      if (user.role === "EMPLOYEE") {
+        redirect("/employee/staff/dashboard");
+      } else if (user.role === "SUPER_ADMIN") {
+        redirect("/super-admin/dashboard");
+      } else if (user.role === "ADMIN") {
+        redirect("/admin/dashboard");
+      } else {
+        redirect("/login");
+      }
+    }
+
+    // Fetch full user data from database with error handling
+    let userData;
+    try {
+      userData = await prisma.user.findUnique({
+        where: { id: user.id },
         include: {
-          course: {
-            select: {
-              id: true,
-              title: true,
-              description: true,
-              thumbnail: true,
-              totalXP: true,
+          courseProgresses: {
+            include: {
+              course: {
+                select: {
+                  id: true,
+                  title: true,
+                  description: true,
+                  thumbnail: true,
+                  totalXP: true,
+                },
+              },
             },
           },
         },
-      },
-    },
-  });
+      });
+    } catch (dbError) {
+      console.error("Error fetching branch manager user data:", dbError);
+      redirect("/login");
+    }
 
-  if (!userData) {
-    redirect("/login");
-  }
+    if (!userData) {
+      redirect("/login");
+    }
 
   const onboardingCompleted = userData.onboardingCompleted || false;
 
