@@ -217,10 +217,8 @@ export async function middleware(request: NextRequest) {
     const userRole = session?.user?.role;
     if (userRole) {
       const redirectUrl = getRoleBasedRedirect(userRole);
-      // Prevent redirect loop: don't redirect to the same page
-      if (redirectUrl !== pathname) {
-        return NextResponse.redirect(new URL(redirectUrl, request.url));
-      }
+      // Redirect to role-based dashboard (redirectUrl will never equal pathname since pathname is /login or /signup)
+      return NextResponse.redirect(new URL(redirectUrl, request.url));
     }
     // If no role, allow the page to render (it will handle the error)
   }
