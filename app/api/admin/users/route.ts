@@ -151,12 +151,32 @@ export async function GET(request: NextRequest) {
       } : "No users");
 
       // Serialize Date objects to ISO strings for JSON response
+      // Explicitly construct the response object to avoid serialization issues
       const serializedUsers = users.map((user) => ({
-        ...user,
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        employeeNumber: user.employeeNumber,
+        phone: user.phone,
+        hireType: user.hireType,
+        department: user.department,
+        branch: user.branch,
+        hireDate: user.hireDate?.toISOString() || null,
+        status: user.status,
+        role: user.role,
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
         approvedAt: user.approvedAt?.toISOString() || null,
-        hireDate: user.hireDate?.toISOString() || null,
+        company: user.company ? {
+          id: user.company.id,
+          name: user.company.name,
+          type: user.company.type,
+        } : null,
+        position: user.position ? {
+          id: user.position.id,
+          title: user.position.title,
+          role: user.position.role,
+        } : null,
       }));
 
       // Return success response
@@ -177,25 +197,45 @@ export async function GET(request: NextRequest) {
       console.error("Database error fetching users:", dbError);
       const errorMessage = dbError instanceof Error ? dbError.message : String(dbError);
       const errorCode = dbError && typeof dbError === "object" && "code" in dbError ? (dbError as any).code : undefined;
+      const errorName = dbError instanceof Error ? dbError.name : undefined;
       console.error("Database error details:", {
         message: errorMessage,
         code: errorCode,
-        where,
+        name: errorName,
+        where: JSON.stringify(where, null, 2),
         stack: dbError instanceof Error ? dbError.stack : undefined,
       });
+      
+      // Return detailed error for debugging
       return NextResponse.json(
         { 
           success: false, 
           error: "Failed to fetch users",
-          details: process.env.NODE_ENV === "development" ? errorMessage : undefined,
+          details: process.env.NODE_ENV === "development" 
+            ? `${errorName || "Error"}: ${errorMessage}${errorCode ? ` (Code: ${errorCode})` : ""}`
+            : undefined,
         },
         { status: 500 }
       );
     }
   } catch (error) {
     console.error("Unexpected error in GET /api/admin/users:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorName = error instanceof Error ? error.name : undefined;
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error("Unexpected error details:", {
+      message: errorMessage,
+      name: errorName,
+      stack: errorStack,
+    });
     return NextResponse.json(
-      { success: false, error: "An unexpected error occurred" },
+      { 
+        success: false, 
+        error: "An unexpected error occurred",
+        details: process.env.NODE_ENV === "development" 
+          ? `${errorName || "Error"}: ${errorMessage}`
+          : undefined,
+      },
       { status: 500 }
     );
   }

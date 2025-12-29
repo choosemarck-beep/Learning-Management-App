@@ -1438,6 +1438,29 @@ return NextResponse.json({
 - Test API responses to ensure JSON serialization works
 - Check for Date objects in nested relations and serialize them too
 - Use TypeScript to catch Date objects in response types
+- **CRITICAL**: When spreading Prisma results (`...user`), explicitly construct response objects instead of spreading to avoid including non-serializable fields
+
+**Common Mistakes:**
+```typescript
+// ❌ WRONG - Spreading includes all Prisma fields which may not be serializable
+const serializedUsers = users.map((user) => ({
+  ...user, // Includes internal Prisma fields, Date objects, etc.
+  createdAt: user.createdAt.toISOString(), // This might not override properly
+}));
+
+// ✅ CORRECT - Explicitly construct response object with only needed fields
+const serializedUsers = users.map((user) => ({
+  id: user.id,
+  name: user.name,
+  email: user.email,
+  createdAt: user.createdAt.toISOString(),
+  updatedAt: user.updatedAt.toISOString(),
+  company: user.company ? {
+    id: user.company.id,
+    name: user.company.name,
+  } : null,
+}));
+```
 
 ---
 
