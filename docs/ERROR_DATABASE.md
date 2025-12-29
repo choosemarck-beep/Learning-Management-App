@@ -349,10 +349,97 @@ function Component({ prop1, prop2, onKeyDown }: Props) {
 - Don't expose sensitive data in logs
 - Use consistent error message format
 
+#### Error: "Server Components render error" - Generic error message in production
+**Symptoms:**
+- Dashboard shows "Dashboard Error" with generic message
+- Error message: "An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details."
+- Console shows error boundary catching errors but actual error is hidden
+- Error digest property exists but doesn't reveal the actual issue
+
+**Common Causes:**
+- Server component throwing an error during render
+- Null/undefined access in server component
+- Data serialization issues (passing non-serializable data to client components)
+- Missing error handling for async operations
+- Variables used before being defined or validated
+
+**Solution:**
+- Add comprehensive error logging that works in production (logs to Vercel console)
+- Add defensive checks before accessing variables (null checks, array checks)
+- Validate all data before passing to client components
+- Use error digest to track errors even when message is hidden
+- Add final validation checks before render
+- Ensure all variables are properly scoped and defined
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - no validation, error hidden in production
+return (
+  <Component
+    data={userData.avatar} // Might be null/undefined
+    items={items} // Might not be array
+  />
+);
+
+// ✅ CORRECT - validate before render, log errors
+try {
+  // Validate all data
+  if (!user || !userData) {
+    throw new Error("User data is missing");
+  }
+  
+  if (!Array.isArray(items)) {
+    throw new Error("Items must be an array");
+  }
+  
+  // Log before render for debugging
+  console.log("[Component] Final render check:", {
+    hasUser: !!user,
+    hasUserData: !!userData,
+    itemsLength: items.length,
+  });
+  
+  return (
+    <Component
+      data={userData.avatar || null} // Safe null handling
+      items={items} // Guaranteed to be array
+    />
+  );
+} catch (error) {
+  // Enhanced logging that works in production
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const errorDigest = error && typeof error === 'object' && 'digest' in error 
+    ? String((error as any).digest) 
+    : undefined;
+  
+  console.error("[Component] CRITICAL ERROR:", {
+    message: errorMessage,
+    digest: errorDigest,
+    timestamp: new Date().toISOString(),
+  });
+  
+  // Show user-friendly error with digest for tracking
+  return <ErrorUI message={userFriendlyMessage} digest={errorDigest} />;
+}
+```
+
+**Files Fixed:**
+- `app/(dashboard)/employee/trainer/dashboard/page.tsx` - Added validation checks, enhanced error logging, safe variable access
+
+**Prevention:**
+- Always validate data before accessing properties
+- Use optional chaining (`?.`) and nullish coalescing (`??`) for safe access
+- Add final validation checks before render
+- Log data structure before passing to client components
+- Use error digest for tracking errors in production
+
+---
+
 ## Revision History
 
 - **2024-01-XX**: Created error database
 - **2024-01-XX**: Added redirect loop error and solution
 - **2024-01-XX**: Added duplicate response variable error
 - **2024-01-XX**: Added syntax error (missing try block) error
+- **2024-01-XX**: Added Server Components render error (production error hiding)
 

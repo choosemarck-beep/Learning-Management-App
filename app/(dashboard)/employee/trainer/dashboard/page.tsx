@@ -341,19 +341,42 @@ export default async function TrainerDashboardPage() {
     throw new Error("Failed to load dashboard data");
   }
 
+    // Final validation before render
+    if (!user || !userData) {
+      throw new Error("User data is missing - cannot render dashboard");
+    }
+    
+    if (!initialStats || !Array.isArray(allTrainings) || !Array.isArray(allCourses)) {
+      throw new Error("Dashboard data is incomplete - cannot render dashboard");
+    }
+    
+    // Ensure trainingIds and courseIds are arrays
+    const safeTrainingIds = Array.isArray(trainingIds) ? trainingIds : [];
+    const safeCourseIds = Array.isArray(courseIds) ? courseIds : [];
+    
+    console.log("[TrainerDashboardPage] Final render check:", {
+      hasUser: !!user,
+      hasUserData: !!userData,
+      hasInitialStats: !!initialStats,
+      trainingIdsLength: safeTrainingIds.length,
+      courseIdsLength: safeCourseIds.length,
+      allTrainingsLength: allTrainings.length,
+      allCoursesLength: allCourses.length,
+    });
+    
     return (
       <TrainerLayout
         userName={user.name}
         userEmail={user.email}
-        userAvatar={userData.avatar}
+        userAvatar={userData.avatar || null}
         pageTitle="Dashboard"
         pageDescription="Overview of training completion rates and customizable dashboard."
       >
         <div className={styles.container}>
           <TrainerDashboardClient
             initialStats={initialStats}
-            initialTrainingPreferences={trainingIds}
-            initialCoursePreferences={courseIds}
+            initialTrainingPreferences={safeTrainingIds}
+            initialCoursePreferences={safeCourseIds}
             allTrainings={allTrainings}
             allCourses={allCourses}
           />
@@ -361,20 +384,33 @@ export default async function TrainerDashboardPage() {
       </TrainerLayout>
     );
   } catch (error) {
-    console.error("[TrainerDashboardPage] Error in TrainerDashboardPage:", {
-      error,
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
+    // Enhanced error logging that works in production
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    const errorDigest = error && typeof error === 'object' && 'digest' in error ? String((error as any).digest) : undefined;
+    
+    // Log to console (visible in Vercel logs)
+    console.error("[TrainerDashboardPage] CRITICAL ERROR:", {
+      message: errorMessage,
+      stack: errorStack,
+      digest: errorDigest,
       errorType: error instanceof Error ? error.constructor.name : typeof error,
+      timestamp: new Date().toISOString(),
     });
     
     // Check if it's a Next.js redirect error - let those through
-    if (error && typeof error === 'object' && 'digest' in error && typeof (error as any).digest === 'string' && (error as any).digest?.includes('NEXT_REDIRECT')) {
+    if (errorDigest?.includes('NEXT_REDIRECT')) {
       // This is a Next.js redirect - let it through
       throw error;
     }
     
-    // For other errors, show error UI instead of throwing to prevent redirect loops
+    // For other errors, show error UI with more details
+    // In production, Next.js hides error messages, so we'll show a user-friendly message
+    // but log the actual error to console/Vercel logs
+    const userFriendlyMessage = process.env.NODE_ENV === 'production'
+      ? "An error occurred while loading the dashboard. Please try refreshing the page. If the problem persists, contact support."
+      : errorMessage;
+    
     return (
       <div className={styles.container}>
         <div style={{ padding: "var(--spacing-lg)", textAlign: "center" }}>
@@ -382,8 +418,18 @@ export default async function TrainerDashboardPage() {
             Dashboard Error
           </h2>
           <p style={{ color: "var(--color-text-secondary)", marginBottom: "var(--spacing-md)" }}>
-            {error instanceof Error ? error.message : "An unexpected error occurred while loading the dashboard."}
+            {userFriendlyMessage}
           </p>
+          {errorDigest && (
+            <p style={{ 
+              color: "var(--color-text-secondary)", 
+              fontSize: "var(--font-size-xs)",
+              marginBottom: "var(--spacing-md)",
+              fontFamily: "monospace"
+            }}>
+              Error ID: {errorDigest}
+            </p>
+          )}
           <button
             onClick={() => window.location.reload()}
             style={{
