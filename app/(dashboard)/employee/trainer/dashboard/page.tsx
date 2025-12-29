@@ -10,48 +10,93 @@ export const dynamic = 'force-dynamic';
 
 export default async function TrainerDashboardPage() {
   console.log("[TrainerDashboardPage] Page component started");
+  
+  // Get user - if this fails, middleware should have caught it
+  // But we'll handle gracefully to prevent redirect loops
+  let user;
   try {
-    console.log("[TrainerDashboardPage] Getting current user...");
-    let user;
-    try {
-      user = await getCurrentUser();
-    } catch (authError) {
-      console.error("[TrainerDashboardPage] Error getting current user:", authError);
-      // Don't redirect on auth error - let middleware handle it
-      // This prevents redirect loops
-      throw new Error("Authentication failed");
-    }
-    
+    user = await getCurrentUser();
     console.log("[TrainerDashboardPage] User retrieved:", { id: user?.id, role: user?.role });
+  } catch (authError) {
+    console.error("[TrainerDashboardPage] Error getting current user:", authError);
+    // If middleware allowed access but getCurrentUser fails, show error UI instead of redirecting
+    // This prevents redirect loops
+    return (
+      <div className={styles.container}>
+        <div style={{ padding: "var(--spacing-lg)", textAlign: "center" }}>
+          <h2 style={{ color: "var(--color-error)", marginBottom: "var(--spacing-md)" }}>
+            Authentication Error
+          </h2>
+          <p style={{ color: "var(--color-text-secondary)", marginBottom: "var(--spacing-md)" }}>
+            Unable to verify your session. Please try refreshing the page.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              padding: "var(--spacing-sm) var(--spacing-md)",
+              background: "var(--color-primary-purple)",
+              color: "white",
+              border: "none",
+              borderRadius: "var(--radius-md)",
+              cursor: "pointer",
+            }}
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-    if (!user) {
-      console.error("[TrainerDashboardPage] User is null - this should not happen if middleware is working");
-      // Don't redirect - throw error instead to show error boundary
-      throw new Error("User session not found");
-    }
+  if (!user) {
+    console.error("[TrainerDashboardPage] User is null - middleware should have prevented this");
+    // Show error UI instead of redirecting to prevent loops
+    return (
+      <div className={styles.container}>
+        <div style={{ padding: "var(--spacing-lg)", textAlign: "center" }}>
+          <h2 style={{ color: "var(--color-error)", marginBottom: "var(--spacing-md)" }}>
+            Session Not Found
+          </h2>
+          <p style={{ color: "var(--color-text-secondary)", marginBottom: "var(--spacing-md)" }}>
+            Your session could not be found. Please log in again.
+          </p>
+          <a
+            href="/login"
+            style={{
+              display: "inline-block",
+              padding: "var(--spacing-sm) var(--spacing-md)",
+              background: "var(--color-primary-purple)",
+              color: "white",
+              textDecoration: "none",
+              borderRadius: "var(--radius-md)",
+            }}
+          >
+            Go to Login
+          </a>
+        </div>
+      </div>
+    );
+  }
 
-    // Role check - only TRAINER can access
-    if (user.role !== "TRAINER") {
-      console.log("[TrainerDashboardPage] User role mismatch:", user.role, "redirecting to correct dashboard");
-      // Let middleware handle role-based redirects to prevent loops
-      // Only redirect if we have a valid role
-      if (user.role === "REGIONAL_MANAGER") {
-        redirect("/employee/regional-manager/dashboard");
-      } else if (user.role === "AREA_MANAGER") {
-        redirect("/employee/area-manager/dashboard");
-      } else if (user.role === "BRANCH_MANAGER") {
-        redirect("/employee/branch-manager/dashboard");
-      } else if (user.role === "EMPLOYEE") {
-        redirect("/employee/staff/dashboard");
-      } else if (user.role === "SUPER_ADMIN") {
-        redirect("/super-admin/dashboard");
-      } else if (user.role === "ADMIN") {
-        redirect("/admin/dashboard");
-      } else {
-        // Unknown role - throw error instead of redirecting to prevent loop
-        throw new Error(`Invalid role for trainer dashboard: ${user.role}`);
-      }
-    }
+  // Role check - only TRAINER can access
+  // If role doesn't match, middleware should have redirected, but handle it gracefully
+  if (user.role !== "TRAINER") {
+    console.log("[TrainerDashboardPage] User role mismatch:", user.role);
+    // Middleware should have handled this, but if we get here, redirect once
+    // Use a direct redirect that won't loop
+    const roleRedirects: Record<string, string> = {
+      REGIONAL_MANAGER: "/employee/regional-manager/dashboard",
+      AREA_MANAGER: "/employee/area-manager/dashboard",
+      BRANCH_MANAGER: "/employee/branch-manager/dashboard",
+      EMPLOYEE: "/employee/staff/dashboard",
+      SUPER_ADMIN: "/super-admin/dashboard",
+      ADMIN: "/admin/dashboard",
+    };
+    
+    const redirectUrl = roleRedirects[user.role] || "/login";
+    console.log("[TrainerDashboardPage] Redirecting to:", redirectUrl);
+    redirect(redirectUrl);
+  }
 
     // Fetch full user data from database with error handling
     let userData: {
