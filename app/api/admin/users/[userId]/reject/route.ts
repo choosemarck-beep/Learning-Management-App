@@ -107,29 +107,6 @@ export async function POST(
         },
       });
 
-    const response = NextResponse.json(
-      {
-        success: true,
-        message: "User rejected successfully",
-        data: rejectedUser,
-      },
-      { status: 200 }
-    );
-
-    // Add rate limit headers
-    response.headers.set(
-      "X-RateLimit-Limit",
-      RATE_LIMIT_CONFIGS.adminAction.maxRequests.toString()
-    );
-    response.headers.set(
-      "X-RateLimit-Remaining",
-      rateLimitResult.remaining.toString()
-    );
-    response.headers.set(
-      "X-RateLimit-Reset",
-      rateLimitResult.resetTime.toString()
-    );
-
       const response = NextResponse.json(
         {
           success: true,

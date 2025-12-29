@@ -174,29 +174,6 @@ export async function POST(
         },
       });
 
-    const response = NextResponse.json(
-      {
-        success: true,
-        password: newPassword, // Return plain password for admin to share
-        message: "Password reset successfully",
-      },
-      { status: 200 }
-    );
-
-    // Add rate limit headers
-    response.headers.set(
-      "X-RateLimit-Limit",
-      RATE_LIMIT_CONFIGS.adminAction.maxRequests.toString()
-    );
-    response.headers.set(
-      "X-RateLimit-Remaining",
-      rateLimitResult.remaining.toString()
-    );
-    response.headers.set(
-      "X-RateLimit-Reset",
-      rateLimitResult.resetTime.toString()
-    );
-
       const response = NextResponse.json(
         {
           success: true,
