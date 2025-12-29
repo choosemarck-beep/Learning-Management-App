@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useCallback } from "react";
 import { UseFormRegister, FieldErrors, UseFormWatch } from "react-hook-form";
 import toast from "react-hot-toast";
-import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import styles from "./AccountSetupStep.module.css";
 
 export interface AccountSetupFormData {
@@ -116,12 +116,12 @@ export const AccountSetupStep: React.FC<AccountSetupStepProps> = ({
             const { ref: registerRef, ...registerRest } = registerProps;
             const registerRefTyped = registerRef as React.Ref<HTMLInputElement> | undefined;
             return (
-              <Input
+              <PasswordInput
                 label="Password"
-                type="password"
                 placeholder="Create a secure password"
                 required
                 onFocus={handlePasswordFocus}
+                error={errors.password?.message}
                 {...registerRest}
                 ref={(el) => {
                   // Merge refs: set both the register ref and our ref
@@ -139,11 +139,11 @@ export const AccountSetupStep: React.FC<AccountSetupStepProps> = ({
           })()}
         </div>
         <div className={styles.passwordField}>
-          <Input
+          <PasswordInput
             label="Confirm Password"
-            type="password"
             placeholder="Confirm your password"
             required
+            error={errors.confirmPassword?.message}
             {...register("confirmPassword")}
           />
         </div>

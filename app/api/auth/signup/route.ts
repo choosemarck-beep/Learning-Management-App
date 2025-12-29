@@ -115,11 +115,31 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Verify company exists
+    const company = await prisma.company.findUnique({
+      where: { id: companyId },
+      select: { id: true },
+    });
+
+    if (!company) {
+      return NextResponse.json(
+        { error: "Selected company not found. Please select a valid company." },
+        { status: 400 }
+      );
+    }
+
     // Fetch position to auto-detect role
     const position = await prisma.position.findUnique({
       where: { id: positionId },
       select: { role: true },
     });
+
+    if (!position) {
+      return NextResponse.json(
+        { error: "Selected position not found. Please select a valid position." },
+        { status: 400 }
+      );
+    }
 
     // Auto-detect role from position, default to EMPLOYEE if not found
     const userRole = position?.role || "EMPLOYEE";
@@ -174,7 +194,12 @@ export async function POST(request: NextRequest) {
     let emailSent = false;
     let emailError: any = null;
     try {
-      const loginUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/login`;
+      // Use NEXTAUTH_URL from environment (set in Vercel) or construct from request
+      // Never use hardcoded localhost - this breaks in production
+      const origin = request.headers.get("origin");
+      const host = request.headers.get("host");
+      const baseUrl = process.env.NEXTAUTH_URL || origin || (host ? `https://${host}` : "");
+      const loginUrl = baseUrl ? `${baseUrl}/login` : "/login";
       await sendOnboardingEmail(user.email, user.name, loginUrl);
       emailSent = true;
       console.log("✅ Onboarding email sent successfully to:", user.email);
@@ -203,12 +228,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Handle Prisma errors
+    if (error && typeof error === "object" && "code" in error) {
+      const prismaError = error as { code: string; meta?: any };
+      
+      // Unique constraint violation (email or employee number already exists)
+      if (prismaError.code === "P2002") {
+        const field = prismaError.meta?.target?.[0] || "field";
+        const fieldName = field === "email" ? "email address" : field === "employeeNumber" ? "employee number" : field;
+        return NextResponse.json(
+          { error: `A user with this ${fieldName} already exists. Please use a different ${fieldName}.` },
+          { status: 400 }
+        );
+      }
+
+      // Foreign key constraint violation
+      if (prismaError.code === "P2003") {
+        return NextResponse.json(
+          { error: "Invalid company or position selected. Please select valid options." },
+          { status: 400 }
+        );
+      }
+
+      // Record not found
+      if (prismaError.code === "P2025") {
+        return NextResponse.json(
+          { error: "The selected company or position no longer exists. Please refresh and try again." },
+          { status: 400 }
+        );
+      }
+    }
+
     // Log the full error for debugging
     console.error("Signup error:", error);
     console.error("Error details:", {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
       name: error instanceof Error ? error.name : undefined,
+      code: error && typeof error === "object" && "code" in error ? (error as any).code : undefined,
     });
 
     // Return more detailed error in development, generic in production
@@ -217,7 +274,7 @@ export async function POST(request: NextRequest) {
         ? error instanceof Error
           ? error.message
           : String(error)
-        : "Internal server error";
+        : "Internal server error. Please try again or contact support.";
 
     return NextResponse.json(
       { 
