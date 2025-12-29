@@ -149,15 +149,51 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Check Cloudinary configuration before upload
+      const hasCloudinaryConfig = !!(
+        process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET
+      );
+      
+      if (!hasCloudinaryConfig) {
+        console.error("[SplashScreen] Cloudinary configuration missing:", {
+          hasCloudName: !!process.env.CLOUDINARY_CLOUD_NAME,
+          hasApiKey: !!process.env.CLOUDINARY_API_KEY,
+          hasApiSecret: !!process.env.CLOUDINARY_API_SECRET,
+        });
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: "Image upload service is not configured. Please contact your administrator.",
+            details: process.env.NODE_ENV === "development" 
+              ? "Cloudinary environment variables are missing. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in Vercel."
+              : undefined,
+          },
+          { status: 500 }
+        );
+      }
+
       // Upload to Cloudinary
       let imageUrl: string;
       try {
+        console.log("[SplashScreen] Starting Cloudinary upload:", { filename, size: buffer.length });
         imageUrl = await uploadToCloudinary(buffer, 'splash', filename, 'image');
         console.log(`[SplashScreen] Successfully uploaded to Cloudinary: ${imageUrl}`);
       } catch (uploadError) {
-        console.error("[SplashScreen] Cloudinary upload error:", uploadError);
+        const errorMessage = uploadError instanceof Error ? uploadError.message : String(uploadError);
+        console.error("[SplashScreen] Cloudinary upload error:", {
+          message: errorMessage,
+          stack: uploadError instanceof Error ? uploadError.stack : undefined,
+          filename,
+          bufferSize: buffer.length,
+        });
         return NextResponse.json(
-          { success: false, error: "Failed to upload splash screen. Please try again." },
+          { 
+            success: false, 
+            error: "Failed to upload splash screen. Please try again.",
+            details: process.env.NODE_ENV === "development" ? errorMessage : undefined,
+          },
           { status: 500 }
         );
       }

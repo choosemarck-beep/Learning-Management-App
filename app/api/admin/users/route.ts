@@ -73,11 +73,16 @@ export async function GET(request: NextRequest) {
       ];
     }
 
+    // Log where clause for debugging
+    console.log("[Users API] Where clause:", JSON.stringify(where, null, 2));
+    console.log("[Users API] Query params:", { status, role, search, page, limit });
+
     // Wrap Prisma queries in try-catch
     let total, users;
     try {
       // Get total count for pagination
       total = await prisma.user.count({ where });
+      console.log("[Users API] Total users found:", total);
 
       // Calculate pagination
       const skip = (page - 1) * limit;
@@ -108,6 +113,8 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit,
       });
+      
+      console.log("[Users API] Users fetched:", users.length);
 
       // Return success response
       return NextResponse.json(

@@ -1286,6 +1286,97 @@ try {
 
 ---
 
+#### Error: "500 Internal Server Error" - Cloudinary Configuration Missing
+**Symptoms:**
+- Uploading images fails with 500 error
+- Error message: "Image upload service is not configured"
+- Console shows Cloudinary configuration missing
+- Works locally but fails on Vercel
+
+**Common Causes:**
+- Cloudinary environment variables not set in Vercel
+- Environment variables set but app not redeployed
+- Environment variables set for wrong environment (Production vs Preview)
+- Typo in environment variable names
+- Environment variables set but not accessible at runtime
+
+**Solution:**
+1. **Check Vercel Environment Variables**:
+   - Go to Vercel Dashboard → Project → Settings → Environment Variables
+   - Verify these three variables exist:
+     - `CLOUDINARY_CLOUD_NAME`
+     - `CLOUDINARY_API_KEY`
+     - `CLOUDINARY_API_SECRET`
+   - Ensure they're set for **Production** environment (and Preview/Development if needed)
+
+2. **Verify Variable Values**:
+   - Check that values are not empty
+   - Verify no extra spaces or quotes around values
+   - Ensure API Secret is revealed (not hidden)
+
+3. **Redeploy After Adding Variables**:
+   - Environment variables require a new deployment to be available
+   - Go to Deployments → Latest → Click "Redeploy"
+   - Or push a new commit to trigger deployment
+
+4. **Add Runtime Checks**:
+   ```typescript
+   // Check Cloudinary configuration before upload
+   const hasCloudinaryConfig = !!(
+     process.env.CLOUDINARY_CLOUD_NAME &&
+     process.env.CLOUDINARY_API_KEY &&
+     process.env.CLOUDINARY_API_SECRET
+   );
+   
+   if (!hasCloudinaryConfig) {
+     console.error("[API] Cloudinary configuration missing:", {
+       hasCloudName: !!process.env.CLOUDINARY_CLOUD_NAME,
+       hasApiKey: !!process.env.CLOUDINARY_API_KEY,
+       hasApiSecret: !!process.env.CLOUDINARY_API_SECRET,
+     });
+     return NextResponse.json(
+       { 
+         success: false, 
+         error: "Image upload service is not configured. Please contact your administrator.",
+         details: process.env.NODE_ENV === "development" 
+           ? "Cloudinary environment variables are missing. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in Vercel."
+           : undefined,
+       },
+       { status: 500 }
+     );
+   }
+   ```
+
+**Debugging Steps:**
+1. **Check Vercel Function Logs**:
+   - Go to Vercel Dashboard → Deployments → Latest → Functions
+   - Look for logs showing "Cloudinary configuration missing"
+   - Check which variables are missing
+
+2. **Verify Variable Names**:
+   - Must be exact: `CLOUDINARY_CLOUD_NAME` (not `CLOUDINARY_CLOUDNAME` or `CLOUDINARY_CLOUD_NAME_`)
+   - Case-sensitive: `CLOUDINARY_API_KEY` (not `cloudinary_api_key`)
+
+3. **Test Locally**:
+   - Create `.env.local` file with Cloudinary credentials
+   - Test upload locally to verify credentials work
+   - If works locally but not on Vercel, it's an environment variable issue
+
+**Files Fixed:**
+- `app/api/admin/carousel/route.ts` - Added Cloudinary configuration check before upload
+- `app/api/admin/splash-screen/route.ts` - Added Cloudinary configuration check before upload
+- `lib/cloudinary/config.ts` - Already has validation in upload functions
+
+**Prevention:**
+- Always check Cloudinary configuration before attempting uploads
+- Add runtime validation for environment variables
+- Provide clear error messages indicating which variables are missing
+- Document required environment variables in setup guides
+- Test uploads in production environment after setting variables
+- Use environment variable validation in CI/CD pipeline
+
+---
+
 ## Revision History
 
 - **2024-01-XX**: Created error database
@@ -1299,4 +1390,5 @@ try {
 - **2024-01-XX**: Added DatePicker mobile touch issues and future dates not disabled error
 - **2024-01-XX**: Added 500 Internal Server Error on Signup API route error and comprehensive debugging guide
 - **2024-12-29**: Added User Management Table 500 error and Carousel/Splash Screen upload errors with solutions
+- **2024-12-29**: Added Cloudinary configuration missing error pattern and debugging steps
 
