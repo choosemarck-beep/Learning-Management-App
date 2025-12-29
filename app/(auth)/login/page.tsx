@@ -141,14 +141,26 @@ function LoginForm() {
           }
           
           console.log("Login successful, redirecting to:", redirectUrl, "for role:", userRole);
-          // Use window.location for a hard redirect to ensure clean navigation
-          window.location.href = redirectUrl;
+          
+          // If we got a valid role, redirect directly
+          if (userRole && redirectUrl) {
+            // Use window.location for a hard redirect to ensure clean navigation
+            // This bypasses Next.js router and prevents redirect loops
+            window.location.href = redirectUrl;
+            return; // Exit early to prevent further execution
+          } else {
+            console.warn("No role found in session, using fallback redirect");
+            // Fallback: use callbackUrl and let middleware handle it
+            console.log("Fallback: redirecting to:", callbackUrl);
+            window.location.href = callbackUrl;
+            return;
+          }
         } catch (sessionError) {
           console.error("Error fetching session after login:", sessionError);
           // Fallback: use callbackUrl and let middleware handle it
           console.log("Fallback: redirecting to:", callbackUrl);
-          await router.push(callbackUrl);
-          router.refresh();
+          window.location.href = callbackUrl;
+          return;
         }
       } else {
         console.error("Unexpected login result:", result);

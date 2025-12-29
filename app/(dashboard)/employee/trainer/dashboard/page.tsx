@@ -12,15 +12,29 @@ export default async function TrainerDashboardPage() {
   console.log("[TrainerDashboardPage] Page component started");
   try {
     console.log("[TrainerDashboardPage] Getting current user...");
-    const user = await getCurrentUser();
+    let user;
+    try {
+      user = await getCurrentUser();
+    } catch (authError) {
+      console.error("[TrainerDashboardPage] Error getting current user:", authError);
+      // Don't redirect on auth error - let middleware handle it
+      // This prevents redirect loops
+      throw new Error("Authentication failed");
+    }
+    
     console.log("[TrainerDashboardPage] User retrieved:", { id: user?.id, role: user?.role });
 
     if (!user) {
-      redirect("/login");
+      console.error("[TrainerDashboardPage] User is null - this should not happen if middleware is working");
+      // Don't redirect - throw error instead to show error boundary
+      throw new Error("User session not found");
     }
 
     // Role check - only TRAINER can access
     if (user.role !== "TRAINER") {
+      console.log("[TrainerDashboardPage] User role mismatch:", user.role, "redirecting to correct dashboard");
+      // Let middleware handle role-based redirects to prevent loops
+      // Only redirect if we have a valid role
       if (user.role === "REGIONAL_MANAGER") {
         redirect("/employee/regional-manager/dashboard");
       } else if (user.role === "AREA_MANAGER") {
@@ -34,7 +48,8 @@ export default async function TrainerDashboardPage() {
       } else if (user.role === "ADMIN") {
         redirect("/admin/dashboard");
       } else {
-        redirect("/login");
+        // Unknown role - throw error instead of redirecting to prevent loop
+        throw new Error(`Invalid role for trainer dashboard: ${user.role}`);
       }
     }
 
