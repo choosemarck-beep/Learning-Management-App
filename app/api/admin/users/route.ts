@@ -114,9 +114,24 @@ export async function GET(request: NextRequest) {
       const totalPages = Math.ceil(total / limit);
 
       // Fetch users with related data
+      // Use select at top level instead of include to avoid Prisma validation issues
       users = await prisma.user.findMany({
         where,
-        include: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          employeeNumber: true,
+          phone: true,
+          hireType: true,
+          department: true,
+          branch: true,
+          hireDate: true,
+          status: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+          approvedAt: true,
           company: {
             select: {
               id: true,
