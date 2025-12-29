@@ -161,5 +161,10 @@ export default async function StaffDashboardPage() {
       />
     </div>
   );
+  } catch (error) {
+    console.error("Error in StaffDashboardPage:", error);
+    // Redirect to login on any error
+    redirect("/login");
+  }
 }
 
