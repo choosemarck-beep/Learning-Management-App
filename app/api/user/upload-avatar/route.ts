@@ -54,6 +54,14 @@ export async function POST(request: NextRequest) {
       `Uploading avatar: ${file.type}, ${(file.size / 1024).toFixed(2)}KB`
     );
 
+    // Validate file name
+    if (!file.name || typeof file.name !== 'string' || file.name.trim() === '') {
+      return NextResponse.json(
+        { success: false, error: "File name is required" },
+        { status: 400 }
+      );
+    }
+
     // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);

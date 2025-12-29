@@ -33,25 +33,34 @@ export async function uploadToCloudinary(
   }
 
   try {
+    // Validate filename
+    if (!filename || typeof filename !== 'string') {
+      throw new Error('Filename is required and must be a string');
+    }
+
     // Convert buffer to data URI format for Cloudinary
     // This avoids using upload_stream which may trigger deprecation warnings
+    const safeFilename = filename.trim() || `upload-${Date.now()}`;
     const mimeType = resourceType === 'image' 
-      ? (filename.match(/\.(jpg|jpeg)$/i) ? 'image/jpeg' : 
-         filename.match(/\.png$/i) ? 'image/png' : 
-         filename.match(/\.gif$/i) ? 'image/gif' : 
-         filename.match(/\.webp$/i) ? 'image/webp' : 'image/jpeg')
-      : (filename.match(/\.mp4$/i) ? 'video/mp4' : 
-         filename.match(/\.webm$/i) ? 'video/webm' : 
-         filename.match(/\.mov$/i) ? 'video/quicktime' : 'video/mp4');
+      ? (safeFilename.match(/\.(jpg|jpeg)$/i) ? 'image/jpeg' : 
+         safeFilename.match(/\.png$/i) ? 'image/png' : 
+         safeFilename.match(/\.gif$/i) ? 'image/gif' : 
+         safeFilename.match(/\.webp$/i) ? 'image/webp' : 'image/jpeg')
+      : (safeFilename.match(/\.mp4$/i) ? 'video/mp4' : 
+         safeFilename.match(/\.webm$/i) ? 'video/webm' : 
+         safeFilename.match(/\.mov$/i) ? 'video/quicktime' : 'video/mp4');
     
     const base64 = buffer.toString('base64');
     const dataUri = `data:${mimeType};base64,${base64}`;
+
+    // Extract public_id from filename (remove extension)
+    const publicId = safeFilename.replace(/\.[^/.]+$/, '') || `upload-${Date.now()}`;
 
     // Use promise-based upload API instead of upload_stream
     // This is more reliable and may avoid deprecation warnings
     const result = await cloudinary.uploader.upload(dataUri, {
       folder: `learning-management/${folder}`,
-      public_id: filename.replace(/\.[^/.]+$/, ''), // Remove file extension (Cloudinary handles it)
+      public_id: publicId, // Remove file extension (Cloudinary handles it)
       resource_type: resourceType,
       overwrite: false, // Don't overwrite existing files
       invalidate: true, // Invalidate CDN cache

@@ -75,6 +75,14 @@ export async function POST(
       );
     }
 
+    // Validate file name
+    if (!file.name || typeof file.name !== 'string' || file.name.trim() === '') {
+      return NextResponse.json(
+        { success: false, error: "File name is required" },
+        { status: 400 }
+      );
+    }
+
     // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);

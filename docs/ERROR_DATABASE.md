@@ -1597,6 +1597,81 @@ return result.secure_url;
 - Monitor for deprecation warnings in logs
 - Update Cloudinary SDK to latest version if available
 - Avoid using `upload_stream()` in favor of `upload()` with data URIs
+- **CRITICAL**: Always validate `file.name` before using it in upload routes
+- **CRITICAL**: Always validate `filename` parameter in `uploadToCloudinary()` function
+
+---
+
+#### Error: "TypeError: Cannot read properties of undefined (reading 'replace')" - Cloudinary Upload
+**Symptoms:**
+- Console shows: `TypeError: Cannot read properties of undefined (reading 'replace')`
+- Error occurs in `uploadToCloudinary()` function
+- Carousel upload fails with 500 error
+- Stack trace points to Cloudinary upload code
+
+**Common Causes:**
+- `filename` parameter is `undefined` or `null` when passed to `uploadToCloudinary()`
+- `file.name` is `undefined` in upload API routes
+- File object doesn't have a `name` property
+- Filename validation missing before calling `uploadToCloudinary()`
+
+**Solution:**
+- **Validate `file.name`** in all upload API routes before using it
+- **Validate `filename` parameter** in `uploadToCloudinary()` function
+- Provide fallback filename if `file.name` is missing
+- Add proper error handling for missing file names
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - No validation, can cause undefined error
+const fileExtension = file.name.split('.').pop() || 'jpg';
+const filename = `carousel-${timestamp}.${fileExtension}`;
+await uploadToCloudinary(buffer, 'carousel', filename, 'image');
+
+// ✅ CORRECT - Validate file.name first
+if (!file.name || typeof file.name !== 'string' || file.name.trim() === '') {
+  return NextResponse.json(
+    { success: false, error: "File name is required" },
+    { status: 400 }
+  );
+}
+const fileExtension = file.name.split('.').pop() || 'jpg';
+const filename = `carousel-${timestamp}.${fileExtension}`;
+await uploadToCloudinary(buffer, 'carousel', filename, 'image');
+
+// ✅ CORRECT - Validate filename in uploadToCloudinary function
+export async function uploadToCloudinary(
+  buffer: Buffer,
+  folder: string,
+  filename: string,
+  resourceType: 'image' | 'video' = 'image'
+): Promise<string> {
+  // Validate filename
+  if (!filename || typeof filename !== 'string') {
+    throw new Error('Filename is required and must be a string');
+  }
+  
+  const safeFilename = filename.trim() || `upload-${Date.now()}`;
+  // ... rest of upload code
+}
+```
+
+**Files Fixed:**
+- `lib/cloudinary/config.ts` - Added filename validation in `uploadToCloudinary()` function
+- `app/api/admin/carousel/route.ts` - Added `file.name` validation before upload
+- `app/api/admin/splash-screen/route.ts` - Added `file.name` validation
+- `app/api/admin/logo/route.ts` - Added `file.name` validation
+- `app/api/admin/carousel/video/route.ts` - Added `file.name` validation
+- `app/api/trainer/trainings/[trainingId]/thumbnail/route.ts` - Added `file.name` validation
+- `app/api/trainer/courses/[courseId]/thumbnail/route.ts` - Added `file.name` validation
+- `app/api/user/upload-avatar/route.ts` - Added `file.name` validation
+
+**Prevention:**
+- Always validate `file.name` exists and is a string before using it
+- Always validate `filename` parameter in utility functions
+- Provide clear error messages when validation fails
+- Use TypeScript to catch potential undefined issues
+- Test upload functionality with files that have no name property
 
 ---
 
