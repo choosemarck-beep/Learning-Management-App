@@ -5,10 +5,22 @@ import { writeFile, mkdir, unlink } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 
+export const dynamic = 'force-dynamic';
+
 // GET - Fetch logo settings
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let currentUser;
+    try {
+      currentUser = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!currentUser) {
       return NextResponse.json(
@@ -24,46 +36,33 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get or create logo settings
-    let settings;
+    // Wrap Prisma queries in try-catch
     try {
-      settings = await prisma.appLogoSettings.findFirst();
-    } catch (error) {
-      console.error("Error accessing appLogoSettings model:", error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error("Full error details:", JSON.stringify(error, null, 2));
-      return NextResponse.json(
-        { success: false, error: `Database error: ${errorMessage}. Please restart the dev server after regenerating Prisma client.` },
-        { status: 500 }
-      );
-    }
+      // Get or create logo settings
+      let settings = await prisma.appLogoSettings.findFirst();
 
-    if (!settings) {
-      // Create default settings if none exist
-      try {
+      if (!settings) {
+        // Create default settings if none exist
         settings = await prisma.appLogoSettings.create({
           data: {},
         });
-      } catch (error) {
-        console.error("Error creating logo settings:", error);
-        return NextResponse.json(
-          { success: false, error: "Failed to create settings" },
-          { status: 500 }
-        );
       }
-    }
 
-    return NextResponse.json(
-      { success: true, data: settings },
-      { status: 200 }
-    );
+      return NextResponse.json(
+        { success: true, data: settings },
+        { status: 200 }
+      );
+    } catch (dbError) {
+      console.error("Database error fetching logo settings:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to fetch logo settings" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error("Error fetching logo settings:", error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const errorStack = error instanceof Error ? error.stack : undefined;
-    console.error("Error details:", { errorMessage, errorStack });
+    console.error("Unexpected error in GET /api/admin/logo:", error);
     return NextResponse.json(
-      { success: false, error: `Failed to fetch logo settings: ${errorMessage}` },
+      { success: false, error: "An unexpected error occurred" },
       { status: 500 }
     );
   }
@@ -72,7 +71,17 @@ export async function GET(request: NextRequest) {
 // POST - Upload new logo image
 export async function POST(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let currentUser;
+    try {
+      currentUser = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!currentUser) {
       return NextResponse.json(
@@ -224,7 +233,17 @@ export async function POST(request: NextRequest) {
 // DELETE - Remove logo image (reset to default)
 export async function DELETE(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let currentUser;
+    try {
+      currentUser = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!currentUser) {
       return NextResponse.json(
@@ -240,35 +259,44 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Get existing settings
-    const settings = await prisma.appLogoSettings.findFirst();
+    // Wrap Prisma queries and file operations in try-catch
+    try {
+      // Get existing settings
+      const settings = await prisma.appLogoSettings.findFirst();
 
-    if (settings?.imageUrl) {
-      // Delete the image file
-      const imagePath = join(process.cwd(), "public", settings.imageUrl);
-      if (existsSync(imagePath)) {
-        try {
-          await unlink(imagePath);
-        } catch (error) {
-          console.error("Error deleting image:", error);
+      if (settings?.imageUrl) {
+        // Delete the image file
+        const imagePath = join(process.cwd(), "public", settings.imageUrl);
+        if (existsSync(imagePath)) {
+          try {
+            await unlink(imagePath);
+          } catch (error) {
+            console.error("Error deleting image:", error);
+          }
         }
+
+        // Update settings to remove image URL
+        await prisma.appLogoSettings.update({
+          where: { id: settings.id },
+          data: { imageUrl: null },
+        });
       }
 
-      // Update settings to remove image URL
-      await prisma.appLogoSettings.update({
-        where: { id: settings.id },
-        data: { imageUrl: null },
-      });
+      return NextResponse.json(
+        { success: true, message: "Logo image removed" },
+        { status: 200 }
+      );
+    } catch (dbError) {
+      console.error("Database or file operation error deleting logo:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to delete logo image" },
+        { status: 500 }
+      );
     }
-
-    return NextResponse.json(
-      { success: true, message: "Logo image removed" },
-      { status: 200 }
-    );
   } catch (error) {
-    console.error("Error deleting logo image:", error);
+    console.error("Unexpected error in DELETE /api/admin/logo:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to delete logo image" },
+      { success: false, error: "An unexpected error occurred" },
       { status: 500 }
     );
   }

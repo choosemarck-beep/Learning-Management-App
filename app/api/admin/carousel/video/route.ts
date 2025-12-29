@@ -5,10 +5,22 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 
+export const dynamic = 'force-dynamic';
+
 // POST - Upload carousel video
 export async function POST(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let currentUser;
+    try {
+      currentUser = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!currentUser) {
       return NextResponse.json(
@@ -71,35 +83,44 @@ export async function POST(request: NextRequest) {
     // Generate public URL
     const videoUrl = `/uploads/carousel/${filename}`;
 
-    // Update carousel settings to VIDEO mode
-    let settings = await prisma.carouselSettings.findFirst();
-    if (!settings) {
-      settings = await prisma.carouselSettings.create({
-        data: {
-          mode: "VIDEO",
-          videoUrl,
-          updatedBy: currentUser.id,
-        },
-      });
-    } else {
-      settings = await prisma.carouselSettings.update({
-        where: { id: settings.id },
-        data: {
-          mode: "VIDEO",
-          videoUrl,
-          updatedBy: currentUser.id,
-        },
-      });
-    }
+    // Wrap Prisma queries in try-catch
+    try {
+      // Update carousel settings to VIDEO mode
+      let settings = await prisma.carouselSettings.findFirst();
+      if (!settings) {
+        settings = await prisma.carouselSettings.create({
+          data: {
+            mode: "VIDEO",
+            videoUrl,
+            updatedBy: currentUser.id,
+          },
+        });
+      } else {
+        settings = await prisma.carouselSettings.update({
+          where: { id: settings.id },
+          data: {
+            mode: "VIDEO",
+            videoUrl,
+            updatedBy: currentUser.id,
+          },
+        });
+      }
 
-    return NextResponse.json(
-      { success: true, data: { videoUrl, settings } },
-      { status: 201 }
-    );
+      return NextResponse.json(
+        { success: true, data: { videoUrl, settings } },
+        { status: 201 }
+      );
+    } catch (dbError) {
+      console.error("Database error uploading carousel video:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to upload carousel video" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error("Error uploading carousel video:", error);
+    console.error("Unexpected error in POST /api/admin/carousel/video:", error);
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: "An unexpected error occurred" },
       { status: 500 }
     );
   }

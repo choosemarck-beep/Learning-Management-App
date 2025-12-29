@@ -5,6 +5,8 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { checkRateLimit, getClientIP, RATE_LIMIT_CONFIGS } from "@/lib/utils/rateLimit";
 
+export const dynamic = 'force-dynamic';
+
 // Generate random password (reused from create-trainer route)
 function generateRandomPassword(length: number = 12): string {
   const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -71,7 +73,17 @@ export async function POST(
   }
 
   try {
-    const currentUser = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let currentUser;
+    try {
+      currentUser = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!currentUser) {
       return NextResponse.json(
@@ -89,8 +101,33 @@ export async function POST(
     }
 
     const { userId } = params;
-    const body = await request.json();
-    const validatedData = resetPasswordSchema.parse(body);
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      return NextResponse.json(
+        { success: false, error: "Invalid request body" },
+        { status: 400 }
+      );
+    }
+
+    // Validate request body
+    let validatedData;
+    try {
+      validatedData = resetPasswordSchema.parse(body);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Validation error",
+            details: error.errors,
+          },
+          { status: 400 }
+        );
+      }
+      throw error;
+    }
 
     // Prevent self-password reset
     if (userId === currentUser.id) {
@@ -100,40 +137,42 @@ export async function POST(
       );
     }
 
-    // Check if user exists
-    const userToReset = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    // Wrap Prisma queries in try-catch
+    try {
+      // Check if user exists
+      const userToReset = await prisma.user.findUnique({
+        where: { id: userId },
+      });
 
-    if (!userToReset) {
-      return NextResponse.json(
-        { success: false, error: "User not found" },
-        { status: 404 }
-      );
-    }
+      if (!userToReset) {
+        return NextResponse.json(
+          { success: false, error: "User not found" },
+          { status: 404 }
+        );
+      }
 
-    // Prevent resetting super admin password unless requester is also super admin
-    if (userToReset.role === "SUPER_ADMIN" && currentUser.role !== "SUPER_ADMIN") {
-      return NextResponse.json(
-        { success: false, error: "Forbidden - Only super admin can reset super admin passwords" },
-        { status: 403 }
-      );
-    }
+      // Prevent resetting super admin password unless requester is also super admin
+      if (userToReset.role === "SUPER_ADMIN" && currentUser.role !== "SUPER_ADMIN") {
+        return NextResponse.json(
+          { success: false, error: "Forbidden - Only super admin can reset super admin passwords" },
+          { status: 403 }
+        );
+      }
 
-    // Generate or use provided password
-    const newPassword = validatedData.newPassword || generateRandomPassword(12);
+      // Generate or use provided password
+      const newPassword = validatedData.newPassword || generateRandomPassword(12);
 
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+      // Hash the new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update user's password
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        password: hashedPassword,
-        updatedAt: new Date(),
-      },
-    });
+      // Update user's password
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          password: hashedPassword,
+          updatedAt: new Date(),
+        },
+      });
 
     const response = NextResponse.json(
       {
@@ -158,9 +197,39 @@ export async function POST(
       rateLimitResult.resetTime.toString()
     );
 
-    return response;
+      const response = NextResponse.json(
+        {
+          success: true,
+          password: newPassword, // Return plain password for admin to share
+          message: "Password reset successfully",
+        },
+        { status: 200 }
+      );
+
+      // Add rate limit headers
+      response.headers.set(
+        "X-RateLimit-Limit",
+        RATE_LIMIT_CONFIGS.adminAction.maxRequests.toString()
+      );
+      response.headers.set(
+        "X-RateLimit-Remaining",
+        rateLimitResult.remaining.toString()
+      );
+      response.headers.set(
+        "X-RateLimit-Reset",
+        rateLimitResult.resetTime.toString()
+      );
+
+      return response;
+    } catch (dbError) {
+      console.error("Database error resetting password:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to reset password" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error("Error resetting password:", error);
+    console.error("Unexpected error in POST /api/admin/users/[userId]/reset-password:", error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
@@ -172,10 +241,7 @@ export async function POST(
       );
     }
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to reset password",
-      },
+      { success: false, error: "An unexpected error occurred" },
       { status: 500 }
     );
   }

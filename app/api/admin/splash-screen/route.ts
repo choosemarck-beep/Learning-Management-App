@@ -10,7 +10,17 @@ export const dynamic = 'force-dynamic';
 // GET - Fetch splash screen settings
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let currentUser;
+    try {
+      currentUser = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!currentUser) {
       return NextResponse.json(
@@ -26,42 +36,33 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get or create splash screen settings
-    let settings;
+    // Wrap Prisma queries in try-catch
     try {
-      settings = await prisma.splashScreenSettings.findFirst();
-    } catch (error) {
-      console.error("Error accessing splashScreenSettings model:", error);
-      // If model doesn't exist, return error
-      return NextResponse.json(
-        { success: false, error: "Database model not available. Please regenerate Prisma client." },
-        { status: 500 }
-      );
-    }
+      // Get or create splash screen settings
+      let settings = await prisma.splashScreenSettings.findFirst();
 
-    if (!settings) {
-      // Create default settings if none exist
-      try {
+      if (!settings) {
+        // Create default settings if none exist
         settings = await prisma.splashScreenSettings.create({
           data: {},
         });
-      } catch (error) {
-        console.error("Error creating splash screen settings:", error);
-        return NextResponse.json(
-          { success: false, error: "Failed to create settings" },
-          { status: 500 }
-        );
       }
-    }
 
-    return NextResponse.json(
-      { success: true, data: settings },
-      { status: 200 }
-    );
+      return NextResponse.json(
+        { success: true, data: settings },
+        { status: 200 }
+      );
+    } catch (dbError) {
+      console.error("Database error fetching splash screen settings:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to fetch splash screen settings" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error("Error fetching splash screen settings:", error);
+    console.error("Unexpected error in GET /api/admin/splash-screen:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to fetch splash screen settings" },
+      { success: false, error: "An unexpected error occurred" },
       { status: 500 }
     );
   }
@@ -70,7 +71,17 @@ export async function GET(request: NextRequest) {
 // POST - Upload new splash screen image
 export async function POST(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let currentUser;
+    try {
+      currentUser = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!currentUser) {
       return NextResponse.json(
@@ -136,50 +147,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get existing settings to delete old image
-    let settings;
+    // Wrap Prisma queries and file operations in try-catch
     try {
-      settings = await prisma.splashScreenSettings.findFirst();
-    } catch (error) {
-      console.error("Error accessing splashScreenSettings model:", error);
-      return NextResponse.json(
-        { success: false, error: "Database model not available. Please regenerate Prisma client." },
-        { status: 500 }
-      );
-    }
-    
-    // Delete old image if it exists
-    if (settings?.imageUrl) {
-      const oldImagePath = join(process.cwd(), "public", settings.imageUrl);
-      if (existsSync(oldImagePath)) {
-        try {
-          await unlink(oldImagePath);
-          console.log("Deleted old splash screen image:", oldImagePath);
-        } catch (error) {
-          console.error("Error deleting old image:", error);
-          // Continue even if deletion fails
+      // Get existing settings to delete old image
+      let settings = await prisma.splashScreenSettings.findFirst();
+      
+      // Delete old image if it exists
+      if (settings?.imageUrl) {
+        const oldImagePath = join(process.cwd(), "public", settings.imageUrl);
+        if (existsSync(oldImagePath)) {
+          try {
+            await unlink(oldImagePath);
+            console.log("Deleted old splash screen image:", oldImagePath);
+          } catch (error) {
+            console.error("Error deleting old image:", error);
+            // Continue even if deletion fails
+          }
         }
       }
-    }
 
-    // Save new file
-    const filepath = join(uploadsDir, filename);
-    try {
+      // Save new file
+      const filepath = join(uploadsDir, filename);
       await writeFile(filepath, buffer);
       console.log("Saved splash screen image to:", filepath);
-    } catch (error) {
-      console.error("Error writing file:", error);
-      return NextResponse.json(
-        { success: false, error: "Failed to save image file" },
-        { status: 500 }
-      );
-    }
 
-    // Generate public URL
-    const imageUrl = `/uploads/splash/${filename}`;
+      // Generate public URL
+      const imageUrl = `/uploads/splash/${filename}`;
 
-    // Update or create settings
-    try {
+      // Update or create settings
       if (settings) {
         settings = await prisma.splashScreenSettings.update({
           where: { id: settings.id },
@@ -191,29 +186,22 @@ export async function POST(request: NextRequest) {
         });
       }
       console.log("Updated splash screen settings:", settings);
-    } catch (error) {
-      console.error("Error updating database:", error);
-      // Try to delete the file we just created
-      try {
-        await unlink(filepath);
-      } catch (deleteError) {
-        console.error("Error cleaning up file:", deleteError);
-      }
+
       return NextResponse.json(
-        { success: false, error: "Failed to update database" },
+        { success: true, data: settings },
+        { status: 200 }
+      );
+    } catch (dbError) {
+      console.error("Database or file operation error uploading splash screen:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to upload splash screen image" },
         { status: 500 }
       );
     }
-
-    return NextResponse.json(
-      { success: true, data: settings },
-      { status: 200 }
-    );
   } catch (error) {
-    console.error("Error uploading splash screen image:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Unexpected error in POST /api/admin/splash-screen:", error);
     return NextResponse.json(
-      { success: false, error: `Failed to upload splash screen image: ${errorMessage}` },
+      { success: false, error: "An unexpected error occurred" },
       { status: 500 }
     );
   }
@@ -222,7 +210,17 @@ export async function POST(request: NextRequest) {
 // DELETE - Remove splash screen image (reset to default)
 export async function DELETE(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let currentUser;
+    try {
+      currentUser = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!currentUser) {
       return NextResponse.json(
@@ -238,35 +236,44 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Get existing settings
-    const settings = await prisma.splashScreenSettings.findFirst();
+    // Wrap Prisma queries and file operations in try-catch
+    try {
+      // Get existing settings
+      const settings = await prisma.splashScreenSettings.findFirst();
 
-    if (settings?.imageUrl) {
-      // Delete the image file
-      const imagePath = join(process.cwd(), "public", settings.imageUrl);
-      if (existsSync(imagePath)) {
-        try {
-          await unlink(imagePath);
-        } catch (error) {
-          console.error("Error deleting image:", error);
+      if (settings?.imageUrl) {
+        // Delete the image file
+        const imagePath = join(process.cwd(), "public", settings.imageUrl);
+        if (existsSync(imagePath)) {
+          try {
+            await unlink(imagePath);
+          } catch (error) {
+            console.error("Error deleting image:", error);
+          }
         }
+
+        // Update settings to remove image URL
+        await prisma.splashScreenSettings.update({
+          where: { id: settings.id },
+          data: { imageUrl: null },
+        });
       }
 
-      // Update settings to remove image URL
-      await prisma.splashScreenSettings.update({
-        where: { id: settings.id },
-        data: { imageUrl: null },
-      });
+      return NextResponse.json(
+        { success: true, message: "Splash screen image removed" },
+        { status: 200 }
+      );
+    } catch (dbError) {
+      console.error("Database or file operation error deleting splash screen:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to delete splash screen image" },
+        { status: 500 }
+      );
     }
-
-    return NextResponse.json(
-      { success: true, message: "Splash screen image removed" },
-      { status: 200 }
-    );
   } catch (error) {
-    console.error("Error deleting splash screen image:", error);
+    console.error("Unexpected error in DELETE /api/admin/splash-screen:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to delete splash screen image" },
+      { success: false, error: "An unexpected error occurred" },
       { status: 500 }
     );
   }

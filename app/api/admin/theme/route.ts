@@ -10,7 +10,17 @@ export const dynamic = 'force-dynamic';
 // GET - Fetch current theme settings
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let currentUser;
+    try {
+      currentUser = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!currentUser) {
       return NextResponse.json(
@@ -26,46 +36,33 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get or create theme settings
-    let settings;
+    // Wrap Prisma queries in try-catch
     try {
-      settings = await prisma.themeSettings.findFirst();
-    } catch (error) {
-      console.error("Error accessing themeSettings model:", error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error("Full error details:", JSON.stringify(error, null, 2));
-      return NextResponse.json(
-        { success: false, error: `Database error: ${errorMessage}. Please restart the dev server after regenerating Prisma client.` },
-        { status: 500 }
-      );
-    }
+      // Get or create theme settings
+      let settings = await prisma.themeSettings.findFirst();
 
-    if (!settings) {
-      // Create default settings if none exist
-      try {
+      if (!settings) {
+        // Create default settings if none exist
         settings = await prisma.themeSettings.create({
           data: {},
         });
-      } catch (error) {
-        console.error("Error creating theme settings:", error);
-        return NextResponse.json(
-          { success: false, error: "Failed to create settings" },
-          { status: 500 }
-        );
       }
-    }
 
-    return NextResponse.json(
-      { success: true, data: settings },
-      { status: 200 }
-    );
+      return NextResponse.json(
+        { success: true, data: settings },
+        { status: 200 }
+      );
+    } catch (dbError) {
+      console.error("Database error fetching theme settings:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to fetch theme settings" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error("Error fetching theme settings:", error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const errorStack = error instanceof Error ? error.stack : undefined;
-    console.error("Error details:", { errorMessage, errorStack });
+    console.error("Unexpected error in GET /api/admin/theme:", error);
     return NextResponse.json(
-      { success: false, error: `Failed to fetch theme settings: ${errorMessage}` },
+      { success: false, error: "An unexpected error occurred" },
       { status: 500 }
     );
   }
@@ -74,7 +71,17 @@ export async function GET(request: NextRequest) {
 // PATCH - Update theme settings
 export async function PATCH(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let currentUser;
+    try {
+      currentUser = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!currentUser) {
       return NextResponse.json(
@@ -90,7 +97,15 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      return NextResponse.json(
+        { success: false, error: "Invalid request body" },
+        { status: 400 }
+      );
+    }
 
     // Validate request body
     let validatedData;
@@ -110,68 +125,85 @@ export async function PATCH(request: NextRequest) {
       throw error;
     }
 
-    // Verify password
+    // Wrap Prisma queries in try-catch
+    try {
+      // Verify password - Get user with password to verify
+      const user = await prisma.user.findUnique({
+        where: { id: currentUser.id },
+        select: { password: true },
+      });
 
-    // Get user with password to verify
-    const user = await prisma.user.findUnique({
-      where: { id: currentUser.id },
-      select: { password: true },
-    });
+      if (!user) {
+        return NextResponse.json(
+          { success: false, error: "User not found" },
+          { status: 404 }
+        );
+      }
 
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: "User not found" },
-        { status: 404 }
-      );
-    }
+      const isPasswordValid = await bcrypt.compare(validatedData.password, user.password);
+      if (!isPasswordValid) {
+        return NextResponse.json(
+          { success: false, error: "Invalid password" },
+          { status: 401 }
+        );
+      }
 
-    const isPasswordValid = await bcrypt.compare(validatedData.password, user.password);
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { success: false, error: "Invalid password" },
-        { status: 401 }
-      );
-    }
-
-    // Build update data from validated fields (exclude password)
-    const updateData: Record<string, string | null | boolean> = {};
-    const { password, ...themeFields } = validatedData;
-    
-    for (const [key, value] of Object.entries(themeFields)) {
-      if (value !== undefined) {
-        if (key === "galaxyBackgroundEnabled") {
-          // Boolean field
-          updateData[key] = value === true;
-        } else {
-          // String fields (can be null or empty string)
-          updateData[key] = value === "" ? null : value;
+      // Build update data from validated fields (exclude password)
+      const updateData: Record<string, string | null | boolean> = {};
+      const { password, ...themeFields } = validatedData;
+      
+      for (const [key, value] of Object.entries(themeFields)) {
+        if (value !== undefined) {
+          if (key === "galaxyBackgroundEnabled") {
+            // Boolean field
+            updateData[key] = value === true;
+          } else {
+            // String fields (can be null or empty string)
+            updateData[key] = value === "" ? null : value;
+          }
         }
       }
+
+      // Get existing settings
+      let settings = await prisma.themeSettings.findFirst();
+
+      // Update or create settings
+      if (settings) {
+        settings = await prisma.themeSettings.update({
+          where: { id: settings.id },
+          data: updateData,
+        });
+      } else {
+        settings = await prisma.themeSettings.create({
+          data: updateData,
+        });
+      }
+
+      return NextResponse.json(
+        { success: true, data: settings },
+        { status: 200 }
+      );
+    } catch (dbError) {
+      console.error("Database error updating theme settings:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to update theme settings" },
+        { status: 500 }
+      );
     }
-
-    // Get existing settings
-    let settings = await prisma.themeSettings.findFirst();
-
-    // Update or create settings
-    if (settings) {
-      settings = await prisma.themeSettings.update({
-        where: { id: settings.id },
-        data: updateData,
-      });
-    } else {
-      settings = await prisma.themeSettings.create({
-        data: updateData,
-      });
-    }
-
-    return NextResponse.json(
-      { success: true, data: settings },
-      { status: 200 }
-    );
   } catch (error) {
-    console.error("Error updating theme settings:", error);
+    console.error("Unexpected error in PATCH /api/admin/theme:", error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Validation error",
+          details: error.errors,
+        },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
-      { success: false, error: "Failed to update theme settings" },
+      { success: false, error: "An unexpected error occurred" },
       { status: 500 }
     );
   }

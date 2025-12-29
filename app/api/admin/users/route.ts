@@ -6,11 +6,21 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let user;
+    try {
+      user = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!user) {
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { success: false, error: "Unauthorized" },
         { status: 401 }
       );
     }
@@ -18,7 +28,7 @@ export async function GET(request: NextRequest) {
     // Check if user is admin or super admin
     if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
       return NextResponse.json(
-        { error: "Forbidden - Admin access required" },
+        { success: false, error: "Forbidden - Admin access required" },
         { status: 403 }
       );
     }
@@ -62,59 +72,67 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    // Get total count for pagination
-    const total = await prisma.user.count({ where });
+    // Wrap Prisma queries in try-catch
+    let total, users;
+    try {
+      // Get total count for pagination
+      total = await prisma.user.count({ where });
 
-    // Calculate pagination
-    const skip = (page - 1) * limit;
-    const totalPages = Math.ceil(total / limit);
+      // Calculate pagination
+      const skip = (page - 1) * limit;
+      const totalPages = Math.ceil(total / limit);
 
-    // Fetch users with related data
-    const users = await prisma.user.findMany({
-      where,
-      include: {
-        company: {
-          select: {
-            id: true,
-            name: true,
-            type: true,
+      // Fetch users with related data
+      users = await prisma.user.findMany({
+        where,
+        include: {
+          company: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+            },
+          },
+          position: {
+            select: {
+              id: true,
+              title: true,
+              role: true,
+            },
           },
         },
-        position: {
-          select: {
-            id: true,
-            title: true,
-            role: true,
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip,
+        take: limit,
+      });
+
+      // Return success response
+      return NextResponse.json(
+        {
+          success: true,
+          data: users,
+          pagination: {
+            page,
+            limit,
+            total,
+            totalPages,
           },
         },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      skip,
-      take: limit,
-    });
-
-    return NextResponse.json(
-      {
-        success: true,
-        data: users,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages,
-        },
-      },
-      { status: 200 }
-    );
+        { status: 200 }
+      );
+    } catch (dbError) {
+      console.error("Database error fetching users:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to fetch users" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error("Error fetching users:", error);
+    console.error("Unexpected error in GET /api/admin/users:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to fetch users",
-      },
+      { success: false, error: "An unexpected error occurred" },
       { status: 500 }
     );
   }

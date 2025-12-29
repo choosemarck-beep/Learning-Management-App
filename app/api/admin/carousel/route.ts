@@ -10,7 +10,17 @@ export const dynamic = 'force-dynamic';
 // GET - Fetch all carousel images (admin)
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let currentUser;
+    try {
+      currentUser = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!currentUser) {
       return NextResponse.json(
@@ -26,21 +36,30 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const images = await prisma.carouselImage.findMany({
-      orderBy: [
-        { order: "asc" },
-        { createdAt: "desc" },
-      ],
-    });
+    // Wrap Prisma queries in try-catch
+    try {
+      const images = await prisma.carouselImage.findMany({
+        orderBy: [
+          { order: "asc" },
+          { createdAt: "desc" },
+        ],
+      });
 
-    return NextResponse.json(
-      { success: true, data: images },
-      { status: 200 }
-    );
+      return NextResponse.json(
+        { success: true, data: images },
+        { status: 200 }
+      );
+    } catch (dbError) {
+      console.error("Database error fetching carousel images:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to fetch carousel images" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error("Error fetching carousel images:", error);
+    console.error("Unexpected error in GET /api/admin/carousel:", error);
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: "An unexpected error occurred" },
       { status: 500 }
     );
   }
@@ -49,7 +68,17 @@ export async function GET(request: NextRequest) {
 // POST - Create new carousel image
 export async function POST(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let currentUser;
+    try {
+      currentUser = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!currentUser) {
       return NextResponse.json(
@@ -118,37 +147,46 @@ export async function POST(request: NextRequest) {
     // Generate public URL
     const imageUrl = `/uploads/carousel/${filename}`;
 
-    // Determine order - use provided order or append at end
-    let newOrder: number;
-    if (order !== undefined) {
-      newOrder = order;
-    } else {
-      const maxOrder = await prisma.carouselImage.aggregate({
-        _max: { order: true },
+    // Wrap Prisma queries in try-catch
+    try {
+      // Determine order - use provided order or append at end
+      let newOrder: number;
+      if (order !== undefined) {
+        newOrder = order;
+      } else {
+        const maxOrder = await prisma.carouselImage.aggregate({
+          _max: { order: true },
+        });
+        newOrder = (maxOrder._max.order ?? -1) + 1;
+      }
+
+      // Create carousel image record
+      const carouselImage = await prisma.carouselImage.create({
+        data: {
+          imageUrl,
+          title: title || null,
+          description: description || null,
+          order: newOrder,
+          isActive,
+          createdBy: currentUser.id,
+        },
       });
-      newOrder = (maxOrder._max.order ?? -1) + 1;
+
+      return NextResponse.json(
+        { success: true, data: carouselImage },
+        { status: 201 }
+      );
+    } catch (dbError) {
+      console.error("Database error creating carousel image:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to create carousel image" },
+        { status: 500 }
+      );
     }
-
-    // Create carousel image record
-    const carouselImage = await prisma.carouselImage.create({
-      data: {
-        imageUrl,
-        title: title || null,
-        description: description || null,
-        order: newOrder,
-        isActive,
-        createdBy: currentUser.id,
-      },
-    });
-
-    return NextResponse.json(
-      { success: true, data: carouselImage },
-      { status: 201 }
-    );
   } catch (error) {
-    console.error("Error creating carousel image:", error);
+    console.error("Unexpected error in POST /api/admin/carousel:", error);
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: "An unexpected error occurred" },
       { status: 500 }
     );
   }

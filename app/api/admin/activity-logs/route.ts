@@ -7,7 +7,17 @@ export const dynamic = 'force-dynamic';
 // GET - Fetch activity logs (admin-only)
 export async function GET(request: NextRequest) {
   try {
-    const currentUser = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let currentUser;
+    try {
+      currentUser = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!currentUser) {
       return NextResponse.json(
@@ -33,47 +43,53 @@ export async function GET(request: NextRequest) {
       where.type = type;
     }
 
-    const [logs, total] = await Promise.all([
-      prisma.activityLog.findMany({
-        where,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
+    // Wrap Prisma queries in try-catch
+    try {
+      const [logs, total] = await Promise.all([
+        prisma.activityLog.findMany({
+          where,
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+              },
             },
           },
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-        take: limit,
-        skip: offset,
-      }),
-      prisma.activityLog.count({ where }),
-    ]);
+          orderBy: {
+            createdAt: "desc",
+          },
+          take: limit,
+          skip: offset,
+        }),
+        prisma.activityLog.count({ where }),
+      ]);
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: {
-          logs,
-          total,
-          limit,
-          offset,
+      return NextResponse.json(
+        {
+          success: true,
+          data: {
+            logs,
+            total,
+            limit,
+            offset,
+          },
         },
-      },
-      { status: 200 }
-    );
+        { status: 200 }
+      );
+    } catch (dbError) {
+      console.error("Database error fetching activity logs:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to fetch activity logs" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error("Error fetching activity logs:", error);
+    console.error("Unexpected error in GET /api/admin/activity-logs:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to fetch activity logs",
-      },
+      { success: false, error: "An unexpected error occurred" },
       { status: 500 }
     );
   }

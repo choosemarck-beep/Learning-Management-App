@@ -3,13 +3,25 @@ import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
 import { processSearchQuery } from "@/lib/ai/gemini";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    // Wrap getCurrentUser in try-catch
+    let user;
+    try {
+      user = await getCurrentUser();
+    } catch (authError) {
+      console.error("Error getting current user:", authError);
+      return NextResponse.json(
+        { success: false, error: "Authentication error" },
+        { status: 401 }
+      );
+    }
 
     if (!user) {
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { success: false, error: "Unauthorized" },
         { status: 401 }
       );
     }
@@ -17,12 +29,21 @@ export async function POST(request: NextRequest) {
     // Check if user is admin or super admin
     if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
       return NextResponse.json(
-        { error: "Forbidden - Admin access required" },
+        { success: false, error: "Forbidden - Admin access required" },
         { status: 403 }
       );
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      return NextResponse.json(
+        { success: false, error: "Invalid request body" },
+        { status: 400 }
+      );
+    }
+
     const { query } = body;
 
     if (!query || typeof query !== "string") {
@@ -316,46 +337,52 @@ export async function POST(request: NextRequest) {
     // Debug logging
     console.log("Final where clause:", JSON.stringify(where, null, 2));
 
-    // Fetch matching users
-    const users = await prisma.user.findMany({
-      where,
-      include: {
-        company: {
-          select: {
-            id: true,
-            name: true,
-            type: true,
+    // Wrap Prisma queries in try-catch
+    try {
+      // Fetch matching users
+      const users = await prisma.user.findMany({
+        where,
+        include: {
+          company: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+            },
+          },
+          position: {
+            select: {
+              id: true,
+              title: true,
+              role: true,
+            },
           },
         },
-        position: {
-          select: {
-            id: true,
-            title: true,
-            role: true,
-          },
+        orderBy: {
+          createdAt: "desc",
         },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+      });
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: users,
-        query: query,
-        resultCount: users.length,
-      },
-      { status: 200 }
-    );
+      return NextResponse.json(
+        {
+          success: true,
+          data: users,
+          query: query,
+          resultCount: users.length,
+        },
+        { status: 200 }
+      );
+    } catch (dbError) {
+      console.error("Database error searching users:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to search users" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
-    console.error("Error searching users:", error);
+    console.error("Unexpected error in POST /api/admin/users/search:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to search users",
-      },
+      { success: false, error: "An unexpected error occurred" },
       { status: 500 }
     );
   }
