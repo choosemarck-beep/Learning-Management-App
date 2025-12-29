@@ -1125,20 +1125,61 @@ export async function POST(request: NextRequest) {
 - Console shows `500 Internal Server Error` for `/api/admin/users?status=ALL`
 - API route returns 500 status code
 - UsersTable component cannot fetch user data
+- Vercel function logs show: `Invalid prisma.user.find...` (Prisma validation error)
+- OR: Vercel function logs show errors related to `Date` objects not being serializable
 
 **Common Causes:**
-- Prisma query error in where clause construction
-- Database connection issues
-- Missing or invalid where clause conditions
-- Prisma client not generated or out of sync
-- Invalid filter combinations (role + search + status)
+1. **Prisma Query Validation Error**: Using `include` with nested `select` for optional relations can cause Prisma validation errors (`Invalid prisma.user.find...`)
+2. **Data Serialization Issue**: Prisma returns `Date` objects, which `NextResponse.json()` cannot directly serialize, leading to a 500 error
+3. Prisma query error in where clause construction
+4. Database connection issues
+5. Missing or invalid where clause conditions
+6. Prisma client not generated or out of sync
+7. Invalid filter combinations (role + search + status)
 
 **Solution:**
-- Ensure where clause is properly constructed for Prisma
-- Prisma automatically ANDs multiple where conditions, so `where.role` and `where.OR` can coexist
-- Add comprehensive error logging to identify specific Prisma error codes
-- Validate all query parameters before building where clause
-- Check database connection and Prisma client generation
+1. **Fix Prisma Query Structure** (CRITICAL):
+   - **Use `select` at top level instead of `include` with nested `select`** for optional relations
+   - Prisma sometimes has validation issues with `include` + nested `select` for optional relations (`company?`, `position?`)
+   - Explicitly select all needed fields at the top level
+   
+   ```typescript
+   // ❌ WRONG - Can cause Prisma validation error "Invalid prisma.user.find"
+   users = await prisma.user.findMany({
+     where,
+     include: {
+       company: {
+         select: { id: true, name: true, type: true },
+       },
+       position: {
+         select: { id: true, title: true, role: true },
+       },
+     },
+   });
+
+   // ✅ CORRECT - Use select at top level
+   users = await prisma.user.findMany({
+     where,
+     select: {
+       id: true,
+       name: true,
+       email: true,
+       // ... all needed fields
+       company: {
+         select: { id: true, name: true, type: true },
+       },
+       position: {
+         select: { id: true, title: true, role: true },
+       },
+     },
+   });
+   ```
+
+2. **Serialize Date Objects**: Convert all `Date` objects returned by Prisma to ISO strings (`.toISOString()`) before sending them in the `NextResponse.json()` response.
+3. Ensure where clause is properly constructed for Prisma. Prisma automatically ANDs multiple where conditions, so `where.role` and `where.OR` can coexist.
+4. Add comprehensive error logging to identify specific Prisma error codes.
+5. Validate all query parameters before building where clause
+6. Check database connection and Prisma client generation
 
 **Example Fix:**
 ```typescript
