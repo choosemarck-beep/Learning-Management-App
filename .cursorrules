@@ -449,6 +449,8 @@ Galaxy-inspired color scheme:
 - Wait at least 2 minutes between deployments
 - Check deployment history before pushing
 - Prevent double-push scenarios that could cause conflicts or unnecessary builds
+- **Vercel Rate Limits**: Free tier allows ~100 deployments/day - avoid rapid commits to prevent rate limiting
+- **Rate Limit Symptoms**: "Deployment rate limited — retry in X hours" - wait for retry or use manual redeploy
 - **Git Push**: Safe to execute automatically since GitHub is already configured and connected
 
 ### Autonomous Command Execution

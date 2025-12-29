@@ -1743,6 +1743,71 @@ git push
 
 ---
 
+#### Error: "Vercel - Deployment rate limited — retry in 3 hours"
+**Symptoms:**
+- Red 'X' appears on GitHub commits
+- Status check shows: "Vercel - Deployment rate limited — retry in 3 hours"
+- Commits push successfully but no new deployments appear
+- Previous deployments worked fine
+
+**Common Causes:**
+- Too many deployments triggered in a short time period
+- Multiple rapid commits/pushes
+- Manual redeploys combined with automatic deployments
+- Vercel free tier rate limits (typically 100 deployments per day)
+
+**Solution:**
+1. **Wait for Rate Limit to Reset**:
+   - Rate limit message shows when it will retry (e.g., "retry in 3 hours")
+   - Wait for the specified time
+   - Vercel will automatically retry the deployment
+
+2. **Manual Redeploy (May Bypass Rate Limit)**:
+   - Go to Vercel Dashboard → Deployments
+   - Find the latest successful deployment
+   - Click "..." → "Redeploy"
+   - This may bypass the automatic deployment rate limit
+
+3. **Prevent Future Rate Limits**:
+   - Avoid rapid commits (wait 2+ minutes between pushes)
+   - Batch multiple changes into single commits when possible
+   - Use manual redeploy for testing instead of pushing test commits
+   - Monitor deployment count in Vercel dashboard
+
+4. **Upgrade Vercel Plan (If Needed)**:
+   - Free tier: 100 deployments/day
+   - Pro tier: Higher limits
+   - Check Vercel dashboard for current usage
+
+**Example Prevention:**
+```bash
+# ❌ WRONG - Rapid commits trigger rate limits
+git commit -m "Fix 1" && git push
+git commit -m "Fix 2" && git push  # Too soon!
+git commit -m "Fix 3" && git push  # Rate limited!
+
+# ✅ CORRECT - Batch changes or wait between pushes
+git add file1.ts file2.ts file3.ts
+git commit -m "Fix multiple issues"
+git push
+# Wait 2+ minutes before next push
+```
+
+**Files Fixed:**
+- N/A (Infrastructure/Configuration issue)
+
+**Prevention:**
+- Wait at least 2 minutes between git pushes
+- Batch related changes into single commits
+- Use manual redeploy for testing instead of pushing test commits
+- Monitor Vercel dashboard for deployment count
+- Document deployment frequency in project rules
+- Consider upgrading Vercel plan if hitting limits frequently
+
+**Note:** The rate limit is per-project, not per-account. Each Vercel project has its own deployment quota.
+
+---
+
 #### Error: "500 Internal Server Error" - Date Serialization in API Responses
 **Symptoms:**
 - API returns 500 error when fetching data with Date fields
