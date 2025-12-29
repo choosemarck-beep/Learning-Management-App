@@ -160,5 +160,9 @@ export default async function BranchManagerDashboardPage() {
       />
     </div>
   );
+  } catch (error) {
+    console.error("Error in BranchManagerDashboardPage:", error);
+    redirect("/login");
+  }
 }
 

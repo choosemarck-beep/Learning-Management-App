@@ -166,5 +166,9 @@ export default async function AreaManagerDashboardPage() {
       />
     </div>
   );
+  } catch (error) {
+    console.error("Error in AreaManagerDashboardPage:", error);
+    redirect("/login");
+  }
 }
 

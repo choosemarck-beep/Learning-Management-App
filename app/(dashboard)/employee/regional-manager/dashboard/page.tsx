@@ -166,5 +166,9 @@ export default async function RegionalManagerDashboardPage() {
       />
     </div>
   );
+  } catch (error) {
+    console.error("Error in RegionalManagerDashboardPage:", error);
+    redirect("/login");
+  }
 }
 
