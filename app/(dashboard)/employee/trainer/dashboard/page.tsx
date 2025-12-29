@@ -103,7 +103,7 @@ export default async function TrainerDashboardPage() {
     let userData: {
       id: string;
       avatar: string | null;
-      courseProgresses: Array<{
+      courseProgresses?: Array<{
         course: {
           id: string;
           title: string;
@@ -118,7 +118,9 @@ export default async function TrainerDashboardPage() {
     try {
       userData = await prisma.user.findUnique({
         where: { id: user.id },
-        include: {
+        select: {
+          id: true,
+          avatar: true, // Explicitly select avatar
           courseProgresses: {
             include: {
               course: {
@@ -135,9 +137,20 @@ export default async function TrainerDashboardPage() {
         },
       });
     } catch (dbError) {
-      console.error("[TrainerDashboardPage] Error fetching trainer user data:", dbError);
+      // Enhanced error logging with more context
+      const errorDetails = dbError instanceof Error 
+        ? { message: dbError.message, stack: dbError.stack, name: dbError.name }
+        : { error: String(dbError) };
+      
+      console.error("[TrainerDashboardPage] Error fetching trainer user data:", {
+        userId: user.id,
+        userRole: user.role,
+        error: errorDetails,
+        timestamp: new Date().toISOString(),
+      });
+      
       // Don't redirect - show error UI instead to prevent loops
-      throw new Error("Failed to load user data from database");
+      throw new Error(`Failed to load user data from database: ${errorDetails.message || 'Unknown database error'}`);
     }
 
     if (!userData) {
@@ -159,7 +172,9 @@ export default async function TrainerDashboardPage() {
       _count: { trainings: number };
     }> = [];
     let preferences: { trainingIds: string[]; courseIds: string[] } | null = null;
+    
     try {
+      console.log("[TrainerDashboardPage] Fetching trainings and courses for trainer:", user.id);
       const [rawTrainings, rawCourses, rawPreferences] = await Promise.all([
         // Fetch all trainings created by this trainer (from courses)
         prisma.training.findMany({
@@ -229,12 +244,31 @@ export default async function TrainerDashboardPage() {
       }));
 
       preferences = rawPreferences;
+      
+      console.log("[TrainerDashboardPage] Successfully fetched dashboard data:", {
+        trainingsCount: allTrainings.length,
+        coursesCount: allCourses.length,
+        hasPreferences: !!preferences,
+      });
     } catch (dbError) {
-      console.error("Error fetching trainer dashboard data:", dbError);
+      // Enhanced error logging
+      const errorDetails = dbError instanceof Error 
+        ? { message: dbError.message, stack: dbError.stack, name: dbError.name }
+        : { error: String(dbError) };
+      
+      console.error("[TrainerDashboardPage] Error fetching trainer dashboard data:", {
+        userId: user.id,
+        error: errorDetails,
+        timestamp: new Date().toISOString(),
+      });
+      
       // Use empty defaults if database query fails
       allTrainings = [];
       allCourses = [];
       preferences = null;
+      
+      // Don't throw - allow page to render with empty data rather than 500 error
+      // The client component will handle empty state gracefully
     }
 
     const trainingIds = preferences?.trainingIds || [];

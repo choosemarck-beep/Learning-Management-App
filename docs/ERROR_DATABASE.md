@@ -424,7 +424,13 @@ try {
 ```
 
 **Files Fixed:**
-- `app/(dashboard)/employee/trainer/dashboard/page.tsx` - Added validation checks, enhanced error logging, safe variable access
+- `app/(dashboard)/employee/trainer/dashboard/page.tsx` - Added validation checks, enhanced error logging, safe variable access, explicit field selection in Prisma queries
+
+**Additional Notes:**
+- **500 Internal Server Error with digest**: When you see a 500 error with a digest (e.g., `653041714`), check Vercel function logs for the actual error
+- **Prisma Query Issues**: Always explicitly `select` or `include` fields you need - don't rely on default selections
+- **Database Error Handling**: Catch database errors with detailed logging including userId, timestamp, and full error details
+- **Graceful Degradation**: For non-critical data (like preferences), use empty defaults instead of throwing errors to prevent 500s
 
 **Prevention:**
 - Always validate data before accessing properties
