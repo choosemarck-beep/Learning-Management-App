@@ -77,6 +77,7 @@ function LoginForm() {
         url: result?.url 
       });
 
+      // Check for errors first - if there's an error, login failed
       if (result?.error) {
         // Handle approval status errors - show toast only, no inline error
         let errorMessage = "The email or password you entered is incorrect. Please try again.";
@@ -92,7 +93,11 @@ function LoginForm() {
         console.error("Login failed:", result.error);
         toast.error(errorMessage);
         setIsLoading(false);
-      } else if (result?.ok) {
+        return; // Exit early - don't proceed with redirect
+      }
+
+      // Only proceed if there's no error AND ok is true
+      if (result?.ok && !result?.error) {
         console.log("Login successful, redirecting to:", callbackUrl);
         router.push(callbackUrl);
         router.refresh();
