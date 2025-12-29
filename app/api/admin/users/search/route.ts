@@ -378,12 +378,40 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      // Serialize Date objects to ISO strings for JSON response
+      const serializedUsers = users.map((user) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        employeeNumber: user.employeeNumber,
+        phone: user.phone,
+        hireType: user.hireType,
+        department: user.department,
+        branch: user.branch,
+        hireDate: user.hireDate instanceof Date ? user.hireDate.toISOString() : null,
+        status: user.status,
+        role: user.role,
+        createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : new Date().toISOString(),
+        updatedAt: user.updatedAt instanceof Date ? user.updatedAt.toISOString() : new Date().toISOString(),
+        approvedAt: user.approvedAt instanceof Date ? user.approvedAt.toISOString() : null,
+        company: user.company ? {
+          id: user.company.id,
+          name: user.company.name,
+          type: user.company.type,
+        } : null,
+        position: user.position ? {
+          id: user.position.id,
+          title: user.position.title,
+          role: user.position.role,
+        } : null,
+      }));
+
       return NextResponse.json(
         {
           success: true,
-          data: users,
+          data: serializedUsers,
           query: query,
-          resultCount: users.length,
+          resultCount: serializedUsers.length,
         },
         { status: 200 }
       );
