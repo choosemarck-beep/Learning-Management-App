@@ -38,7 +38,17 @@ export default async function SuperAdminDashboardPage() {
     }
 
     // Fetch all users for initial render with error handling
-    let allUsers, totalUsers, rejectedUsers, pendingUsers, adminCount;
+    let allUsers: Array<{
+      id: string;
+      name: string;
+      email: string;
+      company: { id: string; name: string; type: string } | null;
+      position: { id: string; title: string; role: string } | null;
+    }> = [];
+    let totalUsers = 0;
+    let rejectedUsers = 0;
+    let pendingUsers = 0;
+    let adminCount = 0;
     try {
       [allUsers, totalUsers, rejectedUsers, pendingUsers, adminCount] = await Promise.all([
         prisma.user.findMany({

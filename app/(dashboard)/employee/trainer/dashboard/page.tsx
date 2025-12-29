@@ -36,7 +36,21 @@ export default async function TrainerDashboardPage() {
     }
 
     // Fetch full user data from database with error handling
-    let userData;
+    let userData: {
+      id: string;
+      avatar: string | null;
+      courseProgresses: Array<{
+        course: {
+          id: string;
+          title: string;
+          description: string | null;
+          thumbnail: string | null;
+          totalXP: number;
+        };
+        progress: number;
+        isCompleted: boolean;
+      }>;
+    } | null = null;
     try {
       userData = await prisma.user.findUnique({
         where: { id: user.id },
@@ -66,9 +80,19 @@ export default async function TrainerDashboardPage() {
     }
 
     // Fetch all trainings and courses with error handling
-    let allTrainings = [];
-    let allCourses = [];
-    let preferences = null;
+    let allTrainings: Array<{
+      id: string;
+      title: string;
+      course: { id: string; title: string } | null;
+    }> = [];
+    let allCourses: Array<{
+      id: string;
+      title: string;
+      description: string | null;
+      thumbnail: string | null;
+      _count: { trainings: number };
+    }> = [];
+    let preferences: { trainingIds: string[]; courseIds: string[] } | null = null;
     try {
       [allTrainings, allCourses, preferences] = await Promise.all([
         // Fetch all trainings created by this trainer (from courses)

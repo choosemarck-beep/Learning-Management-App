@@ -40,7 +40,22 @@ export default async function RegionalManagerDashboardPage() {
     }
 
     // Fetch full user data from database with error handling
-    let userData;
+    let userData: {
+      id: string;
+      name: string;
+      onboardingCompleted: boolean | null;
+      courseProgresses: Array<{
+        course: {
+          id: string;
+          title: string;
+          description: string | null;
+          thumbnail: string | null;
+          totalXP: number;
+        };
+        progress: number;
+        isCompleted: boolean;
+      }>;
+    } | null = null;
     try {
       userData = await prisma.user.findUnique({
         where: { id: user.id },
