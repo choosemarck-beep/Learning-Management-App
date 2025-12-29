@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
       where.role = role;
     }
 
+    // Handle search - Prisma automatically ANDs conditions, so OR can coexist
     if (search) {
       where.OR = [
         { name: { contains: search, mode: "insensitive" } },
@@ -124,8 +125,20 @@ export async function GET(request: NextRequest) {
       );
     } catch (dbError) {
       console.error("Database error fetching users:", dbError);
+      const errorMessage = dbError instanceof Error ? dbError.message : String(dbError);
+      const errorCode = dbError && typeof dbError === "object" && "code" in dbError ? (dbError as any).code : undefined;
+      console.error("Database error details:", {
+        message: errorMessage,
+        code: errorCode,
+        where,
+        stack: dbError instanceof Error ? dbError.stack : undefined,
+      });
       return NextResponse.json(
-        { success: false, error: "Failed to fetch users" },
+        { 
+          success: false, 
+          error: "Failed to fetch users",
+          details: process.env.NODE_ENV === "development" ? errorMessage : undefined,
+        },
         { status: 500 }
       );
     }

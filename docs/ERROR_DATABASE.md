@@ -924,6 +924,368 @@ useEffect(() => {
 
 ---
 
+#### Error: "500 Internal Server Error" on Signup API Route
+**Symptoms:**
+- Signup form submission returns 500 Internal Server Error
+- Console shows: `POST /api/auth/signup 500 (Internal Server Error)`
+- Error message: "Internal server error. Please try again or contact support."
+- Error details: `undefined` (no specific error information)
+- User cannot create account
+
+**Common Causes:**
+- **Database Connection Failure**: Prisma cannot connect to database (P1001 error)
+- **Missing Environment Variables**: `RESEND_API_KEY` not set (email service throws error)
+- **Prisma Schema Mismatch**: Database schema doesn't match Prisma schema (missing fields, wrong types)
+- **Position Role Enum Mismatch**: `position.role` value doesn't match `UserRole` enum values
+- **Null/Undefined Position Role**: Position exists but `role` field is null or undefined
+- **Foreign Key Constraint Violation**: Company or Position doesn't exist in database
+- **Email Service Error**: Resend API throws error that isn't properly caught
+- **Unhandled Exception**: Error occurs outside of try-catch blocks
+
+**Solution:**
+- **Enhanced Error Logging**: Add comprehensive error logging before returning 500 error
+- **Database Connection Check**: Verify DATABASE_URL is set and database is accessible
+- **Environment Variable Validation**: Check for required environment variables (RESEND_API_KEY)
+- **Prisma Error Handling**: Add specific handling for all Prisma error codes
+- **Email Service Error Handling**: Ensure email errors don't cause signup to fail (already non-blocking)
+- **Position Role Validation**: Validate position.role matches UserRole enum before using
+- **Null Safety**: Add null checks for position.role before assignment
+
+**Example Fix:**
+```typescript
+// ✅ CORRECT - Enhanced error handling with detailed logging
+export async function POST(request: NextRequest) {
+  try {
+    // ... validation and checks ...
+    
+    // Fetch position with null safety
+    const position = await prisma.position.findUnique({
+      where: { id: positionId },
+      select: { role: true },
+    });
+
+    if (!position) {
+      return NextResponse.json(
+        { error: "Selected position not found. Please select a valid position." },
+        { status: 400 }
+      );
+    }
+
+    // Validate position.role is valid UserRole enum value
+    const validRoles: UserRole[] = [
+      "EMPLOYEE",
+      "BRANCH_MANAGER",
+      "AREA_MANAGER",
+      "REGIONAL_MANAGER",
+      "TRAINER",
+      "ADMIN",
+      "SUPER_ADMIN",
+    ];
+    
+    if (!position.role || !validRoles.includes(position.role as UserRole)) {
+      console.error("Invalid position role:", {
+        positionId,
+        role: position.role,
+        validRoles,
+      });
+      return NextResponse.json(
+        { error: "Invalid position configuration. Please contact support." },
+        { status: 400 }
+      );
+    }
+
+    // Auto-detect role from position
+    const userRole = position.role as UserRole;
+
+    // Validate that only EMPLOYEE or BRANCH_MANAGER can register
+    if (userRole !== "EMPLOYEE" && userRole !== "BRANCH_MANAGER") {
+      return NextResponse.json(
+        { error: "Invalid role for self-registration" },
+        { status: 400 }
+      );
+    }
+
+    // Create user with explicit error handling
+    let user;
+    try {
+      user = await prisma.user.create({
+        data: {
+          // ... user data ...
+          role: userRole,
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          avatar: true,
+        },
+      });
+    } catch (dbError) {
+      // Enhanced Prisma error handling
+      if (dbError && typeof dbError === "object" && "code" in dbError) {
+        const prismaError = dbError as { code: string; meta?: any };
+        
+        console.error("Prisma error during user creation:", {
+          code: prismaError.code,
+          meta: prismaError.meta,
+          userId: user?.id,
+        });
+
+        // Handle specific Prisma errors
+        if (prismaError.code === "P1001") {
+          return NextResponse.json(
+            { error: "Database connection error. Please try again later." },
+            { status: 503 }
+          );
+        }
+        
+        if (prismaError.code === "P2002") {
+          const field = prismaError.meta?.target?.[0] || "field";
+          return NextResponse.json(
+            { error: `A user with this ${field} already exists.` },
+            { status: 400 }
+          );
+        }
+      }
+      
+      // Re-throw to be caught by outer catch
+      throw dbError;
+    }
+
+    // ... rest of signup logic ...
+    
+  } catch (error) {
+    // Enhanced error logging
+    console.error("Signup error:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+      code: error && typeof error === "object" && "code" in error ? (error as any).code : undefined,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Return appropriate error based on error type
+    if (error instanceof z.ZodError) {
+      const firstError = error.errors[0];
+      return NextResponse.json(
+        { error: firstError?.message || "Validation error" },
+        { status: 400 }
+      );
+    }
+
+    // Generic error response
+    return NextResponse.json(
+      { 
+        error: process.env.NODE_ENV === "development"
+          ? (error instanceof Error ? error.message : String(error))
+          : "Internal server error. Please try again or contact support."
+      },
+      { status: 500 }
+    );
+  }
+}
+```
+
+**Debugging Steps:**
+1. **Check Vercel Function Logs**: Go to Vercel Dashboard → Deployments → Latest → Functions → Check for error messages
+2. **Check Database Connection**: Verify DATABASE_URL is set correctly in Vercel environment variables
+3. **Check Environment Variables**: Verify RESEND_API_KEY is set (email service)
+4. **Check Prisma Schema**: Ensure database schema matches Prisma schema (run `npx prisma db push` or migrations)
+5. **Check Position Data**: Verify positions exist in database and have valid `role` values
+6. **Check Error Logs**: Look for specific Prisma error codes (P1001, P2002, P2003, etc.)
+
+**Files Affected:**
+- `app/api/auth/signup/route.ts` - Signup API route
+- `lib/email/client.ts` - Email service client
+- `lib/email/sendEmail.ts` - Email sending functions
+
+**Prevention:**
+- Always wrap Prisma queries in try-catch blocks
+- Validate all enum values before using them
+- Add null checks for optional fields
+- Check environment variables before using services
+- Add comprehensive error logging for debugging
+- Handle all Prisma error codes specifically
+- Ensure database schema matches Prisma schema
+- Test signup flow in production environment
+- Verify all required data exists in database (companies, positions)
+
+**Common Prisma Error Codes:**
+- **P1001**: Can't reach database server (connection issue)
+- **P2002**: Unique constraint violation (email/employee number already exists)
+- **P2003**: Foreign key constraint violation (company/position doesn't exist)
+- **P2025**: Record not found (company/position deleted)
+- **P2012**: Missing required value (null value for required field)
+
+---
+
+#### Error: "500 Internal Server Error" - User Management Table Not Loading
+**Symptoms:**
+- User Management Table shows no data
+- Console shows `500 Internal Server Error` for `/api/admin/users?status=ALL`
+- API route returns 500 status code
+- UsersTable component cannot fetch user data
+
+**Common Causes:**
+- Prisma query error in where clause construction
+- Database connection issues
+- Missing or invalid where clause conditions
+- Prisma client not generated or out of sync
+- Invalid filter combinations (role + search + status)
+
+**Solution:**
+- Ensure where clause is properly constructed for Prisma
+- Prisma automatically ANDs multiple where conditions, so `where.role` and `where.OR` can coexist
+- Add comprehensive error logging to identify specific Prisma error codes
+- Validate all query parameters before building where clause
+- Check database connection and Prisma client generation
+
+**Example Fix:**
+```typescript
+// ✅ CORRECT - Prisma handles AND automatically
+const where: any = {};
+
+if (status === "ALL") {
+  where.status = "APPROVED";
+}
+
+if (user.role === "ADMIN") {
+  where.role = { notIn: ["ADMIN", "SUPER_ADMIN"] };
+}
+
+if (search) {
+  where.OR = [
+    { name: { contains: search, mode: "insensitive" } },
+    { email: { contains: search, mode: "insensitive" } },
+  ];
+}
+// Prisma will automatically AND these conditions: status AND role AND (OR conditions)
+```
+
+**Enhanced Error Handling:**
+```typescript
+} catch (dbError) {
+  console.error("Database error fetching users:", dbError);
+  const errorMessage = dbError instanceof Error ? dbError.message : String(dbError);
+  const errorCode = dbError && typeof dbError === "object" && "code" in dbError ? (dbError as any).code : undefined;
+  console.error("Database error details:", {
+    message: errorMessage,
+    code: errorCode,
+    where,
+    stack: dbError instanceof Error ? dbError.stack : undefined,
+  });
+  return NextResponse.json(
+    { 
+      success: false, 
+      error: "Failed to fetch users",
+      details: process.env.NODE_ENV === "development" ? errorMessage : undefined,
+    },
+    { status: 500 }
+  );
+}
+```
+
+**Files Fixed:**
+- `app/api/admin/users/route.ts` - Fixed where clause construction, added enhanced error logging
+
+**Prevention:**
+- Always log Prisma error codes for debugging
+- Test where clause construction with different filter combinations
+- Validate query parameters before building where clause
+- Use TypeScript types for where clause to catch errors early
+- Test API routes with various filter combinations
+
+---
+
+#### Error: "500 Internal Server Error" - Carousel/Splash Screen Upload Failing
+**Symptoms:**
+- Uploading carousel images fails with 500 error
+- Uploading splash screen images fails with 500 error
+- No error message shown to user
+- Console shows generic "Internal server error"
+
+**Common Causes:**
+- Cloudinary configuration missing or incorrect
+- Database error during image record creation
+- File upload to Cloudinary fails
+- Missing error handling for Cloudinary upload failures
+- Database transaction fails after successful Cloudinary upload
+
+**Solution:**
+- Add comprehensive error logging for Cloudinary uploads
+- Clean up Cloudinary uploads if database update fails
+- Validate Cloudinary credentials before upload
+- Add detailed error messages for different failure scenarios
+- Handle Prisma errors specifically (P2002, P2003, etc.)
+
+**Example Fix:**
+```typescript
+// Upload to Cloudinary
+let imageUrl: string;
+try {
+  imageUrl = await uploadToCloudinary(buffer, 'carousel', filename, 'image');
+  console.log(`[Carousel] Successfully uploaded to Cloudinary: ${imageUrl}`);
+} catch (uploadError) {
+  console.error("[Carousel] Cloudinary upload error:", uploadError);
+  return NextResponse.json(
+    { success: false, error: "Failed to upload image. Please try again." },
+    { status: 500 }
+  );
+}
+
+// Database update with cleanup on failure
+try {
+  const carouselImage = await prisma.carouselImage.create({
+    data: { imageUrl, ... },
+  });
+  return NextResponse.json({ success: true, data: carouselImage }, { status: 201 });
+} catch (dbError) {
+  // Clean up Cloudinary upload if database fails
+  if (imageUrl) {
+    const publicId = extractPublicIdFromUrl(imageUrl);
+    if (publicId) {
+      try {
+        await deleteFromCloudinary(publicId, 'image');
+        console.error("[Carousel] Cleaned up Cloudinary upload due to DB error:", publicId);
+      } catch (deleteError) {
+        console.error("[Carousel] Error cleaning up Cloudinary upload:", deleteError);
+      }
+    }
+  }
+  
+  const errorMessage = dbError instanceof Error ? dbError.message : String(dbError);
+  const errorCode = dbError && typeof dbError === "object" && "code" in dbError ? (dbError as any).code : undefined;
+  console.error("Database error details:", {
+    message: errorMessage,
+    code: errorCode,
+    stack: dbError instanceof Error ? dbError.stack : undefined,
+  });
+  
+  return NextResponse.json(
+    { 
+      success: false, 
+      error: "Failed to create carousel image",
+      details: process.env.NODE_ENV === "development" ? errorMessage : undefined,
+    },
+    { status: 500 }
+  );
+}
+```
+
+**Files Fixed:**
+- `app/api/admin/carousel/route.ts` - Added enhanced error handling and Cloudinary cleanup
+- `app/api/admin/splash-screen/route.ts` - Already has proper error handling (verified)
+
+**Prevention:**
+- Always clean up Cloudinary uploads if database operations fail
+- Validate Cloudinary credentials before attempting uploads
+- Add detailed error logging for all upload operations
+- Test upload flow end-to-end (file → Cloudinary → database)
+- Handle all Prisma error codes specifically
+- Verify Cloudinary environment variables are set in Vercel
+
+---
+
 ## Revision History
 
 - **2024-01-XX**: Created error database
@@ -935,4 +1297,6 @@ useEffect(() => {
 - **2024-01-XX**: Added systematic dashboard fixes pattern and applied to all dashboard pages
 - **2024-01-XX**: Added 404 image loading errors (Vercel serverless filesystem limitation)
 - **2024-01-XX**: Added DatePicker mobile touch issues and future dates not disabled error
+- **2024-01-XX**: Added 500 Internal Server Error on Signup API route error and comprehensive debugging guide
+- **2024-12-29**: Added User Management Table 500 error and Carousel/Splash Screen upload errors with solutions
 

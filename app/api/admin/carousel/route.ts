@@ -177,15 +177,49 @@ export async function POST(request: NextRequest) {
       );
     } catch (dbError) {
       console.error("Database error creating carousel image:", dbError);
+      const errorMessage = dbError instanceof Error ? dbError.message : String(dbError);
+      const errorCode = dbError && typeof dbError === "object" && "code" in dbError ? (dbError as any).code : undefined;
+      console.error("Database error details:", {
+        message: errorMessage,
+        code: errorCode,
+        stack: dbError instanceof Error ? dbError.stack : undefined,
+      });
+      
+      // If database update fails, try to delete the file we just uploaded to Cloudinary
+      if (imageUrl) {
+        const publicId = extractPublicIdFromUrl(imageUrl);
+        if (publicId) {
+          try {
+            await deleteFromCloudinary(publicId, 'image');
+            console.error("[Carousel] Cleaned up Cloudinary upload due to DB error:", publicId);
+          } catch (deleteError) {
+            console.error("[Carousel] Error cleaning up Cloudinary upload:", deleteError);
+          }
+        }
+      }
+      
       return NextResponse.json(
-        { success: false, error: "Failed to create carousel image" },
+        { 
+          success: false, 
+          error: "Failed to create carousel image",
+          details: process.env.NODE_ENV === "development" ? errorMessage : undefined,
+        },
         { status: 500 }
       );
     }
   } catch (error) {
     console.error("Unexpected error in POST /api/admin/carousel:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Unexpected error details:", {
+      message: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
-      { success: false, error: "An unexpected error occurred" },
+      { 
+        success: false, 
+        error: "An unexpected error occurred",
+        details: process.env.NODE_ENV === "development" ? errorMessage : undefined,
+      },
       { status: 500 }
     );
   }
