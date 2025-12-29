@@ -64,6 +64,45 @@ function LoginForm() {
         originalPasswordLength: data.password.length
       });
 
+      // Check user approval status BEFORE attempting login
+      // This ensures users get the approval message, not "wrong credentials"
+      try {
+        const approvalResponse = await fetch("/api/auth/check-approval", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: normalizedEmail }),
+        });
+
+        if (approvalResponse.ok) {
+          const approvalData = await approvalResponse.json();
+          if (approvalData.status === "PENDING") {
+            toast.error(
+              "Your account is pending approval. Please wait for the approval email before logging in."
+            );
+            setIsLoading(false);
+            return;
+          } else if (approvalData.status === "REJECTED") {
+            toast.error(
+              "Your account has been rejected. Please contact support for assistance."
+            );
+            setIsLoading(false);
+            return;
+          } else if (approvalData.status !== "APPROVED" && approvalData.status !== "UNKNOWN") {
+            // If status is not APPROVED and not UNKNOWN (user doesn't exist), show approval message
+            toast.error(
+              "Your account is not yet approved. Please wait for the approval email before logging in."
+            );
+            setIsLoading(false);
+            return;
+          }
+          // If status is APPROVED or UNKNOWN, proceed with login attempt
+        }
+      } catch (approvalError) {
+        // If approval check fails, proceed with login attempt anyway
+        // The authorize function will handle the approval check server-side
+        console.error("Error checking approval status:", approvalError);
+      }
+
       const result = await signIn("credentials", {
         email: normalizedEmail,
         password: trimmedPassword,
@@ -83,7 +122,7 @@ function LoginForm() {
         let errorMessage = "The email or password you entered is incorrect. Please try again.";
         if (result.error === "PENDING_APPROVAL") {
           errorMessage =
-            "Your account is pending approval. Please wait for email confirmation before logging in.";
+            "Your account is pending approval. Please wait for the approval email before logging in.";
         } else if (result.error === "ACCOUNT_REJECTED") {
           errorMessage =
             "Your account has been rejected. Please contact support for assistance.";
