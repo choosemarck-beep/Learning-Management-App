@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
-import { writeFile, mkdir, unlink } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
+import { uploadToCloudinary, deleteFromCloudinary, extractPublicIdFromUrl } from "@/lib/cloudinary/config";
 
 /**
  * POST - Upload thumbnail image for a training
@@ -85,51 +83,33 @@ export async function POST(
     const timestamp = Date.now();
     const fileExtension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
     const filename = `training-thumbnail-${trainingId}-${timestamp}.${fileExtension}`;
-    
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), "public", "uploads", "thumbnails");
-    try {
-      if (!existsSync(uploadsDir)) {
-        await mkdir(uploadsDir, { recursive: true });
-        console.log("Created thumbnails uploads directory:", uploadsDir);
-      }
-    } catch (error) {
-      console.error("Error creating uploads directory:", error);
-      return NextResponse.json(
-        { success: false, error: "Failed to create uploads directory" },
-        { status: 500 }
-      );
-    }
 
-    // Delete old thumbnail if it exists
+    // Delete old thumbnail from Cloudinary if it exists
     if (training.videoThumbnail) {
-      const oldThumbnailPath = join(process.cwd(), "public", training.videoThumbnail);
-      if (existsSync(oldThumbnailPath)) {
+      const publicId = extractPublicIdFromUrl(training.videoThumbnail);
+      if (publicId) {
         try {
-          await unlink(oldThumbnailPath);
-          console.log("Deleted old thumbnail:", oldThumbnailPath);
+          await deleteFromCloudinary(publicId, 'image');
+          console.log(`[TrainingThumbnail] Deleted old thumbnail from Cloudinary: ${publicId}`);
         } catch (error) {
-          console.error("Error deleting old thumbnail:", error);
+          console.error("[TrainingThumbnail] Error deleting old thumbnail (non-critical):", error);
           // Continue even if deletion fails
         }
       }
     }
 
-    // Save new file
-    const filepath = join(uploadsDir, filename);
+    // Upload to Cloudinary
+    let thumbnailUrl: string;
     try {
-      await writeFile(filepath, buffer);
-      console.log("Saved thumbnail to:", filepath);
-    } catch (error) {
-      console.error("Error writing file:", error);
+      thumbnailUrl = await uploadToCloudinary(buffer, 'thumbnails/trainings', filename, 'image');
+      console.log(`[TrainingThumbnail] Successfully uploaded to Cloudinary: ${thumbnailUrl}`);
+    } catch (uploadError) {
+      console.error("[TrainingThumbnail] Cloudinary upload error:", uploadError);
       return NextResponse.json(
-        { success: false, error: "Failed to save thumbnail file" },
+        { success: false, error: "Failed to upload thumbnail. Please try again." },
         { status: 500 }
       );
     }
-
-    // Generate public URL
-    const thumbnailUrl = `/uploads/thumbnails/${filename}`;
 
     // Update training record
     const updatedTraining = await prisma.training.update({

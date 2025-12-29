@@ -28,6 +28,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
   const [internalProgress, setInternalProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
 
   // Use external progress if provided, otherwise use internal animated progress
   const progress = externalProgress !== undefined ? externalProgress : internalProgress;
@@ -94,13 +95,29 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({
       {/* Background Image - The cosmic/learning themed image */}
       <div 
         className={styles.backgroundImage}
-        style={imageUrl ? { 
+        style={imageUrl && !imageError ? { 
           backgroundImage: `url(${imageUrl})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat'
         } : {}}
-      />
+      >
+        {/* Hidden img to detect load errors */}
+        {imageUrl && !imageError && (
+          <img
+            src={imageUrl}
+            alt=""
+            style={{ display: 'none' }}
+            onError={() => {
+              console.warn("Splash screen image failed to load, using default gradient");
+              setImageError(true);
+            }}
+            onLoad={() => {
+              setImageError(false);
+            }}
+          />
+        )}
+      </div>
 
       {/* Logo with Progress Bar at Top */}
       <div className={styles.logoSection}>

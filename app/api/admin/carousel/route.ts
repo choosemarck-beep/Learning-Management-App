@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
+import { uploadToCloudinary, deleteFromCloudinary, extractPublicIdFromUrl } from "@/lib/cloudinary/config";
 
 export const dynamic = 'force-dynamic';
 
@@ -132,20 +130,21 @@ export async function POST(request: NextRequest) {
 
     // Generate unique filename
     const timestamp = Date.now();
-    const filename = `carousel-${timestamp}.${file.name.split('.').pop()}`;
-    
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), "public", "uploads", "carousel");
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
+    const fileExtension = file.name.split('.').pop() || 'jpg';
+    const filename = `carousel-${timestamp}.${fileExtension}`;
+
+    // Upload to Cloudinary
+    let imageUrl: string;
+    try {
+      imageUrl = await uploadToCloudinary(buffer, 'carousel', filename, 'image');
+      console.log(`[Carousel] Successfully uploaded to Cloudinary: ${imageUrl}`);
+    } catch (uploadError) {
+      console.error("[Carousel] Cloudinary upload error:", uploadError);
+      return NextResponse.json(
+        { success: false, error: "Failed to upload image. Please try again." },
+        { status: 500 }
+      );
     }
-
-    // Save file
-    const filepath = join(uploadsDir, filename);
-    await writeFile(filepath, buffer);
-
-    // Generate public URL
-    const imageUrl = `/uploads/carousel/${filename}`;
 
     // Wrap Prisma queries in try-catch
     try {

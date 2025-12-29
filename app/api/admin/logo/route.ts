@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
-import { writeFile, mkdir, unlink } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
+import { uploadToCloudinary, deleteFromCloudinary, extractPublicIdFromUrl } from "@/lib/cloudinary/config";
 
 export const dynamic = 'force-dynamic';
 
@@ -131,21 +129,6 @@ export async function POST(request: NextRequest) {
     const timestamp = Date.now();
     const fileExtension = file.name.split('.').pop() || 'png';
     const filename = `logo-${timestamp}.${fileExtension}`;
-    
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), "public", "uploads", "logo");
-    try {
-      if (!existsSync(uploadsDir)) {
-        await mkdir(uploadsDir, { recursive: true });
-        console.log("Created uploads directory:", uploadsDir);
-      }
-    } catch (error) {
-      console.error("Error creating uploads directory:", error);
-      return NextResponse.json(
-        { success: false, error: "Failed to create uploads directory" },
-        { status: 500 }
-      );
-    }
 
     // Get existing settings to delete old image
     let settings;
@@ -159,35 +142,32 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Delete old image if it exists
+    // Delete old image from Cloudinary if it exists
     if (settings?.imageUrl) {
-      const oldImagePath = join(process.cwd(), "public", settings.imageUrl);
-      if (existsSync(oldImagePath)) {
+      const publicId = extractPublicIdFromUrl(settings.imageUrl);
+      if (publicId) {
         try {
-          await unlink(oldImagePath);
-          console.log("Deleted old logo image:", oldImagePath);
+          await deleteFromCloudinary(publicId, 'image');
+          console.log(`[Logo] Deleted old logo from Cloudinary: ${publicId}`);
         } catch (error) {
-          console.error("Error deleting old image:", error);
+          console.error("[Logo] Error deleting old logo (non-critical):", error);
           // Continue even if deletion fails
         }
       }
     }
 
-    // Save new file
-    const filepath = join(uploadsDir, filename);
+    // Upload to Cloudinary
+    let imageUrl: string;
     try {
-      await writeFile(filepath, buffer);
-      console.log("Saved logo image to:", filepath);
-    } catch (error) {
-      console.error("Error writing file:", error);
+      imageUrl = await uploadToCloudinary(buffer, 'logo', filename, 'image');
+      console.log(`[Logo] Successfully uploaded to Cloudinary: ${imageUrl}`);
+    } catch (uploadError) {
+      console.error("[Logo] Cloudinary upload error:", uploadError);
       return NextResponse.json(
-        { success: false, error: "Failed to save image file" },
+        { success: false, error: "Failed to upload logo. Please try again." },
         { status: 500 }
       );
     }
-
-    // Generate public URL
-    const imageUrl = `/uploads/logo/${filename}`;
 
     // Update or create settings
     try {

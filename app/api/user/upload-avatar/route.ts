@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
+import { uploadToCloudinary, deleteFromCloudinary, extractPublicIdFromUrl } from "@/lib/cloudinary/config";
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,28 +59,42 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
 
     // Generate unique filename
-    // Use file extension from uploaded file (could be jpg after compression)
-    const fileExtension =
-      file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const fileExtension = file.name.split(".").pop()?.toLowerCase() || "jpg";
     const timestamp = Date.now();
     const filename = `avatar-${currentUser.id}-${timestamp}.${fileExtension}`;
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), "public", "uploads", "avatars");
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
+    // Get old avatar URL for deletion
+    const user = await prisma.user.findUnique({
+      where: { id: currentUser.id },
+      select: { avatar: true },
+    });
+
+    // Upload to Cloudinary
+    let avatarUrl: string;
+    try {
+      avatarUrl = await uploadToCloudinary(buffer, 'avatars', filename, 'image');
+      console.log(`[Avatar] Successfully uploaded to Cloudinary: ${avatarUrl}`);
+    } catch (uploadError) {
+      console.error("[Avatar] Cloudinary upload error:", uploadError);
+      return NextResponse.json(
+        { success: false, error: "Failed to upload avatar. Please try again." },
+        { status: 500 }
+      );
     }
 
-    // Save file
-    const filepath = join(uploadsDir, filename);
-    await writeFile(filepath, buffer);
-
-    console.log(
-      `Avatar saved: ${filename}, ${(buffer.length / 1024).toFixed(2)}KB`
-    );
-
-    // Generate public URL
-    const avatarUrl = `/uploads/avatars/${filename}`;
+    // Delete old avatar from Cloudinary if it exists and is a Cloudinary URL
+    if (user?.avatar) {
+      const publicId = extractPublicIdFromUrl(user.avatar);
+      if (publicId) {
+        try {
+          await deleteFromCloudinary(publicId, 'image');
+          console.log(`[Avatar] Deleted old avatar from Cloudinary: ${publicId}`);
+        } catch (deleteError) {
+          console.error("[Avatar] Error deleting old avatar (non-critical):", deleteError);
+          // Continue - deletion failure is not critical
+        }
+      }
+    }
 
     // Update user avatar in database
     await prisma.user.update({

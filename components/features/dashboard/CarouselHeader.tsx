@@ -166,6 +166,11 @@ export const CarouselHeader: React.FC<CarouselHeaderProps> = ({
               src={images[currentIndex].imageUrl}
               alt={images[currentIndex].title || "Carousel image"}
               className={styles.image}
+              onError={(e) => {
+                // Fallback to placeholder on error
+                e.currentTarget.src = '/placeholder-carousel.png';
+                e.currentTarget.onerror = null; // Prevent infinite loop
+              }}
             />
             {(images[currentIndex].title || images[currentIndex].description) && (
               <div className={styles.overlay}>

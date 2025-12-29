@@ -36,7 +36,35 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
       <div className={styles.userHeader}>
         <div className={styles.avatar}>
           {userAvatar ? (
-            <img src={userAvatar} alt={userName} />
+            <img 
+              src={userAvatar} 
+              alt={userName}
+              onError={(e) => {
+                // Fallback to placeholder on error
+                e.currentTarget.style.display = 'none';
+                const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                if (placeholder && placeholder.classList.contains('avatar-placeholder')) {
+                  placeholder.style.display = 'flex';
+                }
+              }}
+            />
+            <div 
+              className="avatar-placeholder"
+              style={{ 
+                display: userAvatar ? 'none' : 'flex',
+                width: '100%',
+                height: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'var(--color-primary-purple)',
+                borderRadius: '50%',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}
+            >
+              {userName.charAt(0).toUpperCase()}
+            </div>
           ) : (
             <span>{userName.charAt(0).toUpperCase()}</span>
           )}

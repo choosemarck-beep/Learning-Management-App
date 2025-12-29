@@ -49,12 +49,22 @@ export const NetflixTrainingCard: React.FC<NetflixTrainingCardProps> = ({
             src={module.thumbnail}
             alt={module.title}
             className={styles.thumbnail}
+            onError={(e) => {
+              // Fallback to placeholder on error
+              e.currentTarget.style.display = 'none';
+              const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+              if (placeholder && placeholder.classList.contains(styles.thumbnailPlaceholder)) {
+                placeholder.style.display = 'flex';
+              }
+            }}
           />
-        ) : (
-          <div className={styles.thumbnailPlaceholder}>
-            <BookOpen size={40} className={styles.placeholderIcon} />
-          </div>
-        )}
+        ) : null}
+        <div 
+          className={styles.thumbnailPlaceholder}
+          style={{ display: module.thumbnail ? 'none' : 'flex' }}
+        >
+          <BookOpen size={40} className={styles.placeholderIcon} />
+        </div>
 
         {/* Hover overlay with play button */}
         {isHovered && (

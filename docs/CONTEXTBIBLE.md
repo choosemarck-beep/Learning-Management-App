@@ -73,7 +73,7 @@ A **mobile-first, gamified Learning Management System (LMS)** Progressive Web Ap
 - **ORM**: Prisma
 - **Authentication**: NextAuth.js v5 (JWT strategy)
 - **Password Hashing**: bcryptjs
-- **File Uploads**: Vercel Blob or Cloudinary (future)
+- **File Uploads**: Cloudinary (25GB free tier, image optimization, CDN included)
 
 #### PWA & Notifications
 - **PWA**: next-pwa package

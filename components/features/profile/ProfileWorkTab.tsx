@@ -148,12 +148,22 @@ export const ProfileWorkTab: React.FC<ProfileWorkTabProps> = ({
                       src={directManager.avatar}
                       alt={directManager.name}
                       className={styles.managerAvatarImage}
+                      onError={(e) => {
+                        // Fallback to placeholder on error
+                        e.currentTarget.style.display = 'none';
+                        const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (placeholder && placeholder.classList.contains(styles.managerAvatarPlaceholder)) {
+                          placeholder.style.display = 'flex';
+                        }
+                      }}
                     />
-                  ) : (
-                    <div className={styles.managerAvatarPlaceholder}>
-                      {directManager.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  ) : null}
+                  <div 
+                    className={styles.managerAvatarPlaceholder}
+                    style={{ display: directManager.avatar ? 'none' : 'flex' }}
+                  >
+                    {directManager.name.charAt(0).toUpperCase()}
+                  </div>
                 </div>
                 <div className={styles.managerInfo}>
                   <span className={styles.managerName}>{directManager.name}</span>

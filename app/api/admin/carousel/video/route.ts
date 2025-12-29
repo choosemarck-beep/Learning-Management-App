@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
+import { uploadToCloudinary, deleteFromCloudinary, extractPublicIdFromUrl } from "@/lib/cloudinary/config";
 
 export const dynamic = 'force-dynamic';
 
@@ -68,20 +66,40 @@ export async function POST(request: NextRequest) {
 
     // Generate unique filename
     const timestamp = Date.now();
-    const filename = `carousel-video-${timestamp}.${file.name.split('.').pop()}`;
-    
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), "public", "uploads", "carousel");
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
+    const fileExtension = file.name.split('.').pop() || 'mp4';
+    const filename = `carousel-video-${timestamp}.${fileExtension}`;
+
+    // Get existing video URL for deletion
+    let existingSettings = await prisma.carouselSettings.findFirst({
+      select: { videoUrl: true },
+    });
+
+    // Upload to Cloudinary
+    let videoUrl: string;
+    try {
+      videoUrl = await uploadToCloudinary(buffer, 'carousel', filename, 'video');
+      console.log(`[CarouselVideo] Successfully uploaded to Cloudinary: ${videoUrl}`);
+    } catch (uploadError) {
+      console.error("[CarouselVideo] Cloudinary upload error:", uploadError);
+      return NextResponse.json(
+        { success: false, error: "Failed to upload video. Please try again." },
+        { status: 500 }
+      );
     }
 
-    // Save file
-    const filepath = join(uploadsDir, filename);
-    await writeFile(filepath, buffer);
-
-    // Generate public URL
-    const videoUrl = `/uploads/carousel/${filename}`;
+    // Delete old video from Cloudinary if it exists
+    if (existingSettings?.videoUrl) {
+      const publicId = extractPublicIdFromUrl(existingSettings.videoUrl);
+      if (publicId) {
+        try {
+          await deleteFromCloudinary(publicId, 'video');
+          console.log(`[CarouselVideo] Deleted old video from Cloudinary: ${publicId}`);
+        } catch (deleteError) {
+          console.error("[CarouselVideo] Error deleting old video (non-critical):", deleteError);
+          // Continue - deletion failure is not critical
+        }
+      }
+    }
 
     // Wrap Prisma queries in try-catch
     try {

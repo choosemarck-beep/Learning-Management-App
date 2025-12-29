@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
-import { writeFile, mkdir, unlink } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
+import { uploadToCloudinary, deleteFromCloudinary, extractPublicIdFromUrl } from "@/lib/cloudinary/config";
 
 export const dynamic = 'force-dynamic';
 
@@ -131,48 +129,38 @@ export async function POST(request: NextRequest) {
     const timestamp = Date.now();
     const fileExtension = file.name.split('.').pop() || 'png';
     const filename = `splash-${timestamp}.${fileExtension}`;
-    
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), "public", "uploads", "splash");
-    try {
-      if (!existsSync(uploadsDir)) {
-        await mkdir(uploadsDir, { recursive: true });
-        console.log("Created uploads directory:", uploadsDir);
-      }
-    } catch (error) {
-      console.error("Error creating uploads directory:", error);
-      return NextResponse.json(
-        { success: false, error: "Failed to create uploads directory" },
-        { status: 500 }
-      );
-    }
 
     // Wrap Prisma queries and file operations in try-catch
     try {
       // Get existing settings to delete old image
       let settings = await prisma.splashScreenSettings.findFirst();
       
-      // Delete old image if it exists
+      // Delete old image from Cloudinary if it exists
       if (settings?.imageUrl) {
-        const oldImagePath = join(process.cwd(), "public", settings.imageUrl);
-        if (existsSync(oldImagePath)) {
+        const publicId = extractPublicIdFromUrl(settings.imageUrl);
+        if (publicId) {
           try {
-            await unlink(oldImagePath);
-            console.log("Deleted old splash screen image:", oldImagePath);
+            await deleteFromCloudinary(publicId, 'image');
+            console.log(`[SplashScreen] Deleted old image from Cloudinary: ${publicId}`);
           } catch (error) {
-            console.error("Error deleting old image:", error);
+            console.error("[SplashScreen] Error deleting old image (non-critical):", error);
             // Continue even if deletion fails
           }
         }
       }
 
-      // Save new file
-      const filepath = join(uploadsDir, filename);
-      await writeFile(filepath, buffer);
-      console.log("Saved splash screen image to:", filepath);
-
-      // Generate public URL
-      const imageUrl = `/uploads/splash/${filename}`;
+      // Upload to Cloudinary
+      let imageUrl: string;
+      try {
+        imageUrl = await uploadToCloudinary(buffer, 'splash', filename, 'image');
+        console.log(`[SplashScreen] Successfully uploaded to Cloudinary: ${imageUrl}`);
+      } catch (uploadError) {
+        console.error("[SplashScreen] Cloudinary upload error:", uploadError);
+        return NextResponse.json(
+          { success: false, error: "Failed to upload splash screen. Please try again." },
+          { status: 500 }
+        );
+      }
 
       // Update or create settings
       if (settings) {
