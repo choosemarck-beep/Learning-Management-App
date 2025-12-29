@@ -1675,6 +1675,74 @@ export async function uploadToCloudinary(
 
 ---
 
+#### Error: Vercel Not Deploying Automatically After Git Push
+**Symptoms:**
+- Code is pushed to GitHub successfully
+- No new deployment appears in Vercel dashboard
+- Previous deployments worked fine
+- GitHub App permissions are correct
+- No webhooks configured (Vercel uses GitHub App integration, not webhooks)
+
+**Common Causes:**
+- Project is paused in Vercel
+- Production branch mismatch (not set to `main`)
+- Build failures blocking new deployments
+- GitHub App integration disconnected
+- Vercel GitHub App permissions revoked
+- Previous build stuck in "Building" state
+
+**Solution:**
+1. **Check Vercel Dashboard**:
+   - Verify project is not paused
+   - Check Production Branch is set to `main`
+   - Review recent deployments for failures
+
+2. **Check Git Integration**:
+   - Vercel Dashboard → Project → Settings → Git
+   - Verify repository is connected
+   - If disconnected, reconnect the repository
+
+3. **Check GitHub App Permissions**:
+   - GitHub → Settings → Applications → Installed GitHub Apps
+   - Find "Vercel" and verify it has:
+     - Read/write access to code, deployments, etc.
+     - Repository access (All repositories or specific repo)
+
+4. **Manual Redeploy Test**:
+   - Vercel Dashboard → Deployments → Latest → "..." → Redeploy
+   - This tests if builds work (bypasses integration)
+
+5. **Trigger New Deployment**:
+   - Make a small change (e.g., version bump, comment)
+   - Commit and push to `main` branch
+   - Wait 1-2 minutes and check Vercel dashboard
+
+**Example Fix:**
+```bash
+# Test deployment trigger
+echo "# Deployment test - $(date)" >> .deployment-test
+git add .deployment-test
+git commit -m "Test: Trigger Vercel deployment"
+git push
+
+# Then check Vercel dashboard in 1-2 minutes
+```
+
+**Files Fixed:**
+- N/A (Infrastructure/Configuration issue)
+
+**Prevention:**
+- Regularly check Vercel dashboard for paused projects
+- Verify production branch matches your Git branch (`main`)
+- Monitor build logs for failures that might block deployments
+- Keep GitHub App permissions up to date
+- Use manual redeploy if automatic deployments stop working
+- Document Vercel project settings for reference
+
+**Note:** Vercel uses GitHub App integration (not webhooks), so no webhook configuration is needed. If webhooks are missing, that's normal and not the issue.
+
+---
+
 #### Error: "500 Internal Server Error" - Date Serialization in API Responses
 **Symptoms:**
 - API returns 500 error when fetching data with Date fields
