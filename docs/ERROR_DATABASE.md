@@ -276,6 +276,7 @@ export async function GET(request: NextRequest) {
 - `components/layout/admin/AdminHeader.tsx` - Added React Fragment wrapper for multiple elements in ternary
 - `components/layout/trainer/TrainerHeader.tsx` - Added React Fragment wrapper for multiple elements in ternary
 - `components/features/admin/UserProfileDropdown.tsx` - Added React Fragment wrapper for multiple elements in ternary
+- `components/features/employee/ProfileCover.tsx` - Added React Fragment wrapper for multiple elements in ternary
 
 ---
 

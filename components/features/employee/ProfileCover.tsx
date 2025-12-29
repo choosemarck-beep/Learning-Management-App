@@ -45,25 +45,27 @@ export const ProfileCover: React.FC<ProfileCoverProps> = ({
       {/* Profile Picture */}
       <div className={styles.profilePictureContainer}>
         {avatar ? (
-          <img 
-            src={avatar} 
-            alt={name} 
-            className={styles.profilePicture}
-            onError={(e) => {
-              // Fallback to placeholder on error
-              e.currentTarget.style.display = 'none';
-              const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
-              if (placeholder && placeholder.classList.contains(styles.profilePicturePlaceholder)) {
-                placeholder.style.display = 'flex';
-              }
-            }}
-          />
-          <div 
-            className={styles.profilePicturePlaceholder}
-            style={{ display: avatar ? 'none' : 'flex' }}
-          >
-            {name.charAt(0).toUpperCase()}
-          </div>
+          <>
+            <img 
+              src={avatar} 
+              alt={name} 
+              className={styles.profilePicture}
+              onError={(e) => {
+                // Fallback to placeholder on error
+                e.currentTarget.style.display = 'none';
+                const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                if (placeholder && placeholder.classList.contains(styles.profilePicturePlaceholder)) {
+                  placeholder.style.display = 'flex';
+                }
+              }}
+            />
+            <div 
+              className={styles.profilePicturePlaceholder}
+              style={{ display: avatar ? 'none' : 'flex' }}
+            >
+              {name.charAt(0).toUpperCase()}
+            </div>
+          </>
         ) : (
           <div className={styles.profilePicturePlaceholder}>
             {name.charAt(0).toUpperCase()}
