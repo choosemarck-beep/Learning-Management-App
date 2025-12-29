@@ -341,9 +341,23 @@ export default async function TrainerDashboardPage() {
     throw new Error("Failed to load dashboard data");
   }
 
-    // Final validation before render
-    if (!user || !userData) {
-      throw new Error("User data is missing - cannot render dashboard");
+    // Final validation before render - comprehensive checks
+    if (!user) {
+      throw new Error("User is missing - cannot render dashboard");
+    }
+    
+    if (!user.name || !user.email) {
+      console.error("[TrainerDashboardPage] User missing required fields:", {
+        hasName: !!user.name,
+        hasEmail: !!user.email,
+        userId: user.id,
+        userRole: user.role,
+      });
+      throw new Error("User data is incomplete - missing name or email");
+    }
+    
+    if (!userData) {
+      throw new Error("User data from database is missing - cannot render dashboard");
     }
     
     if (!initialStats || !Array.isArray(allTrainings) || !Array.isArray(allCourses)) {
@@ -354,31 +368,82 @@ export default async function TrainerDashboardPage() {
     const safeTrainingIds = Array.isArray(trainingIds) ? trainingIds : [];
     const safeCourseIds = Array.isArray(courseIds) ? courseIds : [];
     
+    // Ensure all data is serializable (no functions, Date objects, etc.)
+    const serializableStats = {
+      overallCompletionRate: typeof initialStats.overallCompletionRate === 'number' 
+        ? initialStats.overallCompletionRate 
+        : 0,
+      totalAssigned: typeof initialStats.totalAssigned === 'number' 
+        ? initialStats.totalAssigned 
+        : 0,
+      totalCompleted: typeof initialStats.totalCompleted === 'number' 
+        ? initialStats.totalCompleted 
+        : 0,
+      trainingStats: Array.isArray(initialStats.trainingStats)
+        ? initialStats.trainingStats.map(stat => ({
+            trainingId: String(stat.trainingId),
+            title: String(stat.title || ''),
+            courseTitle: stat.courseTitle ? String(stat.courseTitle) : undefined,
+            completionRate: typeof stat.completionRate === 'number' ? stat.completionRate : 0,
+            totalAssigned: typeof stat.totalAssigned === 'number' ? stat.totalAssigned : 0,
+            totalCompleted: typeof stat.totalCompleted === 'number' ? stat.totalCompleted : 0,
+          }))
+        : [],
+    };
+    
+    // Ensure all trainings and courses are serializable
+    const serializableTrainings = allTrainings.map(training => ({
+      id: String(training.id),
+      title: String(training.title || ''),
+      course: training.course ? {
+        id: String(training.course.id),
+        title: String(training.course.title || ''),
+      } : undefined,
+    }));
+    
+    const serializableCourses = allCourses.map(course => ({
+      id: String(course.id),
+      title: String(course.title || ''),
+      description: String(course.description || ''),
+      thumbnail: course.thumbnail ? String(course.thumbnail) : null,
+      _count: {
+        trainings: typeof course._count?.trainings === 'number' ? course._count.trainings : 0,
+      },
+    }));
+    
     console.log("[TrainerDashboardPage] Final render check:", {
       hasUser: !!user,
+      hasUserName: !!user.name,
+      hasUserEmail: !!user.email,
       hasUserData: !!userData,
       hasInitialStats: !!initialStats,
       trainingIdsLength: safeTrainingIds.length,
       courseIdsLength: safeCourseIds.length,
-      allTrainingsLength: allTrainings.length,
-      allCoursesLength: allCourses.length,
+      allTrainingsLength: serializableTrainings.length,
+      allCoursesLength: serializableCourses.length,
+      statsSerializable: !!serializableStats,
     });
+    
+    // Final safety check - ensure all required props are valid strings
+    const safeUserName = String(user.name || 'Trainer');
+    const safeUserEmail = String(user.email || '');
+    const safeUserAvatar = userData.avatar ? String(userData.avatar) : null;
     
     return (
       <TrainerLayout
-        userName={user.name}
-        userEmail={user.email}
-        userAvatar={userData.avatar || null}
+        userName={safeUserName}
+        userEmail={safeUserEmail}
+        userAvatar={safeUserAvatar}
         pageTitle="Dashboard"
         pageDescription="Overview of training completion rates and customizable dashboard."
       >
         <div className={styles.container}>
           <TrainerDashboardClient
-            initialStats={initialStats}
+            initialStats={serializableStats}
             initialTrainingPreferences={safeTrainingIds}
             initialCoursePreferences={safeCourseIds}
-            allTrainings={allTrainings}
-            allCourses={allCourses}
+            allTrainings={serializableTrainings}
+            allCourses={serializableCourses}
           />
         </div>
       </TrainerLayout>

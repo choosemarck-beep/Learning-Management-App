@@ -432,6 +432,10 @@ try {
 - Add final validation checks before render
 - Log data structure before passing to client components
 - Use error digest for tracking errors in production
+- **CRITICAL**: Ensure all data passed to client components is serializable (no functions, Date objects, circular references)
+- Convert all values to primitives (String, Number, Boolean) before passing to client components
+- Validate that required string properties (like `user.name`, `user.email`) exist and are strings before use
+- Use explicit type conversion: `String(value)` instead of relying on implicit conversion
 
 ---
 
