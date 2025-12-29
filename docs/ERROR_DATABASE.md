@@ -275,6 +275,7 @@ export async function GET(request: NextRequest) {
 - `components/features/courses/TrainingVideoPageClient.tsx` - Fixed ternary operator structure
 - `components/layout/admin/AdminHeader.tsx` - Added React Fragment wrapper for multiple elements in ternary
 - `components/layout/trainer/TrainerHeader.tsx` - Added React Fragment wrapper for multiple elements in ternary
+- `components/features/admin/UserProfileDropdown.tsx` - Added React Fragment wrapper for multiple elements in ternary
 
 ---
 
