@@ -6,6 +6,8 @@ import { ProfileBottomNav } from "@/components/layout/ProfileBottomNav";
 import { NetflixCoursesPageClient } from "@/components/features/courses/NetflixCoursesPageClient";
 import styles from "./page.module.css";
 
+export const dynamic = 'force-dynamic';
+
 export default async function CoursesPage() {
   const currentUser = await getCurrentUser();
 

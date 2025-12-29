@@ -6,6 +6,8 @@ import { ProfileBottomNav } from "@/components/layout/ProfileBottomNav";
 import { NetflixCourseDetailClient } from "@/components/features/courses/NetflixCourseDetailClient";
 import styles from "./page.module.css";
 
+export const dynamic = 'force-dynamic';
+
 export default async function CourseDetailPage({
   params,
 }: {
