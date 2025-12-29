@@ -24,7 +24,9 @@ export async function middleware(request: NextRequest) {
       case "TRAINER":
         return "/employee/trainer/dashboard";
       default:
-        return "/login"; // Default fallback
+        // If role is undefined but user is authenticated, default to employee dashboard
+        // This prevents redirect loops when role is missing from session
+        return "/employee/staff/dashboard";
     }
   };
 
