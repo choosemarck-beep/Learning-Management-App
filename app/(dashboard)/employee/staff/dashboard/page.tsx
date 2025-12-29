@@ -13,48 +13,56 @@ import styles from "./page.module.css";
 export const dynamic = 'force-dynamic';
 
 export default async function StaffDashboardPage() {
-  const user = await getCurrentUser();
+  try {
+    const user = await getCurrentUser();
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  // Role check - only EMPLOYEE can access
-  if (user.role !== "EMPLOYEE") {
-    if (user.role === "BRANCH_MANAGER") {
-      redirect("/employee/branch-manager/dashboard");
-    } else if (user.role === "SUPER_ADMIN") {
-      redirect("/super-admin/dashboard");
-    } else if (user.role === "ADMIN") {
-      redirect("/admin/dashboard");
-    } else {
+    if (!user) {
       redirect("/login");
     }
-  }
 
-  // Fetch full user data from database
-  const userData = await prisma.user.findUnique({
-    where: { id: user.id },
-    include: {
-      courseProgresses: {
+    // Role check - only EMPLOYEE can access
+    if (user.role !== "EMPLOYEE") {
+      if (user.role === "BRANCH_MANAGER") {
+        redirect("/employee/branch-manager/dashboard");
+      } else if (user.role === "SUPER_ADMIN") {
+        redirect("/super-admin/dashboard");
+      } else if (user.role === "ADMIN") {
+        redirect("/admin/dashboard");
+      } else {
+        redirect("/login");
+      }
+    }
+
+    // Fetch full user data from database with error handling
+    let userData;
+    try {
+      userData = await prisma.user.findUnique({
+        where: { id: user.id },
         include: {
-          course: {
-            select: {
-              id: true,
-              title: true,
-              description: true,
-              thumbnail: true,
-              totalXP: true,
+          courseProgresses: {
+            include: {
+              course: {
+                select: {
+                  id: true,
+                  title: true,
+                  description: true,
+                  thumbnail: true,
+                  totalXP: true,
+                },
+              },
             },
           },
         },
-      },
-    },
-  });
+      });
+    } catch (dbError) {
+      console.error("Error fetching user data:", dbError);
+      // If database query fails, redirect to login
+      redirect("/login");
+    }
 
-  if (!userData) {
-    redirect("/login");
-  }
+    if (!userData) {
+      redirect("/login");
+    }
 
   const onboardingCompleted = userData.onboardingCompleted || false;
 
