@@ -98,6 +98,7 @@ export default async function TrainerDashboardPage() {
     redirect(redirectUrl);
   }
 
+  try {
     // Fetch full user data from database with error handling
     let userData: {
       id: string;
@@ -134,12 +135,14 @@ export default async function TrainerDashboardPage() {
         },
       });
     } catch (dbError) {
-      console.error("Error fetching trainer user data:", dbError);
-      redirect("/login");
+      console.error("[TrainerDashboardPage] Error fetching trainer user data:", dbError);
+      // Don't redirect - show error UI instead to prevent loops
+      throw new Error("Failed to load user data from database");
     }
 
     if (!userData) {
-      redirect("/login");
+      console.error("[TrainerDashboardPage] User data is null after fetch");
+      throw new Error("User data not found in database");
     }
 
     // Fetch all trainings and courses with error handling
@@ -338,25 +341,25 @@ export default async function TrainerDashboardPage() {
     throw new Error("Failed to load dashboard data");
   }
 
-  return (
-    <TrainerLayout
-      userName={user.name}
-      userEmail={user.email}
-      userAvatar={userData.avatar}
-      pageTitle="Dashboard"
-      pageDescription="Overview of training completion rates and customizable dashboard."
-    >
-      <div className={styles.container}>
-        <TrainerDashboardClient
-          initialStats={initialStats}
-          initialTrainingPreferences={trainingIds}
-          initialCoursePreferences={courseIds}
-          allTrainings={allTrainings}
-          allCourses={allCourses}
-        />
-      </div>
-    </TrainerLayout>
-  );
+    return (
+      <TrainerLayout
+        userName={user.name}
+        userEmail={user.email}
+        userAvatar={userData.avatar}
+        pageTitle="Dashboard"
+        pageDescription="Overview of training completion rates and customizable dashboard."
+      >
+        <div className={styles.container}>
+          <TrainerDashboardClient
+            initialStats={initialStats}
+            initialTrainingPreferences={trainingIds}
+            initialCoursePreferences={courseIds}
+            allTrainings={allTrainings}
+            allCourses={allCourses}
+          />
+        </div>
+      </TrainerLayout>
+    );
   } catch (error) {
     console.error("[TrainerDashboardPage] Error in TrainerDashboardPage:", {
       error,
