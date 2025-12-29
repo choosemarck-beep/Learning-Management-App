@@ -1,6 +1,8 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/utils";
+
+export const dynamic = 'force-dynamic';
 import { prisma } from "@/lib/prisma/client";
 import { OnboardingMessageWrapper } from "@/components/features/OnboardingMessageWrapper";
 import { ProfileBottomNav } from "@/components/layout/ProfileBottomNav";
