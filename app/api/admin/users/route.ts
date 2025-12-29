@@ -80,9 +80,34 @@ export async function GET(request: NextRequest) {
     // Wrap Prisma queries in try-catch
     let total, users;
     try {
+      // Validate where clause is not empty (should have at least status or role filter)
+      if (Object.keys(where).length === 0) {
+        console.warn("[Users API] Empty where clause - this should not happen");
+        // Default to showing only APPROVED users if no filter
+        where.status = "APPROVED";
+      }
+
       // Get total count for pagination
       total = await prisma.user.count({ where });
       console.log("[Users API] Total users found:", total);
+
+      // If no users match, return empty array early
+      if (total === 0) {
+        console.log("[Users API] No users match criteria, returning empty array");
+        return NextResponse.json(
+          {
+            success: true,
+            data: [],
+            pagination: {
+              page,
+              limit,
+              total: 0,
+              totalPages: 0,
+            },
+          },
+          { status: 200 }
+        );
+      }
 
       // Calculate pagination
       const skip = (page - 1) * limit;
@@ -115,12 +140,30 @@ export async function GET(request: NextRequest) {
       });
       
       console.log("[Users API] Users fetched:", users.length);
+      console.log("[Users API] First user sample:", users[0] ? {
+        id: users[0].id,
+        name: users[0].name,
+        email: users[0].email,
+        status: users[0].status,
+        role: users[0].role,
+        hasCompany: !!users[0].company,
+        hasPosition: !!users[0].position,
+      } : "No users");
+
+      // Serialize Date objects to ISO strings for JSON response
+      const serializedUsers = users.map((user) => ({
+        ...user,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+        approvedAt: user.approvedAt?.toISOString() || null,
+        hireDate: user.hireDate?.toISOString() || null,
+      }));
 
       // Return success response
       return NextResponse.json(
         {
           success: true,
-          data: users,
+          data: serializedUsers,
           pagination: {
             page,
             limit,

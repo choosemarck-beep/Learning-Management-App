@@ -1377,6 +1377,70 @@ try {
 
 ---
 
+#### Error: "500 Internal Server Error" - Date Serialization in API Responses
+**Symptoms:**
+- API returns 500 error when fetching data with Date fields
+- Prisma queries succeed but JSON serialization fails
+- Error occurs in `NextResponse.json()` when returning Prisma results
+- Date objects from Prisma cannot be directly serialized to JSON
+
+**Common Causes:**
+- Prisma returns Date objects which are not JSON-serializable
+- `NextResponse.json()` cannot serialize Date objects directly
+- Missing date conversion before returning response
+- Date fields in nested relations not converted
+
+**Solution:**
+- Always convert Date objects to ISO strings before returning in JSON responses
+- Use `.toISOString()` method on all Date fields
+- Handle nullable dates with optional chaining: `date?.toISOString() || null`
+- Serialize all Date fields in the response object
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - Date objects cannot be serialized
+const users = await prisma.user.findMany({
+  where,
+  include: { company: true, position: true },
+});
+
+return NextResponse.json({
+  success: true,
+  data: users, // ERROR: Date objects in createdAt, updatedAt, etc.
+}, { status: 200 });
+
+// ✅ CORRECT - Serialize Date objects to ISO strings
+const users = await prisma.user.findMany({
+  where,
+  include: { company: true, position: true },
+});
+
+const serializedUsers = users.map((user) => ({
+  ...user,
+  createdAt: user.createdAt.toISOString(),
+  updatedAt: user.updatedAt.toISOString(),
+  approvedAt: user.approvedAt?.toISOString() || null,
+  hireDate: user.hireDate?.toISOString() || null,
+}));
+
+return NextResponse.json({
+  success: true,
+  data: serializedUsers, // All dates are now ISO strings
+}, { status: 200 });
+```
+
+**Files Fixed:**
+- `app/api/admin/users/route.ts` - Added Date serialization for all Date fields
+
+**Prevention:**
+- Always serialize Date objects before returning in API responses
+- Create a utility function for serializing Prisma results if needed
+- Test API responses to ensure JSON serialization works
+- Check for Date objects in nested relations and serialize them too
+- Use TypeScript to catch Date objects in response types
+
+---
+
 ## Revision History
 
 - **2024-01-XX**: Created error database
@@ -1391,4 +1455,5 @@ try {
 - **2024-01-XX**: Added 500 Internal Server Error on Signup API route error and comprehensive debugging guide
 - **2024-12-29**: Added User Management Table 500 error and Carousel/Splash Screen upload errors with solutions
 - **2024-12-29**: Added Cloudinary configuration missing error pattern and debugging steps
+- **2024-12-29**: Added Date serialization error pattern for Prisma queries in API responses
 
