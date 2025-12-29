@@ -152,47 +152,100 @@ export async function GET(request: NextRequest) {
 
       // Serialize Date objects to ISO strings for JSON response
       // Explicitly construct the response object to avoid serialization issues
-      const serializedUsers = users.map((user) => ({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        employeeNumber: user.employeeNumber,
-        phone: user.phone,
-        hireType: user.hireType,
-        department: user.department,
-        branch: user.branch,
-        hireDate: user.hireDate?.toISOString() || null,
-        status: user.status,
-        role: user.role,
-        createdAt: user.createdAt.toISOString(),
-        updatedAt: user.updatedAt.toISOString(),
-        approvedAt: user.approvedAt?.toISOString() || null,
-        company: user.company ? {
-          id: user.company.id,
-          name: user.company.name,
-          type: user.company.type,
-        } : null,
-        position: user.position ? {
-          id: user.position.id,
-          title: user.position.title,
-          role: user.position.role,
-        } : null,
-      }));
+      // Validate all fields exist before serialization
+      const serializedUsers = users.map((user) => {
+        try {
+          return {
+            id: String(user.id || ''),
+            name: String(user.name || ''),
+            email: String(user.email || ''),
+            employeeNumber: user.employeeNumber ? String(user.employeeNumber) : null,
+            phone: user.phone ? String(user.phone) : null,
+            hireType: user.hireType ? String(user.hireType) : null,
+            department: user.department ? String(user.department) : null,
+            branch: user.branch ? String(user.branch) : null,
+            hireDate: user.hireDate instanceof Date ? user.hireDate.toISOString() : null,
+            status: String(user.status || ''),
+            role: String(user.role || ''),
+            createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : new Date().toISOString(),
+            updatedAt: user.updatedAt instanceof Date ? user.updatedAt.toISOString() : new Date().toISOString(),
+            approvedAt: user.approvedAt instanceof Date ? user.approvedAt.toISOString() : null,
+            company: user.company ? {
+              id: String(user.company.id || ''),
+              name: String(user.company.name || ''),
+              type: String(user.company.type || ''),
+            } : null,
+            position: user.position ? {
+              id: String(user.position.id || ''),
+              title: String(user.position.title || ''),
+              role: String(user.position.role || ''),
+            } : null,
+          };
+        } catch (serializeError) {
+          console.error("[Users API] Error serializing user:", user.id, serializeError);
+          // Return minimal safe object if serialization fails for one user
+          return {
+            id: String(user.id || ''),
+            name: String(user.name || 'Unknown'),
+            email: String(user.email || ''),
+            employeeNumber: null,
+            phone: null,
+            hireType: null,
+            department: null,
+            branch: null,
+            hireDate: null,
+            status: String(user.status || ''),
+            role: String(user.role || ''),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            approvedAt: null,
+            company: null,
+            position: null,
+          };
+        }
+      });
 
-      // Return success response
-      return NextResponse.json(
-        {
-          success: true,
-          data: serializedUsers,
-          pagination: {
-            page,
-            limit,
-            total,
-            totalPages,
+      // Validate serialized data before sending
+      console.log("[Users API] Serialized users count:", serializedUsers.length);
+      if (serializedUsers.length > 0) {
+        console.log("[Users API] Sample serialized user:", JSON.stringify(serializedUsers[0], null, 2));
+      }
+
+      // Return success response - wrap in try-catch to catch JSON serialization errors
+      try {
+        const response = NextResponse.json(
+          {
+            success: true,
+            data: serializedUsers,
+            pagination: {
+              page,
+              limit,
+              total,
+              totalPages,
+            },
           },
-        },
-        { status: 200 }
-      );
+          { status: 200 }
+        );
+        console.log("[Users API] Successfully created response");
+        return response;
+      } catch (jsonError) {
+        console.error("[Users API] Error creating JSON response:", jsonError);
+        console.error("[Users API] Attempted to serialize:", {
+          usersCount: serializedUsers.length,
+          firstUser: serializedUsers[0],
+        });
+        // Return error response
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Failed to serialize response",
+            details: process.env.NODE_ENV === "development" 
+              ? (jsonError instanceof Error ? jsonError.message : String(jsonError))
+              : undefined,
+          },
+          { status: 500 }
+        );
+      }
     } catch (dbError) {
       console.error("Database error fetching users:", dbError);
       const errorMessage = dbError instanceof Error ? dbError.message : String(dbError);
