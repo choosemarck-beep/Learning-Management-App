@@ -1,0 +1,40 @@
+/* Leaderboard Page Client - Mobile-First Design (320px-428px) */
+
+.container {
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+  line-height: 1.2;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary-purple) 0%,
+    var(--color-primary-indigo) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+

@@ -11,6 +11,7 @@ import {
   Loader2,
   Eye,
   Save,
+  Settings,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { Tooltip } from "@/components/ui/Tooltip";
@@ -633,19 +634,29 @@ export const MediaManagement: React.FC = () => {
                     <Eye size={18} />
                   </button>
                   {settings.mode === "PHOTO_CAROUSEL" && (
-                    <button
-                      type="button"
-                      onClick={handleSavePhotos}
-                      className={styles.saveButton}
-                      disabled={isSavingPhotos}
-                      title="Save Photos"
-                    >
-                      {isSavingPhotos ? (
-                        <Loader2 size={18} className={styles.spinner} />
-                      ) : (
-                        <Save size={18} />
-                      )}
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setIsPhotoModalOpen(true)}
+                        className={styles.previewIconButton}
+                        title="Manage Photos (Edit URLs, Titles, Descriptions)"
+                      >
+                        <Settings size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSavePhotos}
+                        className={styles.saveButton}
+                        disabled={isSavingPhotos}
+                        title="Save Photos"
+                      >
+                        {isSavingPhotos ? (
+                          <Loader2 size={18} className={styles.spinner} />
+                        ) : (
+                          <Save size={18} />
+                        )}
+                      </button>
+                    </>
                   )}
                 </div>
               </div>

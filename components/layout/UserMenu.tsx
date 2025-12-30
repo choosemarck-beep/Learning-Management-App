@@ -10,6 +10,7 @@ import {
   FileText,
   Video,
   BookOpen,
+  Trophy,
   Inbox,
   Settings,
   LogOut,
@@ -138,6 +139,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({
       icon: BookOpen,
       route: "/courses",
       label: "Courses",
+    },
+    {
+      id: "leaderboard",
+      icon: Trophy,
+      route: "/leaderboard",
+      label: "Leaderboard",
     },
     {
       id: "inbox",

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Play, CheckCircle2, BookOpen } from "lucide-react";
+import { CheckCircle2, BookOpen } from "lucide-react";
 import styles from "./NetflixCourseCard.module.css";
 
 interface NetflixCourseCardProps {
@@ -71,17 +71,12 @@ export const NetflixCourseCard: React.FC<NetflixCourseCardProps> = ({
           </div>
         )}
 
-        {/* Hover overlay with play button */}
-        {isHovered && (
+        {/* Hover overlay */}
+        {isHovered && course.isCompleted && (
           <div className={styles.hoverOverlay}>
-            <div className={styles.playButton}>
-              <Play size={24} fill="currentColor" />
+            <div className={styles.completedBadge}>
+              <CheckCircle2 size={20} />
             </div>
-            {course.isCompleted && (
-              <div className={styles.completedBadge}>
-                <CheckCircle2 size={20} />
-              </div>
-            )}
           </div>
         )}
 

@@ -1,0 +1,220 @@
+/* Leaderboard Entry - Mobile-First Design (320px-428px) */
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-dark-secondary);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-normal) ease;
+  position: relative;
+}
+
+.entry:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+.entry.highlight {
+  border-color: var(--color-primary-purple);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3), 0 4px 16px rgba(139, 92, 246, 0.4);
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.1) 0%,
+    rgba(99, 102, 241, 0.1) 100%
+  );
+}
+
+.entry.currentUser {
+  border-color: var(--color-star-gold);
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.3), 0 4px 16px rgba(251, 191, 36, 0.4);
+  background: linear-gradient(
+    135deg,
+    rgba(251, 191, 36, 0.1) 0%,
+    rgba(245, 158, 11, 0.1) 100%
+  );
+}
+
+.rankBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.rankNumber {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.goldMedal {
+  color: var(--color-star-gold);
+  filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.5));
+}
+
+.silverMedal {
+  color: #cbd5e1;
+  filter: drop-shadow(0 2px 4px rgba(203, 213, 225, 0.5));
+}
+
+.bronzeMedal {
+  color: #f59e0b;
+  filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.5));
+}
+
+.avatarContainer {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--color-primary-purple);
+  background: var(--color-bg-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.entry.highlight .avatarContainer {
+  border-color: var(--color-primary-purple);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
+}
+
+.entry.currentUser .avatarContainer {
+  border-color: var(--color-star-gold);
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.5);
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-purple) 0%,
+    var(--color-primary-indigo) 100%
+  );
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+}
+
+.userInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.employeeNumber {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.rankName {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary-purple);
+  line-height: 1.4;
+}
+
+.metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.metric {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+}
+
+.metricLabel {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-regular);
+}
+
+.metricValue {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.progressContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+.progressBar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-bg-dark);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary-purple) 0%,
+    var(--color-primary-indigo) 100%
+  );
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease-in-out;
+}
+
+.progressText {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.inlineIcon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 2px;
+  color: var(--color-star-gold);
+}
+

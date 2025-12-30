@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Heart, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle, VolumeX, Volume2, Play, Pause } from "lucide-react";
 import toast from "react-hot-toast";
 import { Video } from "./ReelsPageClient";
 import { ReelCommentsModal } from "./ReelCommentsModal";
@@ -62,6 +62,7 @@ export const VideoReel: React.FC<VideoReelProps> = ({
   const [likeCount, setLikeCount] = useState(0);
   const [commentCount, setCommentCount] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const [showComments, setShowComments] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -171,6 +172,48 @@ export const VideoReel: React.FC<VideoReelProps> = ({
     setShowComments(!showComments);
   };
 
+  const handleMuteToggle = () => {
+    if (isYouTube && iframeRef.current) {
+      const iframe = iframeRef.current;
+      const newMutedState = !isMuted;
+      iframe.contentWindow?.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: newMutedState ? 'mute' : 'unMute',
+          args: [],
+        }),
+        'https://www.youtube.com'
+      );
+      setIsMuted(newMutedState);
+    } else if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const handlePlayPause = () => {
+    if (isYouTube && iframeRef.current) {
+      const iframe = iframeRef.current;
+      iframe.contentWindow?.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: isPlaying ? 'pauseVideo' : 'playVideo',
+          args: [],
+        }),
+        'https://www.youtube.com'
+      );
+      setIsPlaying(!isPlaying);
+    } else if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        videoRef.current.play();
+        setIsPlaying(true);
+      }
+    }
+  };
+
   const handleVideoClick = () => {
     if (isYouTube) {
       // YouTube iframes handle play/pause through their own controls
@@ -271,6 +314,22 @@ export const VideoReel: React.FC<VideoReelProps> = ({
         >
           <MessageCircle size={28} />
           <span className={styles.actionCount}>{commentCount}</span>
+        </button>
+
+        <button
+          className={styles.actionButton}
+          onClick={handleMuteToggle}
+          aria-label={isMuted ? "Unmute" : "Mute"}
+        >
+          {isMuted ? <VolumeX size={28} /> : <Volume2 size={28} />}
+        </button>
+
+        <button
+          className={styles.actionButton}
+          onClick={handlePlayPause}
+          aria-label={isPlaying ? "Pause" : "Play"}
+        >
+          {isPlaying ? <Pause size={28} /> : <Play size={28} />}
         </button>
       </div>
 

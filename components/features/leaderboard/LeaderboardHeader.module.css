@@ -1,0 +1,69 @@
+/* Leaderboard Header - Mobile-First Design (320px-428px) */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-bg-dark-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.viewSelector,
+.periodSelector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.tabs {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.tab {
+  flex: 1;
+  min-width: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-dark);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+  min-height: var(--touch-target-min);
+  text-align: center;
+}
+
+.tab:hover {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: var(--color-primary-purple);
+  color: var(--color-text-primary);
+}
+
+.tab.active {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-purple) 0%,
+    var(--color-primary-indigo) 100%
+  );
+  border-color: var(--color-primary-purple);
+  color: var(--color-text-primary);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.tab:active {
+  transform: scale(0.95);
+}
+

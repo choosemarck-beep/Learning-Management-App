@@ -196,21 +196,7 @@ export const CarouselHeader: React.FC<CarouselHeaderProps> = ({
           </motion.div>
         </AnimatePresence>
 
-        {/* Dots Indicator */}
-        {images.length > 1 && (
-          <div className={styles.dots}>
-            {images.map((_, index) => (
-              <button
-                key={index}
-                className={`${styles.dot} ${
-                  index === currentIndex ? styles.active : ""
-                }`}
-                onClick={() => goToSlide(index)}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
-        )}
+        {/* Dots Indicator - Removed to reduce distraction */}
       </div>
     </div>
   );

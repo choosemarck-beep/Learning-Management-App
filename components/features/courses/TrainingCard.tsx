@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Play } from "lucide-react";
 import styles from "./TrainingCard.module.css";
 
 interface Module {
@@ -44,14 +43,9 @@ export const TrainingCard: React.FC<TrainingCardProps> = ({
           />
         ) : (
           <div className={styles.thumbnailPlaceholder}>
-            <Play size={32} className={styles.playIcon} />
+            {/* Placeholder - no play icon */}
           </div>
         )}
-        <div className={styles.overlay}>
-          <div className={styles.playButton}>
-            <Play size={20} fill="currentColor" />
-          </div>
-        </div>
       </div>
       <div className={styles.info}>
         <h3 className={styles.title}>{module.title}</h3>
