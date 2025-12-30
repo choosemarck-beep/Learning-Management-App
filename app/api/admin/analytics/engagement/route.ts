@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
-import { UserRole } from "@prisma/client";
+import { UserRole, UserStatus } from "@prisma/client";
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
         role: {
           notIn: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
         },
-        status: "APPROVED",
+        status: UserStatus.APPROVED,
       };
 
       const today = new Date();
