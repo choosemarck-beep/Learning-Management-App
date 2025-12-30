@@ -100,6 +100,61 @@ const onboardingCompleted = userData.onboardingCompleted || false;
 
 ---
 
+#### Error: Type 'string[]' is not assignable to type 'UserRole[]' (Prisma Enum Type Error)
+**Symptoms:**
+- Build fails with TypeScript error: `Type 'string[]' is not assignable to type 'UserRole[]'`
+- Error occurs in Prisma queries using `notIn` or `in` filters with role enums
+- Error message: `Types of property 'notIn' are incompatible. Type 'string[]' is not assignable to type 'UserRole[]'`
+
+**Common Causes:**
+- Using string literals `["ADMIN", "SUPER_ADMIN"]` instead of enum values in Prisma queries
+- Prisma requires enum types, not string arrays for enum fields
+- TypeScript strict mode catches type mismatches at compile time
+
+**Solution:**
+- Import `UserRole` enum from `@prisma/client`
+- Use enum values instead of string literals: `[UserRole.ADMIN, UserRole.SUPER_ADMIN]`
+- Replace all string array role filters with enum arrays
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - using string literals
+import { prisma } from "@/lib/prisma/client";
+
+const employeeWhere = {
+  role: {
+    notIn: ["ADMIN", "SUPER_ADMIN"], // ERROR: Type 'string[]' not assignable to 'UserRole[]'
+  },
+  status: "APPROVED",
+};
+
+// ✅ CORRECT - using enum values
+import { prisma } from "@/lib/prisma/client";
+import { UserRole } from "@prisma/client";
+
+const employeeWhere = {
+  role: {
+    notIn: [UserRole.ADMIN, UserRole.SUPER_ADMIN], // Correct: enum array
+  },
+  status: "APPROVED",
+};
+```
+
+**Files Fixed:**
+- `app/api/admin/analytics/users/route.ts` - Fixed employeeWhere role filter
+- `app/api/admin/analytics/engagement/route.ts` - Fixed employeeWhere role filter
+- `app/api/admin/analytics/overview/route.ts` - Fixed employeeWhere and pending approvals role filter
+- `app/api/admin/analytics/learning/route.ts` - Fixed employeeWhere role filter
+- `app/api/admin/analytics/gamification/route.ts` - Fixed employeeWhere role filter
+
+**Prevention:**
+- Always import enum types from `@prisma/client` when using them in Prisma queries
+- Use enum values (`UserRole.ADMIN`) instead of string literals (`"ADMIN"`) for enum fields
+- TypeScript will catch these errors at compile time, preventing runtime issues
+- Check Prisma schema to identify which fields are enums before writing queries
+
+---
+
 #### Error: Type comparison appears unintentional
 **Symptoms:**
 - TypeScript error: "This comparison appears to be unintentional because the types 'X' and 'Y' have no overlap"
