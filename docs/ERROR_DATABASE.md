@@ -2005,4 +2005,7 @@ const serializedUsers = users.map((user) => ({
 - **2024-12-29**: Added Cloudinary configuration missing error pattern and debugging steps
 - **2024-12-29**: Added Date serialization error pattern for Prisma queries in API responses
 - **2024-12-30**: Added Cloudinary error serialization pattern - handling `[object Object]` errors by properly extracting error properties from Cloudinary error objects
+- **2024-12-30**: Added Cloudinary Invalid API Key error (401) - placeholder values in environment variables causing authentication failures
+- **2024-12-30**: Added placeholder detection validation in Cloudinary config - prevents uploads with placeholder API keys
+- **2024-12-30**: Standardized error handling across all file upload endpoints (carousel, avatar, splash, logo, video, thumbnails)
 

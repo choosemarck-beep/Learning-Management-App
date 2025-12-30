@@ -84,8 +84,25 @@ export async function POST(
     }
 
     // Convert file to buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    let buffer: Buffer;
+    try {
+      const bytes = await file.arrayBuffer();
+      buffer = Buffer.from(bytes);
+      
+      // Validate buffer was created successfully
+      if (!buffer || buffer.length === 0) {
+        return NextResponse.json(
+          { success: false, error: "File buffer is empty" },
+          { status: 400 }
+        );
+      }
+    } catch (bufferError) {
+      console.error("[CourseThumbnail] Error converting file to buffer:", bufferError);
+      return NextResponse.json(
+        { success: false, error: "Failed to process file" },
+        { status: 400 }
+      );
+    }
 
     // Generate unique filename
     const timestamp = Date.now();
@@ -109,12 +126,46 @@ export async function POST(
     // Upload to Cloudinary
     let thumbnailUrl: string;
     try {
+      console.log("[CourseThumbnail] Starting Cloudinary upload:", { 
+        filename, 
+        size: buffer.length,
+        hasCloudinaryConfig: !!(
+          process.env.CLOUDINARY_CLOUD_NAME &&
+          process.env.CLOUDINARY_API_KEY &&
+          process.env.CLOUDINARY_API_SECRET
+        ),
+      });
       thumbnailUrl = await uploadToCloudinary(buffer, 'thumbnails/courses', filename, 'image');
       console.log(`[CourseThumbnail] Successfully uploaded to Cloudinary: ${thumbnailUrl}`);
     } catch (uploadError) {
-      console.error("[CourseThumbnail] Cloudinary upload error:", uploadError);
+      // Extract meaningful error message from Cloudinary error structure
+      const errorMessage = uploadError instanceof Error 
+        ? uploadError.message 
+        : (uploadError && typeof uploadError === 'object' && 'message' in uploadError)
+          ? String((uploadError as any).message)
+          : String(uploadError);
+      
+      // Check if it's a configuration error
+      const isConfigError = errorMessage.includes('Cloudinary configuration') || 
+                          errorMessage.includes('missing') ||
+                          errorMessage.includes('placeholder');
+      
+      console.error("[CourseThumbnail] Cloudinary upload error:", {
+        message: errorMessage,
+        stack: uploadError instanceof Error ? uploadError.stack : undefined,
+        filename,
+        bufferSize: buffer.length,
+        isConfigError,
+      });
+      
       return NextResponse.json(
-        { success: false, error: "Failed to upload thumbnail. Please try again." },
+        { 
+          success: false, 
+          error: isConfigError 
+            ? "Image upload service is not configured. Please contact your administrator."
+            : "Failed to upload thumbnail. Please try again.",
+          details: process.env.NODE_ENV === "development" ? errorMessage : undefined,
+        },
         { status: 500 }
       );
     }

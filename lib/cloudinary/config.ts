@@ -32,6 +32,17 @@ export async function uploadToCloudinary(
     throw new Error('Cloudinary configuration is missing. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables.');
   }
 
+  // Check for placeholder values (common mistake)
+  const hasPlaceholders = 
+    process.env.CLOUDINARY_API_KEY?.includes('<your_api_key>') ||
+    process.env.CLOUDINARY_API_KEY?.includes('your_api_key') ||
+    process.env.CLOUDINARY_API_SECRET?.includes('<your_api_secret>') ||
+    process.env.CLOUDINARY_API_SECRET?.includes('your_api_secret');
+  
+  if (hasPlaceholders) {
+    throw new Error('Cloudinary credentials contain placeholder values. Please replace <your_api_key> and <your_api_secret> with your actual Cloudinary credentials from https://console.cloudinary.com/');
+  }
+
   try {
     // Validate filename
     if (!filename || typeof filename !== 'string') {
