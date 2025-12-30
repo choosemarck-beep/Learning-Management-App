@@ -114,6 +114,13 @@
 
 .rejectButton {
   order: 1;
+  border-color: var(--color-status-error) !important;
+  color: var(--color-status-error) !important;
+}
+
+.rejectButton:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  border-color: var(--color-status-error) !important;
 }
 
 .approveButton {

@@ -212,7 +212,7 @@ export const ApplicationPreviewModal: React.FC<ApplicationPreviewModalProps> = (
         <div className={styles.actions}>
           {onReject && (
             <Button
-              variant="danger"
+              variant="outline"
               size="lg"
               onClick={handleReject}
               disabled={isProcessing}

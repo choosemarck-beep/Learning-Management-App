@@ -2465,3 +2465,64 @@ const handleOptionClick = (optionIndex: number) => {
 - Use scroll-into-view for dynamically appearing elements
 - **2024-12-30**: Added overflow hidden clipping pattern - parent containers with `overflow: hidden` can clip child elements, requiring explicit overflow overrides
 
+---
+
+#### Error: Type '"danger"' is not assignable to Button variant type
+**Symptoms:**
+- TypeScript compilation error: `Type '"danger"' is not assignable to type '"primary" | "secondary" | "outline" | "ghost" | undefined'`
+- Build fails with type error on Button component
+- Error occurs when using `variant="danger"` on Button component
+
+**Common Causes:**
+- Button component only supports specific variants: "primary", "secondary", "outline", "ghost"
+- Attempting to use "danger" variant which doesn't exist in Button component
+- Confusion between context menu option variants (which can have "danger") and Button component variants
+
+**Solution:**
+- Use valid Button variant: "outline" or "secondary" for danger-style buttons
+- Add custom CSS class to style the button with error colors
+- Use CSS to override button colors: `border-color: var(--color-status-error); color: var(--color-status-error);`
+- Add hover states for error-styled buttons
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - "danger" variant doesn't exist
+<Button variant="danger" onClick={handleReject}>
+  Reject
+</Button>
+
+// ✅ CORRECT - Use "outline" variant with custom styling
+<Button 
+  variant="outline" 
+  onClick={handleReject}
+  className={styles.rejectButton}
+>
+  Reject
+</Button>
+```
+
+```css
+/* Custom styling for reject/danger button */
+.rejectButton {
+  border-color: var(--color-status-error) !important;
+  color: var(--color-status-error) !important;
+}
+
+.rejectButton:hover:not(:disabled) {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  border-color: var(--color-status-error) !important;
+}
+```
+
+**Files Fixed:**
+- `components/features/admin/ApplicationPreviewModal.tsx` - Changed variant from "danger" to "outline" with custom CSS styling
+- `components/features/admin/ApplicationPreviewModal.module.css` - Added rejectButton styling with error colors
+
+**Prevention:**
+- Always check component prop types before using variants
+- Use TypeScript to catch variant errors during development
+- Document available variants in component interfaces
+- Use custom CSS classes for styling variations not covered by built-in variants
+- **Note**: Context menu options can use "danger" variant (it's a string literal in data structures), but Button components cannot
+- **2024-12-30**: Added Button variant type error pattern - Button component only supports "primary", "secondary", "outline", "ghost" variants, use custom CSS for danger styling
+
