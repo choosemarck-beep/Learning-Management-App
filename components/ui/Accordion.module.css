@@ -1,0 +1,116 @@
+/* Accordion Component - Desktop-Optimized */
+
+.accordion {
+  width: 100%;
+  background-color: var(--color-bg-dark-secondary);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+  transition: all var(--transition-normal) ease;
+}
+
+.accordion:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+.trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  font-family: var(--font-glacial);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  text-align: left;
+  transition: background-color var(--transition-fast) ease;
+  min-height: 56px; /* Desktop touch target */
+}
+
+.trigger:hover {
+  background-color: rgba(139, 92, 246, 0.1);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--color-primary-purple);
+  outline-offset: -2px;
+}
+
+.triggerContent {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  color: var(--color-primary-purple);
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+.chevron {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  transition: transform var(--transition-normal) ease, color var(--transition-fast) ease;
+  flex-shrink: 0;
+  margin-left: var(--spacing-md);
+}
+
+.trigger:hover .chevron {
+  color: var(--color-primary-purple);
+}
+
+.content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--transition-slow) ease, padding var(--transition-slow) ease;
+  background-color: transparent;
+}
+
+.contentOpen {
+  max-height: 5000px; /* Large enough for most content */
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
+}
+
+.contentInner {
+  padding-top: var(--spacing-md);
+  opacity: 0;
+  transition: opacity var(--transition-normal) ease;
+}
+
+.contentOpen .contentInner {
+  opacity: 1;
+  transition-delay: 100ms;
+}
+
+/* Desktop optimizations */
+@media (min-width: 768px) {
+  .trigger {
+    padding: var(--spacing-lg);
+    min-height: 60px;
+  }
+
+  .title {
+    font-size: var(--font-size-lg);
+  }
+
+  .contentOpen {
+    padding: 0 var(--spacing-xl) var(--spacing-xl);
+  }
+}
+

@@ -22,4 +22,5 @@ export { Modal, type ModalProps } from "./Modal";
 export { SplashScreen, type SplashScreenProps } from "./SplashScreen";
 export { Tooltip, type TooltipProps } from "./Tooltip";
 export { VideoPlayer, type VideoPlayerProps } from "./VideoPlayer";
+export { Accordion, type AccordionProps } from "./Accordion";
 

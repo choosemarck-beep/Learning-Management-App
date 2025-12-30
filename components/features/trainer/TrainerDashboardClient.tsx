@@ -9,6 +9,7 @@ import { Card, CardBody } from "@/components/ui/Card";
 import { CompletionRateCard } from "./CompletionRateCard";
 import { TrainingCompletionCard } from "./TrainingCompletionCard";
 import { CourseCompletionCard } from "./CourseCompletionCard";
+import { TrainerAnalyticsDashboard } from "./analytics/TrainerAnalyticsDashboard";
 import toast from "react-hot-toast";
 import styles from "./TrainerDashboardClient.module.css";
 
@@ -477,6 +478,11 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
             })}
           </div>
         )}
+      </div>
+
+      {/* Analytics Dashboard Section */}
+      <div className={styles.analyticsSection}>
+        <TrainerAnalyticsDashboard />
       </div>
 
       {/* Add Training/Course Modal */}

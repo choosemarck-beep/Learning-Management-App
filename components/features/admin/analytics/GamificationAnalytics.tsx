@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { StatsCard } from "../StatsCard";
 import { AnalyticsChart } from "./AnalyticsChart";
 import { DateRangePicker } from "./DateRangePicker";
@@ -58,11 +57,7 @@ export const GamificationAnalytics: React.FC = () => {
 
   if (loading || !data) {
     return (
-      <Card className={styles.card}>
-        <CardBody>
-          <div className={styles.loading}>Loading gamification analytics...</div>
-        </CardBody>
-      </Card>
+      <div className={styles.loading}>Loading gamification analytics...</div>
     );
   }
 
@@ -72,14 +67,11 @@ export const GamificationAnalytics: React.FC = () => {
   }));
 
   return (
-    <Card className={styles.card}>
-      <CardHeader>
-        <CardTitle className={styles.title}>
-          <Trophy size={20} /> Gamification Analytics
-        </CardTitle>
+    <div className={styles.content}>
+      <div className={styles.header}>
         <DateRangePicker days={days} onChange={setDays} />
-      </CardHeader>
-      <CardBody>
+      </div>
+      <div className={styles.body}>
         <div className={styles.statsGrid}>
           <StatsCard
             label="Total XP Earned"
@@ -187,8 +179,8 @@ export const GamificationAnalytics: React.FC = () => {
             </div>
           </div>
         )}
-      </CardBody>
-    </Card>
+      </div>
+    </div>
   );
 };
 

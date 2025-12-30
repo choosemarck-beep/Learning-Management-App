@@ -46,7 +46,7 @@
   color: var(--color-text-secondary);
 }
 
-.atRiskSection {
+.learnersSection {
   margin-top: var(--spacing-xl);
   padding-top: var(--spacing-lg);
   border-top: 1px solid rgba(139, 92, 246, 0.2);
@@ -59,35 +59,35 @@
   margin-bottom: var(--spacing-md);
 }
 
-.atRiskTable {
+.learnersTable {
   overflow-x: auto;
 }
 
-.atRiskTable table {
+.learnersTable table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.atRiskTable th,
-.atRiskTable td {
+.learnersTable th,
+.learnersTable td {
   padding: var(--spacing-sm) var(--spacing-md);
   text-align: left;
   border-bottom: 1px solid rgba(139, 92, 246, 0.1);
 }
 
-.atRiskTable th {
+.learnersTable th {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
   background: rgba(139, 92, 246, 0.05);
 }
 
-.atRiskTable td {
+.learnersTable td {
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
 }
 
-.atRiskTable tr:hover {
+.learnersTable tr:hover {
   background: rgba(139, 92, 246, 0.05);
 }
 

@@ -9,6 +9,7 @@ import {
   GraduationCap,
   FileQuestion,
   ClipboardCheck,
+  Trophy,
 } from "lucide-react";
 import styles from "./TrainerSidebar.module.css";
 
@@ -28,6 +29,11 @@ export const TrainerSidebar: React.FC<TrainerSidebarProps> = ({
       href: "/employee/trainer/dashboard",
       label: "Dashboard",
       icon: LayoutDashboard,
+    },
+    {
+      href: "/leaderboard",
+      label: "Leaderboard",
+      icon: Trophy,
     },
     {
       href: "/employee/trainer/workshop",

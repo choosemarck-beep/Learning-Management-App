@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Card, CardBody } from "@/components/ui/Card";
+import { Accordion } from "@/components/ui/Accordion";
 import { StatsCard } from "../StatsCard";
 import { UserAnalytics } from "./UserAnalytics";
 import { LearningAnalytics } from "./LearningAnalytics";
@@ -9,7 +10,7 @@ import { CourseAnalytics } from "./CourseAnalytics";
 import { QuizAnalytics } from "./QuizAnalytics";
 import { GamificationAnalytics } from "./GamificationAnalytics";
 import { EngagementAnalytics } from "./EngagementAnalytics";
-import { Users, BookOpen, CheckCircle, Trophy } from "lucide-react";
+import { Users, BookOpen, CheckCircle, Trophy, FileQuestion, Activity } from "lucide-react";
 import styles from "./AnalyticsDashboard.module.css";
 
 interface OverviewData {
@@ -88,14 +89,55 @@ export const AnalyticsDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Analytics Widgets */}
+      {/* Analytics Widgets - Accordion Format */}
       <div className={styles.analyticsSection}>
-        <UserAnalytics />
-        <LearningAnalytics />
-        <CourseAnalytics />
-        <QuizAnalytics />
-        <GamificationAnalytics />
-        <EngagementAnalytics />
+        <Accordion
+          title="User & Employee Analytics"
+          icon={<Users size={18} />}
+          defaultOpen={false}
+        >
+          <UserAnalytics />
+        </Accordion>
+        
+        <Accordion
+          title="Learning Progress & Completion Analytics"
+          icon={<BookOpen size={18} />}
+          defaultOpen={false}
+        >
+          <LearningAnalytics />
+        </Accordion>
+        
+        <Accordion
+          title="Course & Training Analytics"
+          icon={<BookOpen size={18} />}
+          defaultOpen={false}
+        >
+          <CourseAnalytics />
+        </Accordion>
+        
+        <Accordion
+          title="Quiz Performance Analytics"
+          icon={<FileQuestion size={18} />}
+          defaultOpen={false}
+        >
+          <QuizAnalytics />
+        </Accordion>
+        
+        <Accordion
+          title="Gamification Analytics"
+          icon={<Trophy size={18} />}
+          defaultOpen={false}
+        >
+          <GamificationAnalytics />
+        </Accordion>
+        
+        <Accordion
+          title="Engagement Analytics"
+          icon={<Activity size={18} />}
+          defaultOpen={false}
+        >
+          <EngagementAnalytics />
+        </Accordion>
       </div>
     </div>
   );

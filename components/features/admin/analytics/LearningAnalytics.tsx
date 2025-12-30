@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { StatsCard } from "../StatsCard";
 import { AnalyticsChart } from "./AnalyticsChart";
 import { DateRangePicker } from "./DateRangePicker";
@@ -69,11 +68,7 @@ export const LearningAnalytics: React.FC = () => {
 
   if (loading || !data) {
     return (
-      <Card className={styles.card}>
-        <CardBody>
-          <div className={styles.loading}>Loading learning analytics...</div>
-        </CardBody>
-      </Card>
+      <div className={styles.loading}>Loading learning analytics...</div>
     );
   }
 
@@ -83,14 +78,11 @@ export const LearningAnalytics: React.FC = () => {
   }));
 
   return (
-    <Card className={styles.card}>
-      <CardHeader>
-        <CardTitle className={styles.title}>
-          <BookOpen size={20} /> Learning Progress & Completion Analytics
-        </CardTitle>
+    <div className={styles.content}>
+      <div className={styles.header}>
         <DateRangePicker days={days} onChange={setDays} />
-      </CardHeader>
-      <CardBody>
+      </div>
+      <div className={styles.body}>
         <div className={styles.statsGrid}>
           <StatsCard
             label="Overall Completion Rate"
@@ -190,8 +182,8 @@ export const LearningAnalytics: React.FC = () => {
             </div>
           </div>
         )}
-      </CardBody>
-    </Card>
+      </div>
+    </div>
   );
 };
 

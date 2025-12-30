@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { StatsCard } from "../StatsCard";
-import { AnalyticsChart } from "./AnalyticsChart";
-import { DateRangePicker } from "./DateRangePicker";
+import { StatsCard } from "../../admin/StatsCard";
+import { AnalyticsChart } from "../../admin/analytics/AnalyticsChart";
+import { DateRangePicker } from "../../admin/analytics/DateRangePicker";
 import { FileQuestion, CheckCircle, XCircle, Clock } from "lucide-react";
-import styles from "./QuizAnalytics.module.css";
+import styles from "./TrainerQuizAnalytics.module.css";
 
-interface QuizAnalyticsData {
+interface TrainerQuizAnalyticsData {
   totalQuizAttempts: number;
-  quizAttempts: number;
-  miniQuizAttempts: number;
+  totalMiniQuizAttempts: number;
+  totalAttempts: number;
   averageScore: number;
-  quizAverageScore: number;
-  miniQuizAverageScore: number;
+  averageMiniQuizScore: number;
+  overallAverageScore: number;
   passRate: number;
   failRate: number;
   retakeRate: number;
@@ -21,20 +21,14 @@ interface QuizAnalyticsData {
   quizPerformance: Array<{
     quizId: string;
     title: string;
-    passingScore: number;
-    totalAttempts: number;
-    passed: number;
-    failed: number;
-    passRate: number;
     averageScore: number;
+    totalAttempts: number;
   }>;
   mostDifficultQuizzes: Array<{
     quizId: string;
     title: string;
-    passingScore: number;
     averageScore: number;
     totalAttempts: number;
-    passRate: number;
   }>;
   scoreDistribution: {
     "0-50%": number;
@@ -44,22 +38,22 @@ interface QuizAnalyticsData {
   };
 }
 
-export const QuizAnalytics: React.FC = () => {
+export const TrainerQuizAnalytics: React.FC = () => {
   const [days, setDays] = useState(30);
-  const [data, setData] = useState<QuizAnalyticsData | null>(null);
+  const [data, setData] = useState<TrainerQuizAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/admin/analytics/quizzes?days=${days}`);
+        const response = await fetch(`/api/trainer/analytics/quizzes?days=${days}`);
         const result = await response.json();
         if (result.success) {
           setData(result.data);
         }
       } catch (error) {
-        console.error("Error fetching quiz analytics:", error);
+        console.error("Error fetching trainer quiz analytics:", error);
       } finally {
         setLoading(false);
       }
@@ -88,12 +82,12 @@ export const QuizAnalytics: React.FC = () => {
         <div className={styles.statsGrid}>
           <StatsCard
             label="Total Attempts"
-            value={data.totalQuizAttempts}
+            value={data.totalAttempts}
             icon={<FileQuestion size={18} />}
           />
           <StatsCard
             label="Average Score"
-            value={`${data.averageScore}%`}
+            value={`${data.overallAverageScore}%`}
             icon={<CheckCircle size={18} />}
           />
           <StatsCard

@@ -9,6 +9,7 @@ import {
   Settings,
   Shield,
   Image as ImageIcon,
+  Trophy,
 } from "lucide-react";
 import styles from "./AdminSidebar.module.css";
 
@@ -30,6 +31,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       href: userRole === "SUPER_ADMIN" ? "/super-admin/dashboard" : "/admin/dashboard",
       label: "Dashboard",
       icon: LayoutDashboard,
+    },
+    {
+      href: "/leaderboard",
+      label: "Leaderboard",
+      icon: Trophy,
     },
     {
       href: userRole === "SUPER_ADMIN" ? "/super-admin/users" : "/admin/users",
