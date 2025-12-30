@@ -26,6 +26,7 @@ export const ProfileBottomNav: React.FC<ProfileBottomNavProps> = ({
   const { data: session } = useSession();
   const [isVisible, setIsVisible] = useState(true);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [inboxUnreadCount, setInboxUnreadCount] = useState(0);
   const lastScrollY = useRef(0);
 
   // Handle scroll to hide/show navigation
