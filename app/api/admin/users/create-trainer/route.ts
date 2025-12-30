@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { sendTrainerOnboardingEmail } from "@/lib/email/sendEmail";
 
 export const dynamic = 'force-dynamic';
 
@@ -162,12 +163,42 @@ export async function POST(request: NextRequest) {
         },
       });
 
+      // Send trainer onboarding email (non-blocking - don't fail creation if email fails)
+      let emailSent = false;
+      let emailError: any = null;
+      try {
+        // Use NEXTAUTH_URL from environment (set in Vercel) or construct from request
+        // Never use hardcoded localhost - this breaks in production
+        const origin = request.headers.get("origin");
+        const host = request.headers.get("host");
+        const baseUrl = process.env.NEXTAUTH_URL || origin || (host ? `https://${host}` : "");
+        const loginUrl = baseUrl ? `${baseUrl}/login` : "/login";
+        
+        await sendTrainerOnboardingEmail(
+          trainer.email,
+          trainer.name,
+          generatedPassword,
+          loginUrl
+        );
+        emailSent = true;
+        console.log("✅ Trainer onboarding email sent successfully to:", trainer.email);
+      } catch (error) {
+        emailError = error;
+        console.error("❌ Failed to send trainer onboarding email:", {
+          email: trainer.email,
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        });
+        // Continue even if email fails - trainer is still created
+      }
+
       return NextResponse.json(
         {
           success: true,
           data: trainer,
           password: generatedPassword, // Return plain password for admin to copy
           message: "Trainer created successfully",
+          emailSent, // Indicate if email was sent successfully
         },
         { status: 201 }
       );
