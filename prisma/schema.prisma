@@ -64,6 +64,7 @@ model User {
   company                         Company?                     @relation(fields: [companyId], references: [id])
   position                        Position?                    @relation(fields: [positionId], references: [id])
   videoWatchProgresses            VideoWatchProgress[]
+  reelsPlaylistSettingsUpdated    ReelsPlaylistSettings[]        @relation("ReelsPlaylistUpdater")
 
   @@index([email])
   @@index([xp])
@@ -377,6 +378,20 @@ model Video {
 
   @@index([isActive, createdAt])
   @@index([category])
+}
+
+model ReelsPlaylistSettings {
+  id                String   @id @default(cuid())
+  youtubePlaylistId String   // YouTube playlist ID (e.g., "PLrAXtmRdnEQy6nuLMH" from URL)
+  playlistUrl       String   // Full YouTube playlist URL for reference
+  isActive          Boolean  @default(true)
+  updatedBy         String
+  updatedAt         DateTime @updatedAt
+  createdAt         DateTime @default(now())
+  updater           User     @relation("ReelsPlaylistUpdater", fields: [updatedBy], references: [id])
+
+  @@unique([id])
+  @@index([isActive])
 }
 
 model Notification {

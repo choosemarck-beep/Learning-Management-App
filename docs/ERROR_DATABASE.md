@@ -2592,3 +2592,47 @@ const handleOptionClick = (optionIndex: number) => {
 - **Note**: Context menu options can use "danger" variant (it's a string literal in data structures), but Button components cannot
 - **2024-12-30**: Added Button variant type error pattern - Button component only supports "primary", "secondary", "outline", "ghost" variants, use custom CSS for danger styling
 
+#### Error: Operator '+' cannot be applied to types 'PrismaPromise<number>' (Prisma Promise Addition Error)
+**Symptoms:**
+- Build fails with TypeScript error: `Operator '+' cannot be applied to types 'PrismaPromise<number>' and 'PrismaPromise<number>'`
+- Error occurs when trying to add two Prisma query results directly with `+` operator
+- Error message: `Type error: Operator '+' cannot be applied to types 'import(".../node_modules/.prisma/client/index").Prisma.PrismaPromise<number>'`
+
+**Common Causes:**
+- Trying to add Prisma promises directly: `prisma.model1.count({...}) + prisma.model2.count({...})`
+- Prisma queries return promises, not numbers - you cannot add promises with `+` operator
+- Forgetting to await or wrap in Promise.all before performing arithmetic operations
+
+**Solution:**
+- Wrap each pair of Prisma queries in `Promise.all()` and then add the results
+- Use `.then()` to add the resolved values, not the promises themselves
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - trying to add promises directly
+Promise.all([
+  prisma.courseProgress.count({ where: {...} }) + prisma.trainingProgressNew.count({ where: {...} }),
+  // ... more items
+])
+
+// ✅ CORRECT - wrap in Promise.all, then add resolved values
+Promise.all([
+  Promise.all([
+    prisma.courseProgress.count({ where: {...} }),
+    prisma.trainingProgressNew.count({ where: {...} }),
+  ]).then(([course, training]) => course + training),
+  // ... more items
+])
+```
+
+**Files Fixed:**
+- `app/api/admin/analytics/learning/route.ts` - Fixed progress distribution calculation (line 183, 248)
+- `app/api/admin/analytics/quizzes/route.ts` - Fixed score distribution calculation (line 283)
+
+**Prevention:**
+- Always remember that Prisma queries return promises, not values
+- Use `Promise.all()` to await multiple queries, then perform arithmetic on resolved values
+- Never use `+`, `-`, `*`, `/` operators directly on Prisma query results
+- If you need to add counts from different models, wrap each pair in Promise.all first
+
+---

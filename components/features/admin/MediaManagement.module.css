@@ -756,3 +756,75 @@
   }
 }
 
+/* Reels Playlist Management Styles */
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  width: 100%;
+}
+
+.inputLabel {
+  font-size: var(--font-size-sm); /* Facebook Captions: 14px */
+  font-weight: var(--font-weight-semibold); /* 600 */
+  color: var(--color-text-primary);
+  line-height: 1.4; /* Facebook Captions: 1.4x */
+}
+
+.textInput {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-base); /* Facebook Body: 16px */
+  line-height: 1.6; /* Facebook Body: 1.6x */
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius-md);
+  width: 100%;
+  box-sizing: border-box;
+  transition: all var(--transition-normal) ease;
+}
+
+.textInput:focus {
+  outline: none;
+  border-color: var(--color-primary-purple);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.textInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.textInput::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.6;
+}
+
+.currentPlaylistInfo {
+  font-size: var(--font-size-sm); /* Facebook Captions: 14px */
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-top: var(--spacing-xs);
+}
+
+.playlistLink {
+  color: var(--color-accent-cyan);
+  text-decoration: underline;
+  word-break: break-all;
+}
+
+.playlistLink:hover {
+  color: var(--color-primary-purple);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(139, 92, 246, 0.15);
+}
+

@@ -180,15 +180,18 @@ export async function GET(request: NextRequest) {
                     isCompleted: true,
                   },
                 }),
-                prisma.courseProgress.count({
-                  where: {
-                    userId: { in: userIds },
-                  },
-                }) + prisma.trainingProgressNew.count({
-                  where: {
-                    userId: { in: userIds },
-                  },
-                }),
+                Promise.all([
+                  prisma.courseProgress.count({
+                    where: {
+                      userId: { in: userIds },
+                    },
+                  }),
+                  prisma.trainingProgressNew.count({
+                    where: {
+                      userId: { in: userIds },
+                    },
+                  }),
+                ]).then(([courseCount, trainingCount]) => courseCount + trainingCount),
               ]);
 
               return {
@@ -242,35 +245,50 @@ export async function GET(request: NextRequest) {
         // Progress distribution
         Promise.all([
           // 0-25%
-          prisma.courseProgress.count({
-            where: { progress: { gte: 0, lt: 25 } },
-          }) + prisma.trainingProgressNew.count({
-            where: { progress: { gte: 0, lt: 25 } },
-          }),
+          Promise.all([
+            prisma.courseProgress.count({
+              where: { progress: { gte: 0, lt: 25 } },
+            }),
+            prisma.trainingProgressNew.count({
+              where: { progress: { gte: 0, lt: 25 } },
+            }),
+          ]).then(([course, training]) => course + training),
           // 25-50%
-          prisma.courseProgress.count({
-            where: { progress: { gte: 25, lt: 50 } },
-          }) + prisma.trainingProgressNew.count({
-            where: { progress: { gte: 25, lt: 50 } },
-          }),
+          Promise.all([
+            prisma.courseProgress.count({
+              where: { progress: { gte: 25, lt: 50 } },
+            }),
+            prisma.trainingProgressNew.count({
+              where: { progress: { gte: 25, lt: 50 } },
+            }),
+          ]).then(([course, training]) => course + training),
           // 50-75%
-          prisma.courseProgress.count({
-            where: { progress: { gte: 50, lt: 75 } },
-          }) + prisma.trainingProgressNew.count({
-            where: { progress: { gte: 50, lt: 75 } },
-          }),
+          Promise.all([
+            prisma.courseProgress.count({
+              where: { progress: { gte: 50, lt: 75 } },
+            }),
+            prisma.trainingProgressNew.count({
+              where: { progress: { gte: 50, lt: 75 } },
+            }),
+          ]).then(([course, training]) => course + training),
           // 75-100%
-          prisma.courseProgress.count({
-            where: { progress: { gte: 75, lt: 100 } },
-          }) + prisma.trainingProgressNew.count({
-            where: { progress: { gte: 75, lt: 100 } },
-          }),
+          Promise.all([
+            prisma.courseProgress.count({
+              where: { progress: { gte: 75, lt: 100 } },
+            }),
+            prisma.trainingProgressNew.count({
+              where: { progress: { gte: 75, lt: 100 } },
+            }),
+          ]).then(([course, training]) => course + training),
           // 100% (completed)
-          prisma.courseProgress.count({
-            where: { progress: 100, isCompleted: true },
-          }) + prisma.trainingProgressNew.count({
-            where: { progress: 100, isCompleted: true },
-          }),
+          Promise.all([
+            prisma.courseProgress.count({
+              where: { progress: 100, isCompleted: true },
+            }),
+            prisma.trainingProgressNew.count({
+              where: { progress: 100, isCompleted: true },
+            }),
+          ]).then(([course, training]) => course + training),
         ]).then(([range0_25, range25_50, range50_75, range75_100, completed]) => ({
           "0-25%": range0_25,
           "25-50%": range25_50,

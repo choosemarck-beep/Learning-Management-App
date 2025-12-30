@@ -280,53 +280,65 @@ export async function GET(request: NextRequest) {
         // Score distribution
         Promise.all([
           // 0-50%
-          prisma.quizAttempt.count({
-            where: {
-              completedAt: { gte: startDate },
-              score: { gte: 0, lt: 50 },
-            },
-          }) + prisma.miniQuizAttempt.count({
-            where: {
-              completedAt: { gte: startDate },
-              score: { gte: 0, lt: 50 },
-            },
-          }),
+          Promise.all([
+            prisma.quizAttempt.count({
+              where: {
+                completedAt: { gte: startDate },
+                score: { gte: 0, lt: 50 },
+              },
+            }),
+            prisma.miniQuizAttempt.count({
+              where: {
+                completedAt: { gte: startDate },
+                score: { gte: 0, lt: 50 },
+              },
+            }),
+          ]).then(([quiz, miniQuiz]) => quiz + miniQuiz),
           // 50-70%
-          prisma.quizAttempt.count({
-            where: {
-              completedAt: { gte: startDate },
-              score: { gte: 50, lt: 70 },
-            },
-          }) + prisma.miniQuizAttempt.count({
-            where: {
-              completedAt: { gte: startDate },
-              score: { gte: 50, lt: 70 },
-            },
-          }),
+          Promise.all([
+            prisma.quizAttempt.count({
+              where: {
+                completedAt: { gte: startDate },
+                score: { gte: 50, lt: 70 },
+              },
+            }),
+            prisma.miniQuizAttempt.count({
+              where: {
+                completedAt: { gte: startDate },
+                score: { gte: 50, lt: 70 },
+              },
+            }),
+          ]).then(([quiz, miniQuiz]) => quiz + miniQuiz),
           // 70-85%
-          prisma.quizAttempt.count({
-            where: {
-              completedAt: { gte: startDate },
-              score: { gte: 70, lt: 85 },
-            },
-          }) + prisma.miniQuizAttempt.count({
-            where: {
-              completedAt: { gte: startDate },
-              score: { gte: 70, lt: 85 },
-            },
-          }),
+          Promise.all([
+            prisma.quizAttempt.count({
+              where: {
+                completedAt: { gte: startDate },
+                score: { gte: 70, lt: 85 },
+              },
+            }),
+            prisma.miniQuizAttempt.count({
+              where: {
+                completedAt: { gte: startDate },
+                score: { gte: 70, lt: 85 },
+              },
+            }),
+          ]).then(([quiz, miniQuiz]) => quiz + miniQuiz),
           // 85-100%
-          prisma.quizAttempt.count({
-            where: {
-              completedAt: { gte: startDate },
-              score: { gte: 85, lte: 100 },
-            },
-          }) + prisma.miniQuizAttempt.count({
-            where: {
-              completedAt: { gte: startDate },
-              score: { gte: 85, lte: 100 },
-            },
-          }),
+          Promise.all([
+            prisma.quizAttempt.count({
+              where: {
+                completedAt: { gte: startDate },
+                score: { gte: 85, lte: 100 },
+              },
+            }),
+            prisma.miniQuizAttempt.count({
+              where: {
+                completedAt: { gte: startDate },
+                score: { gte: 85, lte: 100 },
+              },
+            }),
+          ]).then(([quiz, miniQuiz]) => quiz + miniQuiz),
         ]).then(([range0_50, range50_70, range70_85, range85_100]) => ({
           "0-50%": range0_50,
           "50-70%": range50_70,

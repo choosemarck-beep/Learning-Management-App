@@ -64,10 +64,21 @@ export const MediaManagement: React.FC = () => {
   const [isUploadingSplash, setIsUploadingSplash] = useState(false);
   const [splashPreviewUrl, setSplashPreviewUrl] = useState<string | null>(null);
 
+  // Reels playlist state
+  const [playlistUrl, setPlaylistUrl] = useState<string>("");
+  const [playlistSettings, setPlaylistSettings] = useState<{
+    playlistUrl: string | null;
+    youtubePlaylistId: string | null;
+    isActive: boolean;
+  } | null>(null);
+  const [isSavingPlaylist, setIsSavingPlaylist] = useState(false);
+  const [isLoadingPlaylist, setIsLoadingPlaylist] = useState(false);
+
   useEffect(() => {
     fetchSettings();
     fetchImages();
     fetchSplashSettings();
+    fetchPlaylistSettings();
   }, []);
 
   // Carousel functions
@@ -407,6 +418,51 @@ export const MediaManagement: React.FC = () => {
   };
 
   // Splash screen functions
+  const fetchPlaylistSettings = async () => {
+    try {
+      setIsLoadingPlaylist(true);
+      const response = await fetch("/api/admin/reels/playlist");
+      const data = await response.json();
+      if (data.success) {
+        setPlaylistSettings(data.data);
+        setPlaylistUrl(data.data.playlistUrl || "");
+      }
+    } catch (error) {
+      console.error("Error fetching playlist settings:", error);
+    } finally {
+      setIsLoadingPlaylist(false);
+    }
+  };
+
+  const handleSavePlaylist = async () => {
+    if (!playlistUrl.trim()) {
+      toast.error("Please enter a YouTube playlist URL");
+      return;
+    }
+
+    try {
+      setIsSavingPlaylist(true);
+      const response = await fetch("/api/admin/reels/playlist", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playlistUrl: playlistUrl.trim() }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast.success("Playlist URL saved successfully!");
+        fetchPlaylistSettings();
+      } else {
+        toast.error(data.error || "Failed to save playlist URL");
+      }
+    } catch (error) {
+      console.error("Error saving playlist:", error);
+      toast.error("Failed to save playlist URL");
+    } finally {
+      setIsSavingPlaylist(false);
+    }
+  };
+
   const fetchSplashSettings = async () => {
     try {
       const response = await fetch("/api/admin/splash-screen");
@@ -831,6 +887,78 @@ export const MediaManagement: React.FC = () => {
 
         {/* Theme Management Section */}
         <ThemeManagement />
+
+        {/* Reels Playlist Management Section */}
+        <Card className={styles.sectionCard}>
+          <CardHeader className={styles.cardHeaderWithPreview}>
+            <div className={styles.headerContent}>
+              <div>
+                <h3 className={styles.sectionTitle}>Reels Playlist Management</h3>
+                <p className={styles.sectionDescription}>
+                  Configure the YouTube playlist that will be displayed on the Reels page for staff.
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardBody>
+            {isLoadingPlaylist ? (
+              <div className={styles.loading}>
+                <Loader2 size={16} className={styles.spinner} />
+                <span>Loading playlist settings...</span>
+              </div>
+            ) : (
+              <>
+                <div className={styles.formGroup}>
+                  <label htmlFor="playlist-url" className={styles.inputLabel}>
+                    YouTube Playlist URL
+                  </label>
+                  <input
+                    id="playlist-url"
+                    type="url"
+                    value={playlistUrl}
+                    onChange={(e) => setPlaylistUrl(e.target.value)}
+                    placeholder="https://www.youtube.com/playlist?list=PLxxx"
+                    className={styles.textInput}
+                    disabled={isSavingPlaylist}
+                  />
+                  {playlistSettings?.playlistUrl && (
+                    <p className={styles.currentPlaylistInfo}>
+                      Current playlist: <a href={playlistSettings.playlistUrl} target="_blank" rel="noopener noreferrer" className={styles.playlistLink}>{playlistSettings.playlistUrl}</a>
+                    </p>
+                  )}
+                </div>
+                <div className={styles.actions}>
+                  <button
+                    onClick={handleSavePlaylist}
+                    disabled={isSavingPlaylist || !playlistUrl.trim()}
+                    className={styles.saveButton}
+                  >
+                    {isSavingPlaylist ? (
+                      <>
+                        <Loader2 size={16} className={styles.spinner} />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={16} />
+                        Save Playlist
+                      </>
+                    )}
+                  </button>
+                </div>
+                <div className={styles.fileRequirements}>
+                  <p className={styles.fileRequirementsTitle}>Supported URL Formats:</p>
+                  <ul className={styles.fileRequirementsList}>
+                    <li>https://www.youtube.com/playlist?list=PLxxx</li>
+                    <li>https://youtube.com/playlist?list=PLxxx</li>
+                    <li>https://youtu.be/xxx?list=PLxxx</li>
+                    <li>PLxxx (direct playlist ID)</li>
+                  </ul>
+                </div>
+              </>
+            )}
+          </CardBody>
+        </Card>
       </div>
 
       {/* Photo List Management Modal */}
