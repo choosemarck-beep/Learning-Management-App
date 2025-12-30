@@ -125,27 +125,27 @@ const employeeWhere = {
   role: {
     notIn: ["ADMIN", "SUPER_ADMIN"], // ERROR: Type 'string[]' not assignable to 'UserRole[]'
   },
-  status: "APPROVED",
+  status: "APPROVED", // ERROR: Type 'string' not assignable to 'UserStatus'
 };
 
 // ✅ CORRECT - using enum values
 import { prisma } from "@/lib/prisma/client";
-import { UserRole } from "@prisma/client";
+import { UserRole, UserStatus } from "@prisma/client";
 
 const employeeWhere = {
   role: {
     notIn: [UserRole.ADMIN, UserRole.SUPER_ADMIN], // Correct: enum array
   },
-  status: "APPROVED",
+  status: UserStatus.APPROVED, // Correct: enum value
 };
 ```
 
 **Files Fixed:**
-- `app/api/admin/analytics/users/route.ts` - Fixed employeeWhere role filter
-- `app/api/admin/analytics/engagement/route.ts` - Fixed employeeWhere role filter
-- `app/api/admin/analytics/overview/route.ts` - Fixed employeeWhere and pending approvals role filter
-- `app/api/admin/analytics/learning/route.ts` - Fixed employeeWhere role filter
-- `app/api/admin/analytics/gamification/route.ts` - Fixed employeeWhere role filter
+- `app/api/admin/analytics/users/route.ts` - Fixed employeeWhere role and status filters
+- `app/api/admin/analytics/engagement/route.ts` - Fixed employeeWhere role and status filters
+- `app/api/admin/analytics/overview/route.ts` - Fixed employeeWhere and pending approvals (role and status filters)
+- `app/api/admin/analytics/learning/route.ts` - Fixed employeeWhere role and status filters
+- `app/api/admin/analytics/gamification/route.ts` - Fixed employeeWhere role and status filters
 
 **Prevention:**
 - Always import enum types from `@prisma/client` when using them in Prisma queries
