@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
           where: {
             status: "PENDING",
             role: {
-              notIn: ["ADMIN", "SUPER_ADMIN"],
+              notIn: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
             },
           },
         }),
