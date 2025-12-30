@@ -46,6 +46,14 @@
   left: 0;
   border: none;
   background: #000;
+  /* Ensure full viewport coverage on mobile */
+  min-width: 100%;
+  min-height: 100%;
+  /* Maintain aspect ratio while filling screen */
+  object-fit: cover;
+  /* Mobile viewport optimization */
+  transform: scale(1);
+  transform-origin: center center;
 }
 
 .playOverlay {

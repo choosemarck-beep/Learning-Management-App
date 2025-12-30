@@ -2173,6 +2173,274 @@ try {
 
 ---
 
+#### Error: Reels YouTube Videos Not Working on Mobile
+**Symptoms:**
+- YouTube videos appear black or don't play on mobile devices
+- Videos don't fill the screen properly on mobile viewports
+- Galaxy background visible at sides of video
+- Videos may not autoplay on mobile
+
+**Common Causes:**
+- YouTube embed URL missing mobile-optimized parameters
+- Iframe not properly sized for mobile viewports
+- Missing `enablejsapi=1` for better mobile control
+- Missing `origin` parameter for security
+- CSS not ensuring full viewport coverage
+
+**Solution:**
+1. **Update YouTube Embed URL Parameters:**
+   - Add `enablejsapi=1` for JavaScript API control on mobile
+   - Add `origin` parameter for security (use `window.location.origin`)
+   - Ensure `playsinline=1` is present (already required for mobile autoplay)
+   - Keep `modestbranding=1` for cleaner mobile UI
+
+2. **Fix Iframe CSS:**
+   - Ensure `.videoIframe` has `min-width: 100%` and `min-height: 100%`
+   - Add `object-fit: cover` equivalent styling
+   - Ensure iframe covers full viewport without gaps
+
+**Example Fix:**
+```typescript
+// In VideoReel.tsx - getVideoEmbedUrl function
+const origin = typeof window !== "undefined" ? window.location.origin : "";
+const params = new URLSearchParams({
+  autoplay: "1",
+  mute: "1",
+  loop: "1",
+  playlist: videoId,
+  controls: "1",
+  modestbranding: "1",
+  rel: "0",
+  playsinline: "1",
+  enablejsapi: "1", // Mobile control
+  ...(origin ? { origin } : {}), // Security
+});
+embedUrl = `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+```
+
+```css
+/* In VideoReel.module.css */
+.videoIframe {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover;
+  transform: scale(1);
+  transform-origin: center center;
+}
+```
+
+**Files Fixed:**
+- `components/features/reels/VideoReel.tsx` - Added mobile-optimized YouTube parameters
+- `components/features/reels/VideoReel.module.css` - Enhanced iframe mobile coverage
+
+**Prevention:**
+- Always include mobile-optimized parameters for YouTube embeds
+- Test video playback on actual mobile devices (320px-428px viewports)
+- Ensure iframe CSS covers full viewport without gaps
+- Disable galaxy background for full-screen video pages
+
+---
+
+#### Error: Dashboard Courses Card Not Displaying Content
+**Symptoms:**
+- Dashboard shows hardcoded "No courses yet" message
+- User's enrolled courses not displayed even when they exist
+- `DashboardCoursesSection` component exists but not being used
+
+**Common Causes:**
+- Dashboard page has hardcoded empty state instead of fetching courses
+- `DashboardCoursesSection` component not imported or used
+- Missing database query to fetch user's enrolled courses
+
+**Solution:**
+1. **Fetch User's Enrolled Courses:**
+   - Query `courseProgresses` to find courses user is enrolled in
+   - Include course details (title, description, thumbnail, totalXP)
+   - Calculate progress percentage from `courseProgresses.progress`
+   - Map to `Course` interface expected by `DashboardCoursesSection`
+
+2. **Use DashboardCoursesSection Component:**
+   - Import `DashboardCoursesSection` component
+   - Pass fetched courses as props
+   - Component handles empty state automatically
+
+**Example Fix:**
+```typescript
+// In app/(dashboard)/dashboard/page.tsx
+import { DashboardCoursesSection } from "@/components/features/dashboard/DashboardCoursesSection";
+
+// Fetch enrolled courses
+const enrolledCourses = await prisma.course.findMany({
+  where: {
+    courseProgresses: {
+      some: {
+        userId: user.id,
+      },
+    },
+    isPublished: true,
+  },
+  include: {
+    courseProgresses: {
+      where: {
+        userId: user.id,
+      },
+    },
+  },
+});
+
+// Format for component
+const coursesWithProgress = enrolledCourses.map((course) => {
+  const progress = course.courseProgresses[0];
+  return {
+    id: course.id,
+    title: course.title,
+    description: course.description || "",
+    thumbnail: course.thumbnail,
+    totalXP: course.totalXP,
+    progress: progress ? progress.progress : 0,
+    isCompleted: progress ? progress.isCompleted : false,
+  };
+});
+
+// Use component
+<DashboardCoursesSection courses={coursesWithProgress} />
+```
+
+**Files Fixed:**
+- `app/(dashboard)/dashboard/page.tsx` - Added course fetching and component usage
+
+**Prevention:**
+- Always use existing components instead of hardcoding empty states
+- Verify component interfaces match data structure before passing props
+- Test with users who have enrolled courses to ensure data displays
+
+---
+
+#### Error: Courses Page Showing Fewer Items on Mobile Than Desktop
+**Symptoms:**
+- Courses page displays fewer courses on mobile viewports
+- Some courses appear on desktop but not on mobile
+- Horizontal scroll containers may not work properly on mobile
+
+**Common Causes:**
+- Filtering logic in `NetflixCoursesView` too restrictive
+- Horizontal scroll not touch-friendly on mobile
+- Courses filtered into categories that don't display on mobile
+- Missing courses in "All Courses" section
+
+**Solution:**
+1. **Verify Filtering Logic:**
+   - Ensure "All Courses" section always shows ALL courses regardless of enrollment status
+   - Add debugging logs to track course counts per category
+   - Verify no courses are filtered out incorrectly
+
+2. **Improve Mobile Scrolling:**
+   - Add `touch-action: pan-x` for touch-friendly horizontal scrolling
+   - Add `overscroll-behavior-x: contain` to prevent scroll chaining
+   - Ensure `-webkit-overflow-scrolling: touch` is present
+
+**Example Fix:**
+```css
+/* In NetflixCoursesView.module.css */
+.horizontalScroll {
+  /* ... existing styles ... */
+  touch-action: pan-x; /* Touch-friendly scrolling */
+  overscroll-behavior-x: contain; /* Prevent scroll chaining */
+  width: 100%;
+  min-width: 0; /* Allow flex shrinking */
+}
+```
+
+```typescript
+// In NetflixCoursesView.tsx - Add debugging
+useEffect(() => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log("[NetflixCoursesView] Course counts:", {
+      total: courses.length,
+      allCourses: allCourses.length,
+      enrolled: enrolledCourses.length,
+      available: availableCourses.length,
+      completed: completedCourses.length,
+    });
+  }
+}, [courses, allCourses, enrolledCourses, availableCourses, completedCourses]);
+```
+
+**Files Fixed:**
+- `components/features/courses/NetflixCoursesView.tsx` - Added debugging logs
+- `components/features/courses/NetflixCoursesView.module.css` - Improved mobile scrolling
+
+**Prevention:**
+- Always ensure "All Courses" shows all courses regardless of filters
+- Test horizontal scroll on actual mobile devices
+- Add debugging logs in development to track course counts
+- Verify no hidden limits or pagination affecting mobile
+
+---
+
+#### Error: Avatar Upload Not Updating All Components in Real-Time
+**Symptoms:**
+- Avatar updates in `ProfileHeader` after upload
+- Avatar doesn't update in other components (ProfileBottomNav, UserMenu, AdminHeader, TrainerHeader, UserProfileDropdown)
+- User sees old avatar in navigation/header components
+
+**Common Causes:**
+- Components receive avatar as props from server components (static data)
+- Components don't subscribe to session updates
+- Components use prop avatar instead of session avatar
+
+**Solution:**
+1. **Update Components to Use `useSession()` Hook:**
+   - Import `useSession` from `next-auth/react`
+   - Get avatar from `session?.user?.avatar`
+   - Fallback to prop avatar for SSR compatibility
+   - Components automatically re-render when session updates
+
+2. **Verify Session Update Flow:**
+   - Ensure JWT callback includes avatar in token
+   - Verify JWT callback has `trigger === "update"` handler that fetches latest user data
+   - Ensure session callback includes avatar in session object
+
+**Example Fix:**
+```typescript
+// In components that display avatars
+import { useSession } from "next-auth/react";
+
+export const Component: React.FC<{ userAvatar: string | null }> = ({
+  userAvatar: propAvatar,
+}) => {
+  const { data: session } = useSession();
+  
+  // Use session avatar if available (real-time updates), fallback to prop (SSR)
+  const displayAvatar = session?.user?.avatar || propAvatar || null;
+  
+  return (
+    <img src={displayAvatar} alt="Avatar" />
+  );
+};
+```
+
+**Files Fixed:**
+- `components/layout/admin/AdminHeader.tsx` - Added useSession() for avatar
+- `components/layout/trainer/TrainerHeader.tsx` - Added useSession() for avatar
+- `components/features/admin/UserProfileDropdown.tsx` - Added useSession() for avatar
+- `components/layout/ProfileBottomNav.tsx` - Already uses useSession() (verified)
+- `components/layout/UserMenu.tsx` - Already uses useSession() (verified)
+- `lib/auth/config.ts` - Already includes avatar in JWT and session callbacks (verified)
+
+**Prevention:**
+- Always use `useSession()` hook for avatar in client components
+- Fallback to prop avatar for SSR compatibility
+- Verify JWT callback includes avatar and has update trigger
+- Test avatar updates across all components after upload
+
+---
+
 ## Revision History
 
 - **2024-01-XX**: Created error database

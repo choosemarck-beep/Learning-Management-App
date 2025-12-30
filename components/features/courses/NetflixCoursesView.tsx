@@ -22,6 +22,19 @@ export const NetflixCoursesView: React.FC<NetflixCoursesViewProps> = ({
   const availableCourses = courses.filter((c) => !c.isEnrolled);
   const completedCourses = courses.filter((c) => c.isCompleted);
 
+  // Debug: Log course counts per category (only in development)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log("[NetflixCoursesView] Course counts:", {
+        total: courses.length,
+        allCourses: allCourses.length,
+        enrolled: enrolledCourses.length,
+        available: availableCourses.length,
+        completed: completedCourses.length,
+      });
+    }
+  }, [courses, allCourses, enrolledCourses, availableCourses, completedCourses]);
+
   if (courses.length === 0) {
     return (
       <div className={styles.emptyState}>

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { User, Settings, LogOut } from "lucide-react";
 import styles from "./UserProfileDropdown.module.css";
 
@@ -16,8 +16,13 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   userName,
   userEmail,
   userRole,
-  userAvatar,
+  userAvatar: propAvatar,
 }) => {
+  const { data: session } = useSession();
+  
+  // Use session avatar if available (real-time updates), fallback to prop (SSR)
+  const userAvatar = session?.user?.avatar || propAvatar || null;
+
   const handleLogout = async () => {
     // Clear remembered user from localStorage
     if (typeof window !== "undefined") {

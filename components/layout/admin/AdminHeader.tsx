@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Bell } from "lucide-react";
 import { UserProfileDropdown } from "@/components/features/admin/UserProfileDropdown";
 import styles from "./AdminHeader.module.css";
@@ -18,13 +19,17 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
   userName,
   userEmail,
   userRole,
-  userAvatar,
+  userAvatar: propAvatar,
   pageTitle,
   pageDescription,
 }) => {
+  const { data: session } = useSession();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Use session avatar if available (real-time updates), fallback to prop (SSR)
+  const userAvatar = session?.user?.avatar || propAvatar || null;
 
   // Close dropdown when clicking outside
   useEffect(() => {

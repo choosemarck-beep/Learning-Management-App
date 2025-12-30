@@ -5,6 +5,7 @@ import { Card, CardHeader, CardBody } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Flame } from "lucide-react";
+import { DashboardCoursesSection } from "@/components/features/dashboard/DashboardCoursesSection";
 import styles from "./page.module.css";
 
 export const dynamic = 'force-dynamic';
@@ -42,6 +43,42 @@ export default async function DashboardPage() {
       (xpInCurrentLevel / xpNeededForNextLevel) * 100,
       100
     );
+
+    // Fetch user's enrolled courses with progress data
+    const enrolledCourses = await prisma.course.findMany({
+      where: {
+        courseProgresses: {
+          some: {
+            userId: user.id,
+          },
+        },
+        isPublished: true,
+      },
+      include: {
+        courseProgresses: {
+          where: {
+            userId: user.id,
+          },
+        },
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+    });
+
+    // Format courses for DashboardCoursesSection component
+    const coursesWithProgress = enrolledCourses.map((course) => {
+      const progress = course.courseProgresses[0];
+      return {
+        id: course.id,
+        title: course.title,
+        description: course.description || "",
+        thumbnail: course.thumbnail,
+        totalXP: course.totalXP,
+        progress: progress ? progress.progress : 0,
+        isCompleted: progress ? progress.isCompleted : false,
+      };
+    });
 
     return (
       <div className={styles.container}>
@@ -83,16 +120,7 @@ export default async function DashboardPage() {
           </CardBody>
         </Card>
 
-        <Card className={styles.coursesCard}>
-          <CardHeader>
-            <h2 className={styles.cardTitle}>Your Courses</h2>
-          </CardHeader>
-          <CardBody>
-            <p className={styles.emptyState}>
-              No courses yet. Start your learning journey!
-            </p>
-          </CardBody>
-        </Card>
+        <DashboardCoursesSection courses={coursesWithProgress} />
       </div>
     );
   } catch (error) {

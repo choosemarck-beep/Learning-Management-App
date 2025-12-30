@@ -48,6 +48,12 @@
   /* Add padding for scroll arrows */
   scroll-padding-left: var(--spacing-md);
   scroll-padding-right: var(--spacing-md);
+  /* Ensure all items are visible on mobile - no clipping */
+  width: 100%;
+  min-width: 0; /* Allow flex shrinking */
+  /* Touch-friendly scrolling on mobile */
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
 }
 
 .horizontalScroll::-webkit-scrollbar {

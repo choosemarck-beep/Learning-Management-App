@@ -24,10 +24,26 @@ const getVideoEmbedUrl = (videoUrl: string): { isYouTube: boolean; embedUrl: str
   
   if (match && match[1]) {
     const videoId = match[1];
-    // YouTube embed URL with autoplay, mute, loop, and controls
+    // Get origin for security (client-side)
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    // YouTube embed URL with mobile-optimized parameters
+    // enablejsapi=1: Enables JavaScript API for better mobile control
+    // origin: Security parameter for iframe communication
+    const params = new URLSearchParams({
+      autoplay: "1",
+      mute: "1",
+      loop: "1",
+      playlist: videoId,
+      controls: "1",
+      modestbranding: "1",
+      rel: "0",
+      playsinline: "1",
+      enablejsapi: "1",
+      ...(origin ? { origin } : {}),
+    });
     return {
       isYouTube: true,
-      embedUrl: `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1&rel=0&playsinline=1`,
+      embedUrl: `https://www.youtube.com/embed/${videoId}?${params.toString()}`,
     };
   }
 
