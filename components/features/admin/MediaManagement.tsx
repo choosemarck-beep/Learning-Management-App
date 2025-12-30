@@ -525,9 +525,27 @@ export const MediaManagement: React.FC = () => {
   const maxPhotosReached = activeImages.length >= 4;
 
   // Prepare carousel images for preview (all images, in order - shows what's uploaded)
-  const previewImages = images
+  // Preview should show all images (active and inactive) so users can see what they uploaded
+  // Group by order and take the most recent image at each order (first 4 orders)
+  const imagesByOrder = new Map<number, typeof images[0]>();
+  images
+    .filter((img) => img.order < 4) // Only first 4 orders
+    .sort((a, b) => {
+      // Sort by order first, then by createdAt DESC (most recent first)
+      if (a.order !== b.order) return a.order - b.order;
+      const aTime = a.createdAt ? (typeof a.createdAt === 'string' ? new Date(a.createdAt).getTime() : (a.createdAt as Date).getTime()) : 0;
+      const bTime = b.createdAt ? (typeof b.createdAt === 'string' ? new Date(b.createdAt).getTime() : (b.createdAt as Date).getTime()) : 0;
+      return bTime - aTime;
+    })
+    .forEach((img) => {
+      // Only keep the first (most recent) image at each order
+      if (!imagesByOrder.has(img.order)) {
+        imagesByOrder.set(img.order, img);
+      }
+    });
+
+  const previewImages = Array.from(imagesByOrder.values())
     .sort((a, b) => a.order - b.order)
-    .slice(0, 4) // Only show first 4
     .map((img) => ({
       id: img.id,
       imageUrl: img.imageUrl,
