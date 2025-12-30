@@ -152,6 +152,10 @@ const employeeWhere = {
 - Use enum values (`UserRole.ADMIN`) instead of string literals (`"ADMIN"`) for enum fields
 - TypeScript will catch these errors at compile time, preventing runtime issues
 - Check Prisma schema to identify which fields are enums before writing queries
+- **Both role and status fields are enums** - always use `UserRole` and `UserStatus` enums
+
+**Related Error:**
+- Same pattern applies to `UserStatus` enum - use `UserStatus.APPROVED` instead of `"APPROVED"`
 
 ---
 
