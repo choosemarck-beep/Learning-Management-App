@@ -2898,6 +2898,77 @@ Promise.all([
 - `app/api/admin/analytics/quizzes/route.ts` - Fixed score distribution calculation (line 283)
 
 **Prevention:**
+- Always wrap Prisma count queries in `Promise.all()` before performing arithmetic operations
+- Remember that Prisma queries return promises - await them or use Promise.all before adding/subtracting
+- Check for promise operations in analytics calculations
+
+---
+
+#### Error: Property 'branch' (or 'area', 'region') does not exist on getCurrentUser() return type
+**Symptoms:**
+- Build fails with TypeScript error: `Property 'branch' does not exist on type '{ id: string; email: string; name: string; avatar: string | null; role: ...; employeeNumber: string | null; }'`
+- Error occurs when trying to access `currentUser.branch`, `currentUser.area`, or `currentUser.region`
+- Error message indicates these properties are not in the session user type
+
+**Common Causes:**
+- `getCurrentUser()` only returns session fields from NextAuth (id, email, name, avatar, role, employeeNumber)
+- Session user type doesn't include database-specific fields like `branch`, `area`, `region`, `companyId`, `positionId`, etc.
+- Attempting to use database fields directly from `getCurrentUser()` without fetching from database
+- Confusion between session user (from NextAuth) and full user data (from database)
+
+**Solution:**
+- Fetch full user data from database using Prisma when you need fields not in the session
+- Use `prisma.user.findUnique()` to get the specific fields you need
+- Only use `getCurrentUser()` for fields that are in the session (id, email, name, avatar, role, employeeNumber)
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - trying to access database fields from session user
+const currentUser = await getCurrentUser();
+if (view === "BRANCH" && currentUser.branch) { // ERROR: branch doesn't exist
+  whereClause.branch = currentUser.branch;
+}
+
+// ✅ CORRECT - fetch full user data from database
+const currentUser = await getCurrentUser();
+if (!currentUser) {
+  return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+}
+
+// Fetch full user data to get branch, area, region fields
+const userData = await prisma.user.findUnique({
+  where: { id: currentUser.id },
+  select: {
+    id: true,
+    branch: true,
+    area: true,
+    region: true,
+  },
+});
+
+if (!userData) {
+  return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
+}
+
+// Now use userData instead of currentUser for database fields
+if (view === "BRANCH" && userData.branch) {
+  whereClause.branch = userData.branch;
+}
+```
+
+**Files Fixed:**
+- `app/api/leaderboard/route.ts` - Fixed by fetching full user data to get branch, area, region fields
+
+**Prevention:**
+- **Remember**: `getCurrentUser()` only returns session fields (id, email, name, avatar, role, employeeNumber)
+- **Database fields** like `branch`, `area`, `region`, `companyId`, `positionId`, `xp`, `level`, `streak`, `diamonds`, etc. are NOT in the session
+- Always check what fields are available in the session user type before using them
+- When you need database fields, fetch them from the database using Prisma
+- Check `types/next-auth.d.ts` to see what fields are in the session user type
+- **Pattern**: Use `getCurrentUser()` for authentication/authorization, use `prisma.user.findUnique()` for database fields
+- **2025-01-01**: Added getCurrentUser() field access error - session user only contains id, email, name, avatar, role, employeeNumber; fetch from database for other fields
+
+---
 - Always remember that Prisma queries return promises, not values
 - Use `Promise.all()` to await multiple queries, then perform arithmetic on resolved values
 - Never use `+`, `-`, `*`, `/` operators directly on Prisma query results
