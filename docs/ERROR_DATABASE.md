@@ -153,9 +153,16 @@ const employeeWhere = {
 - TypeScript will catch these errors at compile time, preventing runtime issues
 - Check Prisma schema to identify which fields are enums before writing queries
 - **Both role and status fields are enums** - always use `UserRole` and `UserStatus` enums
+- **Batch all enum fixes together** - fix both UserRole and UserStatus in the same commit to avoid wasting Vercel deployments
 
 **Related Error:**
 - Same pattern applies to `UserStatus` enum - use `UserStatus.APPROVED` instead of `"APPROVED"`
+
+**Deployment Best Practice:**
+- When fixing multiple related TypeScript errors, fix ALL of them before committing
+- Don't commit fixes one at a time - batch related fixes together
+- Wait at least 2 minutes between deployments (per .cursorrules)
+- Check for all enum-related errors at once (UserRole, UserStatus, etc.) before pushing
 
 ---
 

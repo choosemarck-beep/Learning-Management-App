@@ -467,6 +467,8 @@ Galaxy-inspired color scheme:
 - **Vercel Rate Limits**: Free tier allows ~100 deployments/day - avoid rapid commits to prevent rate limiting
 - **Rate Limit Symptoms**: "Deployment rate limited — retry in X hours" - wait for retry or use manual redeploy
 - **Git Push**: Safe to execute automatically since GitHub is already configured and connected
+- **CRITICAL - Batch Related Fixes**: When fixing multiple related errors (e.g., enum type errors), fix ALL of them in a single commit. Do NOT commit fixes one at a time. This wastes Vercel deployments and can trigger rate limiting.
+- **Before Committing**: Check if there are related errors that should be fixed together (e.g., UserRole AND UserStatus enum errors, multiple files with same issue)
 
 ### Autonomous Command Execution
 - **CRITICAL - Run Commands Without User Intervention**: Agents should execute commands, installations, and scripts autonomously without asking for user permission or guidance, unless the operation is critical or potentially destructive
