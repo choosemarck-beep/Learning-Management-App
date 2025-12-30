@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
 import { checkRateLimit, getClientIP, RATE_LIMIT_CONFIGS } from "@/lib/utils/rateLimit";
+import { sendApprovalEmail } from "@/lib/email/sendEmail";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   // Apply rate limiting
   const clientIP = getClientIP(request);
@@ -67,7 +68,7 @@ export async function POST(
       );
     }
 
-    const { userId } = params;
+    const { userId } = await params;
 
     // Wrap Prisma queries in try-catch
     try {
@@ -109,11 +110,40 @@ export async function POST(
         },
       });
 
+      // Send approval email (non-blocking - don't fail approval if email fails)
+      let emailSent = false;
+      let emailError: any = null;
+      try {
+        // Use NEXTAUTH_URL from environment (set in Vercel) or construct from request
+        // Never use hardcoded localhost - this breaks in production
+        const origin = request.headers.get("origin");
+        const host = request.headers.get("host");
+        const baseUrl = process.env.NEXTAUTH_URL || origin || (host ? `https://${host}` : "");
+        const loginUrl = baseUrl ? `${baseUrl}/login` : "/login";
+        
+        await sendApprovalEmail(
+          approvedUser.email,
+          approvedUser.name,
+          loginUrl
+        );
+        emailSent = true;
+        console.log("✅ Approval email sent successfully to:", approvedUser.email);
+      } catch (error) {
+        emailError = error;
+        console.error("❌ Failed to send approval email:", {
+          email: approvedUser.email,
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        });
+        // Continue even if email fails - user is still approved
+      }
+
       const response = NextResponse.json(
         {
           success: true,
           message: "User approved successfully",
           data: approvedUser,
+          emailSent, // Indicate if email was sent successfully
         },
         { status: 200 }
       );

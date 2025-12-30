@@ -944,18 +944,18 @@ useEffect(() => {
 
 **Common Causes:**
 - **Database Connection Failure**: Prisma cannot connect to database (P1001 error)
-- **Missing Environment Variables**: `RESEND_API_KEY` not set (email service throws error)
+- **Missing Environment Variables**: `SENDGRID_API_KEY` not set (email service throws error)
 - **Prisma Schema Mismatch**: Database schema doesn't match Prisma schema (missing fields, wrong types)
 - **Position Role Enum Mismatch**: `position.role` value doesn't match `UserRole` enum values
 - **Null/Undefined Position Role**: Position exists but `role` field is null or undefined
 - **Foreign Key Constraint Violation**: Company or Position doesn't exist in database
-- **Email Service Error**: Resend API throws error that isn't properly caught
+- **Email Service Error**: SendGrid API throws error that isn't properly caught
 - **Unhandled Exception**: Error occurs outside of try-catch blocks
 
 **Solution:**
 - **Enhanced Error Logging**: Add comprehensive error logging before returning 500 error
 - **Database Connection Check**: Verify DATABASE_URL is set and database is accessible
-- **Environment Variable Validation**: Check for required environment variables (RESEND_API_KEY)
+- **Environment Variable Validation**: Check for required environment variables (SENDGRID_API_KEY)
 - **Prisma Error Handling**: Add specific handling for all Prisma error codes
 - **Email Service Error Handling**: Ensure email errors don't cause signup to fail (already non-blocking)
 - **Position Role Validation**: Validate position.role matches UserRole enum before using
@@ -1099,7 +1099,7 @@ export async function POST(request: NextRequest) {
 **Debugging Steps:**
 1. **Check Vercel Function Logs**: Go to Vercel Dashboard → Deployments → Latest → Functions → Check for error messages
 2. **Check Database Connection**: Verify DATABASE_URL is set correctly in Vercel environment variables
-3. **Check Environment Variables**: Verify RESEND_API_KEY is set (email service)
+3. **Check Environment Variables**: Verify SENDGRID_API_KEY is set (email service)
 4. **Check Prisma Schema**: Ensure database schema matches Prisma schema (run `npx prisma db push` or migrations)
 5. **Check Position Data**: Verify positions exist in database and have valid `role` values
 6. **Check Error Logs**: Look for specific Prisma error codes (P1001, P2002, P2003, etc.)
@@ -1989,6 +1989,124 @@ const serializedUsers = users.map((user) => ({
 
 ---
 
+#### Error: Emails Not Being Received (SendGrid)
+**Symptoms:**
+- Trainer creation email not received
+- Approval email not received
+- No error messages in console
+- Email sending appears to succeed but emails don't arrive
+- User account created/approved successfully but no email notification
+
+**Common Causes:**
+- **Missing SENDGRID_API_KEY**: Environment variable not set in Vercel
+- **Invalid SendGrid API Key**: API key is incorrect or expired
+- **Unverified Sender Email**: SendGrid requires sender email to be verified
+- **Email in Spam Folder**: Emails are being sent but filtered as spam
+- **SendGrid Account Issues**: Free tier limitations or account restrictions
+- **Email Service Error Not Logged**: Errors are caught but not properly logged
+
+**Solution:**
+1. **Check Environment Variables in Vercel**:
+   - Go to Vercel Dashboard → Project → Settings → Environment Variables
+   - Verify `SENDGRID_API_KEY` exists and is set correctly
+   - Ensure it's set for Production, Preview, and Development environments
+   - API key should start with `SG.` and be ~70 characters long
+
+2. **Verify SendGrid API Key**:
+   - Log in to SendGrid dashboard
+   - Go to Settings → API Keys
+   - Verify the API key exists and is active
+   - Check if API key has "Mail Send" permissions
+   - Regenerate API key if needed
+
+3. **Verify Sender Email in SendGrid**:
+   - Go to SendGrid Dashboard → Settings → Sender Authentication
+   - Verify sender email address or domain
+   - For production, verify your domain (recommended)
+   - For testing, use a verified single sender email
+   - Update `from` address in `lib/email/client.ts` to use verified sender
+
+4. **Check Email Logs**:
+   - Go to SendGrid Dashboard → Activity
+   - Check for email delivery status
+   - Look for bounce, block, or spam reports
+   - Check if emails are being processed
+
+5. **Check Application Logs**:
+   - Check Vercel function logs for email sending errors
+   - Look for "❌ Email sending error" messages
+   - Verify error details are logged correctly
+
+6. **Test Email Sending**:
+   - Use SendGrid test email endpoint
+   - Check if API key works with SendGrid API directly
+   - Verify email service is not rate-limited
+
+**Example Fix:**
+```typescript
+// ✅ CORRECT - Enhanced email error logging
+try {
+  console.log("📧 Attempting to send email:", {
+    to,
+    from,
+    subject,
+    hasApiKey: !!process.env.SENDGRID_API_KEY,
+    apiKeyLength: process.env.SENDGRID_API_KEY?.length || 0,
+  });
+  
+  await sendEmailViaResend({
+    to: email,
+    subject: "Your Account Has Been Approved",
+    html,
+  });
+  
+  console.log("✅ Email sent successfully to:", email);
+} catch (error) {
+  // Log detailed error information
+  console.error("❌ Failed to send email:", {
+    email,
+    error: error instanceof Error ? error.message : String(error),
+    code: (error as any)?.code,
+    response: (error as any)?.response?.body,
+    stack: error instanceof Error ? error.stack : undefined,
+  });
+  // Continue - don't fail the operation if email fails
+}
+```
+
+**Files Fixed:**
+- `lib/email/client.ts` - Enhanced error logging for SendGrid
+- `app/api/admin/users/[userId]/approve/route.ts` - Added approval email sending
+- `app/api/admin/users/create-trainer/route.ts` - Already has email sending (check logs)
+- `lib/email/sendEmail.ts` - Added `sendApprovalEmail` function
+
+**Prevention:**
+- Always check `SENDGRID_API_KEY` is set before sending emails
+- Verify sender email is authenticated in SendGrid dashboard
+- Use verified domain for production (not `noreply@sendgrid.net`)
+- Log email sending attempts with detailed information
+- Don't fail operations if email sending fails (non-blocking)
+- Check SendGrid Activity dashboard regularly for delivery issues
+- Test email sending in development before deploying
+- Monitor SendGrid API usage and rate limits
+
+**Common SendGrid Error Codes:**
+- **401 Unauthorized**: Invalid API key
+- **403 Forbidden**: API key doesn't have required permissions
+- **400 Bad Request**: Invalid sender email (not verified)
+- **429 Too Many Requests**: Rate limit exceeded
+- **500 Internal Server Error**: SendGrid service issue
+
+**Testing Email Sending:**
+1. Check Vercel function logs for email sending attempts
+2. Verify `SENDGRID_API_KEY` is set in environment variables
+3. Check SendGrid Activity dashboard for email status
+4. Verify sender email is authenticated in SendGrid
+5. Test with a verified email address
+6. Check spam folder if email doesn't arrive
+
+---
+
 ## Revision History
 
 - **2024-01-XX**: Created error database
@@ -2006,6 +2124,8 @@ const serializedUsers = users.map((user) => ({
 - **2024-12-29**: Added Date serialization error pattern for Prisma queries in API responses
 - **2024-12-30**: Added Cloudinary error serialization pattern - handling `[object Object]` errors by properly extracting error properties from Cloudinary error objects
 - **2024-12-30**: Added Cloudinary Invalid API Key error (401) - placeholder values in environment variables causing authentication failures
+- **2024-12-30**: Added placeholder detection validation in Cloudinary config - prevents uploads with placeholder API keys
+- **2024-12-30**: Standardized error handling across all file upload endpoints (carousel, avatar, splash, logo, video, thumbnails)
 - **2024-12-30**: Added placeholder detection validation in Cloudinary config - prevents uploads with placeholder API keys
 - **2024-12-30**: Standardized error handling across all file upload endpoints (carousel, avatar, splash, logo, video, thumbnails)
 

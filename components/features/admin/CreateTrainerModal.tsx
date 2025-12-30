@@ -122,9 +122,13 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
     e.preventDefault();
 
     // Only submit if we're on the final step
+    // Prevent form submission on intermediate steps (e.g., when pressing Enter)
     if (currentStep !== totalSteps) {
-      // If not on final step, just advance to next step
-      handleNext();
+      // If not on final step, prevent submission and just advance to next step
+      // But only if validation passes
+      if (validateStep(currentStep)) {
+        handleNext();
+      }
       return;
     }
 

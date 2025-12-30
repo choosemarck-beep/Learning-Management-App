@@ -2,6 +2,7 @@ import { render } from "@react-email/render";
 import { sendEmail as sendEmailViaResend } from "./client";
 import { OnboardingEmail } from "./templates/onboarding";
 import { TrainerOnboardingEmail } from "./templates/trainer-onboarding";
+import { ApprovalEmail } from "./templates/approval";
 
 /**
  * Send onboarding email to new staff member (employees, branch managers, etc.)
@@ -71,6 +72,40 @@ export async function sendTrainerOnboardingEmail(
     return { success: true };
   } catch (error) {
     console.error("Failed to send trainer onboarding email:", error);
+    throw error;
+  }
+}
+
+/**
+ * Send approval email to user when their account is approved
+ * @param email - User's email address
+ * @param userName - User's name
+ * @param loginUrl - URL to login page
+ */
+export async function sendApprovalEmail(
+  email: string,
+  userName: string,
+  loginUrl: string
+) {
+  try {
+    // Render React Email component to HTML
+    const html = await render(
+      ApprovalEmail({
+        userName,
+        loginUrl,
+      })
+    );
+
+    // Send email via SendGrid (function name is legacy from Resend migration)
+    await sendEmailViaResend({
+      to: email,
+      subject: "Your Account Has Been Approved - Welcome to Learning Management!",
+      html,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to send approval email:", error);
     throw error;
   }
 }

@@ -223,8 +223,9 @@ export const ThemeManagement: React.FC = () => {
         setGradientColor2(data.data.gradientColor2 || DEFAULT_THEME.bgDarkSecondary);
         setGradientColor3(data.data.gradientColor3 || DEFAULT_THEME.primaryDark);
         // Set background type - check if gradient colors exist to determine if gradient was previously used
-        // If gradient colors are set, assume gradient was selected, otherwise use galaxy/plain logic
-        const hasGradientColors = data.data.gradientColor1 || data.data.gradientColor2 || data.data.gradientColor3;
+        // If gradient colors are set AND galaxy is disabled, it's gradient
+        // Otherwise, check galaxy enabled status
+        const hasGradientColors = !!(data.data.gradientColor1 && data.data.gradientColor2 && data.data.gradientColor3);
         const bgType = hasGradientColors && !galaxyEnabled ? "gradient" : (galaxyEnabled ? "galaxy" : "plain");
         setBackgroundType(bgType);
         // If plain is selected, apply the background color immediately
@@ -326,10 +327,11 @@ export const ThemeManagement: React.FC = () => {
       
       // Add background settings
       updateData.galaxyBackgroundEnabled = backgroundType === "galaxy";
-      updateData.plainBackgroundColor = plainBgColor;
-      updateData.gradientColor1 = gradientColor1;
-      updateData.gradientColor2 = gradientColor2;
-      updateData.gradientColor3 = gradientColor3;
+      updateData.plainBackgroundColor = backgroundType === "plain" ? plainBgColor : null;
+      // Only save gradient colors if gradient is selected, otherwise set to null
+      updateData.gradientColor1 = backgroundType === "gradient" ? gradientColor1 : null;
+      updateData.gradientColor2 = backgroundType === "gradient" ? gradientColor2 : null;
+      updateData.gradientColor3 = backgroundType === "gradient" ? gradientColor3 : null;
 
       const response = await fetch("/api/admin/theme", {
         method: "PATCH",

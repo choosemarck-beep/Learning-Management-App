@@ -188,7 +188,7 @@ export const UserManagementTabs: React.FC<UserManagementTabsProps> = ({
           />
           {onAdd && (
             <Button variant="primary" size="lg" onClick={onAdd} className={styles.addButton}>
-              Add User
+              Add Trainer
             </Button>
           )}
         </div>

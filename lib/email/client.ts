@@ -26,10 +26,17 @@ export async function sendEmail({
   }
 
   // Note: SendGrid free tier allows sending to any email address
-  // Default "from" address works for testing, but domain verification recommended for production
+  // For production, verify your sender domain in SendGrid dashboard
+  // Default "from" address may not work - use a verified sender email
 
   try {
-    console.log("📧 Attempting to send email to:", to);
+    console.log("📧 Attempting to send email:", {
+      to,
+      from,
+      subject,
+      hasApiKey: !!process.env.SENDGRID_API_KEY,
+      apiKeyLength: process.env.SENDGRID_API_KEY?.length || 0,
+    });
     
     const msg = {
       to,

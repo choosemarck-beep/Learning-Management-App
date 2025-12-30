@@ -73,7 +73,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
     user: null,
   });
 
-  // Column resizing state
+  // Column resizing state - widths will be normalized to fill table width
   const [columnWidths, setColumnWidths] = useState<number[]>(() => {
     // Load from localStorage or use defaults
     if (typeof window !== "undefined") {
@@ -86,7 +86,8 @@ export const UsersTable: React.FC<UsersTableProps> = ({
         }
       }
     }
-    // Default widths in pixels (added Actions column) - compressed for better fit
+    // Default widths in pixels (will be normalized to fill table width on mount)
+    // These represent relative proportions that will scale to fit
     return [100, 140, 120, 140, 160, 110, 150, 50];
   });
 
@@ -113,48 +114,54 @@ export const UsersTable: React.FC<UsersTableProps> = ({
   }, [columnWidths]);
 
   // Normalize column widths when table is rendered to fit table width
+  // This ensures columns expand to fill available table width
   useEffect(() => {
     const normalizeWidths = () => {
       if (tableRef.current) {
         const tableElement = tableRef.current;
         const tableWidth = tableElement.offsetWidth;
         
+        if (tableWidth <= 0) return; // Table not yet rendered
+        
         setColumnWidths((prev) => {
           const currentTotal = prev.reduce((sum, width) => sum + width, 0);
-          
-        // If total exceeds table width, scale down proportionally
-        // But ensure Actions column (index 7) never goes below 50px
-        if (currentTotal > tableWidth && tableWidth > 0) {
           const ACTIONS_COLUMN_INDEX = 7;
           const ACTIONS_MIN_WIDTH = 50;
           
-          const scaleFactor = tableWidth / currentTotal;
-          const scaledWidths = prev.map((width, index) => {
-            const scaled = Math.floor(width * scaleFactor);
-            // Actions column must be at least 50px
-            return index === ACTIONS_COLUMN_INDEX 
-              ? Math.max(ACTIONS_MIN_WIDTH, scaled)
-              : Math.max(50, scaled);
-          });
-          
-          // Recalculate if Actions column constraint affected the total
-          const newTotal = scaledWidths.reduce((sum, width) => sum + width, 0);
-          if (newTotal > tableWidth) {
-            // Adjust other columns to compensate
-            const actionsWidth = scaledWidths[ACTIONS_COLUMN_INDEX];
-            const otherColumnsTotal = newTotal - actionsWidth;
-            const availableWidth = tableWidth - actionsWidth;
-            const otherScaleFactor = availableWidth / otherColumnsTotal;
+          // If total is less than table width, scale up to fill space
+          // If total exceeds table width, scale down proportionally
+          if (currentTotal !== tableWidth && tableWidth > 0) {
+            const scaleFactor = tableWidth / currentTotal;
+            const scaledWidths = prev.map((width, index) => {
+              const scaled = Math.floor(width * scaleFactor);
+              // Actions column must be at least 50px
+              return index === ACTIONS_COLUMN_INDEX 
+                ? Math.max(ACTIONS_MIN_WIDTH, scaled)
+                : Math.max(50, scaled);
+            });
             
-            return scaledWidths.map((width, index) => 
-              index === ACTIONS_COLUMN_INDEX 
-                ? width 
-                : Math.max(50, Math.floor(width * otherScaleFactor))
-            );
+            // Recalculate if Actions column constraint affected the total
+            const newTotal = scaledWidths.reduce((sum, width) => sum + width, 0);
+            if (newTotal !== tableWidth && newTotal > 0) {
+              // Adjust other columns to fill remaining space
+              const actionsWidth = scaledWidths[ACTIONS_COLUMN_INDEX];
+              const otherColumnsTotal = newTotal - actionsWidth;
+              const availableWidth = tableWidth - actionsWidth;
+              
+              if (otherColumnsTotal > 0 && availableWidth > 0) {
+                const otherScaleFactor = availableWidth / otherColumnsTotal;
+                
+                return scaledWidths.map((width, index) => 
+                  index === ACTIONS_COLUMN_INDEX 
+                    ? width 
+                    : Math.max(50, Math.floor(width * otherScaleFactor))
+                );
+              }
+            }
+            
+            return scaledWidths;
           }
           
-          return scaledWidths;
-        }
           return prev;
         });
       }
@@ -170,7 +177,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
       clearTimeout(timeoutId);
       window.removeEventListener('resize', normalizeWidths);
     };
-  }, []); // Run once on mount
+  }, [users]); // Re-run when users change (table re-renders)
 
   // Column resizing handlers
   const handleResizeStart = useCallback((columnIndex: number, e: React.MouseEvent) => {
@@ -671,13 +678,23 @@ export const UsersTable: React.FC<UsersTableProps> = ({
   };
 
   if (users.length === 0) {
+    // Tab-specific empty state messages
+    let emptyMessage = "No users found.";
+    if (currentTab === "PENDING") {
+      emptyMessage = "No pending users at this time.";
+    } else if (currentTab === "REJECTED") {
+      emptyMessage = "No rejected users at this time.";
+    } else if (currentTab === "ALL") {
+      emptyMessage = "No approved users found.";
+    }
+
     return (
       <div className={styles.empty}>
-        <p>No users found.</p>
+        <p>{emptyMessage}</p>
         {onAdd && (
           <Button variant="primary" size="lg" onClick={onAdd} className={styles.addButton}>
             <Plus size={20} />
-            Add User
+            Add Trainer
           </Button>
         )}
       </div>

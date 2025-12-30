@@ -8,14 +8,15 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
-  padding: var(--spacing-sm) 0;
+  gap: var(--spacing-md);
+  padding: 0;
 }
 
 /* Progress Section */
 .progressSection {
-  padding: var(--spacing-md) 0 var(--spacing-sm);
-  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+  margin-bottom: var(--spacing-sm);
 }
 
 .progressIndicator {
@@ -24,9 +25,10 @@
 
 /* Step Container */
 .stepContainer {
-  min-height: 320px;
+  min-height: 280px;
   position: relative;
   overflow: hidden;
+  flex: 1;
 }
 
 .stepWrapper {
@@ -36,8 +38,8 @@
 .stepContent {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
-  padding: var(--spacing-md) 0;
+  gap: var(--spacing-md);
+  padding: 0;
 }
 
 /* Responsive adjustments for name fields */
@@ -53,7 +55,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
 }
 
 .stepTitle {
@@ -61,14 +63,14 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.4;
 }
 
 .stepDescription {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   margin: 0;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 /* Fields Group */
@@ -76,18 +78,21 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  width: 100%;
 }
 
 .nameFieldsRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-md);
+  width: 100%;
 }
 
 .formField {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
+  width: 100%;
 }
 
 .helperText {
@@ -104,28 +109,32 @@
   gap: var(--spacing-md);
   margin-top: var(--spacing-md);
   padding-top: var(--spacing-md);
-  border-top: 1px solid rgba(139, 92, 246, 0.2);
+  border-top: 1px solid rgba(139, 92, 246, 0.15);
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .cancelButton,
 .backButton,
 .nextButton,
 .submitButton {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-xs);
   min-height: 44px;
+  min-width: 100px;
 }
 
 .backButton {
+  min-width: 100px;
   max-width: 120px;
 }
 
 .nextButton,
 .submitButton {
-  flex: 1;
+  min-width: 140px;
+  flex: 0 1 auto;
 }
 
 /* Credentials Modal Styles */

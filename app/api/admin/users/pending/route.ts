@@ -35,12 +35,23 @@ export async function GET(request: NextRequest) {
 
     // Wrap Prisma queries in try-catch
     try {
-      // Fetch pending users with related data
+      // Fetch pending users with related data - include all fields needed for UserCard
       const pendingUsers = await prisma.user.findMany({
         where: {
           status: "PENDING",
         },
-        include: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          employeeNumber: true,
+          phone: true,
+          department: true,
+          branch: true,
+          hireDate: true,
+          status: true,
+          role: true,
+          createdAt: true,
           company: {
             select: {
               id: true,
