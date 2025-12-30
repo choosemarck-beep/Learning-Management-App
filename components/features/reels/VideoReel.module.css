@@ -2,8 +2,8 @@
 
 .reelContainer {
   width: 100%;
-  height: calc(100vh - 80px); /* Account for bottom navigation */
-  height: calc(100dvh - 80px); /* Dynamic viewport height minus nav */
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height */
   position: relative;
   scroll-snap-align: start;
   scroll-snap-stop: always;
@@ -24,13 +24,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  background: #000;
 }
 
 .video {
   width: 100%;
   height: 100%;
   object-fit: cover; /* Fill screen like TikTok */
+  object-position: center;
   background: #000;
+  min-width: 100%;
+  min-height: 100%;
 }
 
 .playOverlay {

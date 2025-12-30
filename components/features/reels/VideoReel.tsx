@@ -67,7 +67,8 @@ export const VideoReel: React.FC<VideoReelProps> = ({
           className={styles.video}
           loop
           playsInline
-          muted={false}
+          autoPlay
+          muted={true}
           onClick={handleVideoClick}
         />
         {!isPlaying && (

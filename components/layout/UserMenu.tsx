@@ -67,6 +67,10 @@ export const UserMenu: React.FC<UserMenuProps> = ({
 
   const handleLogout = async () => {
     onClose();
+    // Clear remembered user from localStorage
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("rememberedUser");
+    }
     // Sign out without redirect to bypass NextAuth's NEXTAUTH_URL dependency
     await signOut({ redirect: false });
     

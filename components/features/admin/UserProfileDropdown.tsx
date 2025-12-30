@@ -19,6 +19,10 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   userAvatar,
 }) => {
   const handleLogout = async () => {
+    // Clear remembered user from localStorage
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("rememberedUser");
+    }
     // Sign out without redirect to bypass NextAuth's NEXTAUTH_URL dependency
     await signOut({ redirect: false });
     

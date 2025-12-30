@@ -601,11 +601,13 @@ Galaxy-inspired color scheme:
 
 ### Vercel Setup
 **Status**: ✅ Already configured
+- **Production Domain**: `https://learning-management-app-sigma.vercel.app`
 - GitHub integration: Connected
 - Automatic deployments: Enabled on push to main
 - Environment variables: Already configured
 - Build command: `prisma generate && next build`
 - Deployments happen automatically - no manual steps needed
+- **CRITICAL**: Always use the Vercel production URL (`https://learning-management-app-sigma.vercel.app`) for preview links, NOT localhost
 
 ### Railway Setup
 **Status**: ✅ Already configured
@@ -620,7 +622,7 @@ DATABASE_URL="postgresql://..."
 
 # NextAuth
 NEXTAUTH_SECRET="generate-random-string"
-NEXTAUTH_URL="https://your-app.vercel.app"
+NEXTAUTH_URL="https://learning-management-app-sigma.vercel.app"
 
 # Email Service (SendGrid)
 SENDGRID_API_KEY="SG.your_api_key_here"
@@ -717,6 +719,7 @@ BLOB_READ_WRITE_TOKEN="..."
   - Creating or modifying components
   - Making UI/UX changes
   - **Encountering errors** - Always check ERROR_DATABASE.md first to see if we've fixed similar issues
+  - **Before losing context** - ALWAYS tag @.cursorrules when you're about to lose context or at the start of a new conversation to maintain continuity
 - **Why This Matters**: These files contain critical project rules, design standards, technical specifications, and proven error solutions that ensure consistency and prevent repeating mistakes
 - **Review Before Implementation**: Always check all context files before implementing features to ensure compliance with project standards
 - **Error Resolution Workflow**: When encountering an error:
@@ -724,6 +727,7 @@ BLOB_READ_WRITE_TOKEN="..."
   2. Apply the documented solution if available
   3. If solution works, update ERROR_DATABASE.md with any improvements
   4. If solution doesn't work or error is new, document the new error and solution in ERROR_DATABASE.md
+- **CRITICAL - Context Preservation**: Always tag @.cursorrules at the start of responses or when context might be lost to ensure all project rules, deployment URLs, and standards are maintained
 
 ## Related Rules Files
 
@@ -932,10 +936,13 @@ The application supports four distinct user roles with different access levels:
   - For every action: explain the problem, the solution, and why it works
 - **Preview Links (MANDATORY)**: 
   - **ALWAYS** provide a preview link to view the latest changes after completing work
-  - Include the local development URL (e.g., `http://localhost:3000/signup`) or production URL if deployed
+  - **CRITICAL - Use Vercel Production URL**: Always use the production Vercel URL (e.g., `https://your-app.vercel.app`) for preview links, NOT localhost
+  - **Vercel Domain**: The project is deployed on Vercel - use the actual Vercel deployment URL for all preview links
   - Specify which page/route to visit to see the changes
   - If multiple pages were modified, list all relevant preview links
-  - Example: "Preview the changes at: http://localhost:3000/signup"
+  - **Example (Production)**: "Preview the changes at: https://learning-management-app-sigma.vercel.app/login"
+  - **Note**: Localhost URLs (`http://localhost:3000`) should only be mentioned for local development testing, but production previews must use Vercel URL
+  - **Context Reminder**: Tag @.cursorrules when providing preview links to ensure correct Vercel domain is used
 
 ## Security Best Practices
 

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { SplashScreen } from "@/components/ui/SplashScreen";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface SplashScreenWrapperProps {
   children: React.ReactNode;
@@ -14,6 +15,8 @@ export const SplashScreenWrapper: React.FC<SplashScreenWrapperProps> = ({
   const [showSplash, setShowSplash] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session } = useSession();
 
   useEffect(() => {
     setIsClient(true);
@@ -33,6 +36,12 @@ export const SplashScreenWrapper: React.FC<SplashScreenWrapperProps> = ({
 
   const handleSplashComplete = () => {
     setShowSplash(false);
+    
+    // Redirect to login if user is not authenticated
+    // Only redirect if we're on the root path or a non-protected route
+    if (!session && (pathname === "/" || pathname === "/login" || pathname === "/signup")) {
+      router.push("/login");
+    }
   };
 
   // Don't render anything until client-side hydration is complete

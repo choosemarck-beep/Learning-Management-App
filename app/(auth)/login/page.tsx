@@ -12,7 +12,14 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { IntroCarousel } from "@/components/features/IntroCarousel";
+import { ContinueAsCard } from "@/components/features/auth/ContinueAsCard";
 import styles from "./page.module.css";
+
+interface RememberedUser {
+  email: string;
+  name: string;
+  avatar: string | null;
+}
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -28,6 +35,25 @@ function LoginForm() {
   // This prevents redirect loops when user role doesn't match the hardcoded dashboard route
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberedUser, setRememberedUser] = useState<RememberedUser | null>(null);
+  const [showContinueAs, setShowContinueAs] = useState(false);
+
+  // Check for remembered user on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("rememberedUser");
+      if (stored) {
+        try {
+          const user = JSON.parse(stored) as RememberedUser;
+          setRememberedUser(user);
+          setShowContinueAs(true);
+        } catch (error) {
+          console.error("Error parsing remembered user:", error);
+          localStorage.removeItem("rememberedUser");
+        }
+      }
+    }
+  }, []);
 
   // Show toast for URL message parameter (fallback for direct URL access)
   useEffect(() => {
@@ -44,6 +70,7 @@ function LoginForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -148,6 +175,16 @@ function LoginForm() {
           const session = await sessionResponse.json();
           const userRole = session?.user?.role;
           
+          // Store user credentials in localStorage for "Continue as" feature
+          if (session?.user && typeof window !== "undefined") {
+            const userData: RememberedUser = {
+              email: session.user.email || normalizedEmail,
+              name: session.user.name || "",
+              avatar: session.user.avatar || null,
+            };
+            localStorage.setItem("rememberedUser", JSON.stringify(userData));
+          }
+          
           // Determine redirect URL based on role
           let redirectUrl = callbackUrl;
           if (callbackUrl === "/dashboard" || !callbackUrl) {
@@ -213,12 +250,37 @@ function LoginForm() {
     }
   };
 
+  const handleContinueAs = (email: string) => {
+    setValue("email", email);
+    setShowContinueAs(false);
+    // Focus on password input
+    setTimeout(() => {
+      const passwordInput = document.querySelector('input[type="password"]') as HTMLInputElement;
+      if (passwordInput) {
+        passwordInput.focus();
+      }
+    }, 100);
+  };
+
+  const handleDismissContinueAs = () => {
+    setShowContinueAs(false);
+  };
+
   return (
     <div className={styles.container}>
       {/* Login Section with Carousel */}
       <div className={styles.loginSection}>
       {/* Intro Carousel */}
       <IntroCarousel className={styles.carousel} />
+
+      {/* Continue As Card */}
+      {showContinueAs && rememberedUser && (
+        <ContinueAsCard
+          user={rememberedUser}
+          onContinue={handleContinueAs}
+          onDismiss={handleDismissContinueAs}
+        />
+      )}
 
       {/* Login Form */}
         <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
