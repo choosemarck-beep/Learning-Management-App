@@ -44,16 +44,27 @@ export async function GET(request: NextRequest) {
     // Build where clause
     const where: any = {};
 
-    // Handle status filter
+    // Handle status filter - STRICT: Each status must ONLY show users with that exact status
     // "ALL" means show only APPROVED users (for "All Users" tab)
     if (status === "ALL") {
       where.status = "APPROVED";
+    } else if (status === "PENDING") {
+      // STRICT: Only show PENDING users in PENDING tab
+      where.status = "PENDING";
+    } else if (status === "REJECTED") {
+      // STRICT: Only show REJECTED users in REJECTED tab
+      where.status = "REJECTED";
     } else if (status) {
+      // For any other status value, use it as-is
       where.status = status;
+    } else {
+      // Default to APPROVED if no status specified
+      where.status = "APPROVED";
     }
 
     // Role-based filtering: Regular admins cannot see other admins or super admins
-    // This applies to "ALL" (which is APPROVED) and "APPROVED" status
+    // This applies ONLY to "ALL" (which is APPROVED) and "APPROVED" status
+    // Do NOT apply role filtering to PENDING or REJECTED tabs - they should show all users with that status
     if (user.role === "ADMIN" && (status === "ALL" || status === "APPROVED" || !status)) {
       // Filter out ADMIN and SUPER_ADMIN roles for regular admins
       where.role = {

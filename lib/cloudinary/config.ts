@@ -73,14 +73,41 @@ export async function uploadToCloudinary(
     console.log(`[Cloudinary] Successfully uploaded to: ${result.secure_url}`);
     return result.secure_url;
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    // Cloudinary errors are objects, not simple Error instances
+    // Extract meaningful error message from Cloudinary error structure
+    let errorMessage: string;
+    let errorDetails: any = {};
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorDetails.stack = error.stack;
+    } else if (error && typeof error === 'object') {
+      // Cloudinary error objects have properties like: message, http_code, name, etc.
+      const cloudinaryError = error as any;
+      errorMessage = cloudinaryError.message || 
+                    cloudinaryError.error?.message || 
+                    `Cloudinary upload failed${cloudinaryError.http_code ? ` (HTTP ${cloudinaryError.http_code})` : ''}`;
+      
+      // Extract all relevant error properties for logging
+      errorDetails = {
+        message: cloudinaryError.message,
+        http_code: cloudinaryError.http_code,
+        name: cloudinaryError.name,
+        error: cloudinaryError.error,
+        raw: process.env.NODE_ENV === 'development' ? JSON.stringify(error, null, 2) : undefined,
+      };
+    } else {
+      errorMessage = String(error);
+    }
+    
     console.error('[Cloudinary] Upload error:', {
       message: errorMessage,
-      stack: error instanceof Error ? error.stack : undefined,
+      ...errorDetails,
       filename,
       resourceType,
       bufferSize: buffer.length,
     });
+    
     throw new Error(`Failed to upload to Cloudinary: ${errorMessage}`);
   }
 }
@@ -113,10 +140,36 @@ export async function deleteFromCloudinary(
       // Resolve anyway - file might not exist or already deleted
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    // Cloudinary errors are objects, not simple Error instances
+    // Extract meaningful error message from Cloudinary error structure
+    let errorMessage: string;
+    let errorDetails: any = {};
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorDetails.stack = error.stack;
+    } else if (error && typeof error === 'object') {
+      // Cloudinary error objects have properties like: message, http_code, name, etc.
+      const cloudinaryError = error as any;
+      errorMessage = cloudinaryError.message || 
+                    cloudinaryError.error?.message || 
+                    `Cloudinary delete failed${cloudinaryError.http_code ? ` (HTTP ${cloudinaryError.http_code})` : ''}`;
+      
+      // Extract all relevant error properties for logging
+      errorDetails = {
+        message: cloudinaryError.message,
+        http_code: cloudinaryError.http_code,
+        name: cloudinaryError.name,
+        error: cloudinaryError.error,
+        raw: process.env.NODE_ENV === 'development' ? JSON.stringify(error, null, 2) : undefined,
+      };
+    } else {
+      errorMessage = String(error);
+    }
+    
     console.error('[Cloudinary] Delete error:', {
       message: errorMessage,
-      stack: error instanceof Error ? error.stack : undefined,
+      ...errorDetails,
       publicId,
       resourceType,
     });

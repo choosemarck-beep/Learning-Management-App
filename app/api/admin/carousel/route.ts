@@ -173,13 +173,21 @@ export async function POST(request: NextRequest) {
       imageUrl = await uploadToCloudinary(buffer, 'carousel', filename, 'image');
       console.log(`[Carousel] Successfully uploaded to Cloudinary: ${imageUrl}`);
     } catch (uploadError) {
-      const errorMessage = uploadError instanceof Error ? uploadError.message : String(uploadError);
+      // uploadToCloudinary now throws Error with proper message, but handle edge cases
+      const errorMessage = uploadError instanceof Error 
+        ? uploadError.message 
+        : (uploadError && typeof uploadError === 'object' && 'message' in uploadError)
+          ? String((uploadError as any).message)
+          : String(uploadError);
+      
       console.error("[Carousel] Cloudinary upload error:", {
         message: errorMessage,
         stack: uploadError instanceof Error ? uploadError.stack : undefined,
         filename,
         bufferSize: buffer.length,
+        errorType: uploadError instanceof Error ? 'Error' : typeof uploadError,
       });
+      
       return NextResponse.json(
         { 
           success: false, 

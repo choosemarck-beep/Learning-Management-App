@@ -605,8 +605,8 @@ DATABASE_URL="postgresql://..."
 NEXTAUTH_SECRET="generate-random-string"
 NEXTAUTH_URL="https://your-app.vercel.app"
 
-# Email Service (Resend)
-RESEND_API_KEY="re_your_api_key_here"
+# Email Service (SendGrid)
+SENDGRID_API_KEY="SG.your_api_key_here"
 
 # Analytics
 NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"

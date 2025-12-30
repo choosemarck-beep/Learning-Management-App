@@ -1675,6 +1675,100 @@ export async function uploadToCloudinary(
 
 ---
 
+#### Error: "[object Object]" in Cloudinary Upload Error Messages
+**Symptoms:**
+- Console shows: `[Cloudinary] Upload error: { message: '[object Object]', ... }`
+- Error message displays as `[object Object]` instead of actual error details
+- Carousel photo upload fails with unhelpful error message
+- Error object is not properly serialized when logging or throwing
+
+**Common Causes:**
+- Cloudinary errors are objects, not simple Error instances
+- Using `String(error)` on Cloudinary error objects returns `[object Object]`
+- Not extracting error properties (`message`, `http_code`, `name`) from Cloudinary error structure
+- Error object structure: `{ message: string, http_code: number, name: string, error?: { message: string } }`
+
+**Solution:**
+- **Extract Error Properties**: Check if error is an object and extract meaningful properties
+- **Handle Multiple Error Structures**: Cloudinary errors can be Error instances or plain objects
+- **Serialize Properly**: Extract `message`, `http_code`, and other relevant properties
+- **Log Full Details**: Include all error properties in logs for debugging
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - Returns [object Object] for Cloudinary errors
+catch (error) {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  // String(error) returns "[object Object]" for Cloudinary error objects
+  throw new Error(`Failed to upload: ${errorMessage}`);
+}
+
+// ✅ CORRECT - Extract meaningful error message from Cloudinary error structure
+catch (error) {
+  let errorMessage: string;
+  let errorDetails: any = {};
+  
+  if (error instanceof Error) {
+    errorMessage = error.message;
+    errorDetails.stack = error.stack;
+  } else if (error && typeof error === 'object') {
+    // Cloudinary error objects have properties like: message, http_code, name, etc.
+    const cloudinaryError = error as any;
+    errorMessage = cloudinaryError.message || 
+                  cloudinaryError.error?.message || 
+                  `Cloudinary upload failed${cloudinaryError.http_code ? ` (HTTP ${cloudinaryError.http_code})` : ''}`;
+    
+    // Extract all relevant error properties for logging
+    errorDetails = {
+      message: cloudinaryError.message,
+      http_code: cloudinaryError.http_code,
+      name: cloudinaryError.name,
+      error: cloudinaryError.error,
+      raw: process.env.NODE_ENV === 'development' ? JSON.stringify(error, null, 2) : undefined,
+    };
+  } else {
+    errorMessage = String(error);
+  }
+  
+  console.error('[Cloudinary] Upload error:', {
+    message: errorMessage,
+    ...errorDetails,
+    filename,
+    resourceType,
+    bufferSize: buffer.length,
+  });
+  
+  throw new Error(`Failed to upload to Cloudinary: ${errorMessage}`);
+}
+```
+
+**Files Fixed:**
+- `lib/cloudinary/config.ts` - Updated `uploadToCloudinary()` and `deleteFromCloudinary()` to properly serialize Cloudinary error objects
+- `app/api/admin/carousel/route.ts` - Enhanced error handling to extract meaningful error messages
+
+**Prevention:**
+- Always check if error is an object before using `String(error)`
+- Extract specific error properties (`message`, `http_code`) from Cloudinary error objects
+- Use conditional logic to handle both Error instances and plain error objects
+- Log full error details (including `http_code`, `name`) for debugging
+- Test error handling with actual Cloudinary API errors
+- **CRITICAL**: Cloudinary errors are objects with properties, not simple strings - always extract `message` or `error.message` property
+
+**Cloudinary Error Structure:**
+```typescript
+// Cloudinary error object structure
+{
+  message: string,        // Error message
+  http_code: number,     // HTTP status code (e.g., 400, 401, 403, 500)
+  name: string,          // Error name/type
+  error?: {              // Nested error object (sometimes present)
+    message: string
+  }
+}
+```
+
+---
+
 #### Error: Vercel Not Deploying Automatically After Git Push
 **Symptoms:**
 - Code is pushed to GitHub successfully
@@ -1910,4 +2004,5 @@ const serializedUsers = users.map((user) => ({
 - **2024-12-29**: Added User Management Table 500 error and Carousel/Splash Screen upload errors with solutions
 - **2024-12-29**: Added Cloudinary configuration missing error pattern and debugging steps
 - **2024-12-29**: Added Date serialization error pattern for Prisma queries in API responses
+- **2024-12-30**: Added Cloudinary error serialization pattern - handling `[object Object]` errors by properly extracting error properties from Cloudinary error objects
 

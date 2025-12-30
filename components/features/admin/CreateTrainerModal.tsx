@@ -27,7 +27,8 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 2;
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     employeeNumber: "",
     phone: "",
@@ -46,7 +47,8 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
   useEffect(() => {
     if (!isOpen) {
       setFormData({
-        name: "",
+        firstName: "",
+        lastName: "",
         email: "",
         employeeNumber: "",
         phone: "",
@@ -73,10 +75,16 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
     const newErrors: Record<string, string> = {};
 
     if (step === 1) {
-      if (!formData.name.trim()) {
-        newErrors.name = "Name is required";
-      } else if (formData.name.trim().length < 2) {
-        newErrors.name = "Name must be at least 2 characters";
+      if (!formData.firstName.trim()) {
+        newErrors.firstName = "First name is required";
+      } else if (formData.firstName.trim().length < 2) {
+        newErrors.firstName = "First name must be at least 2 characters";
+      }
+
+      if (!formData.lastName.trim()) {
+        newErrors.lastName = "Last name is required";
+      } else if (formData.lastName.trim().length < 2) {
+        newErrors.lastName = "Last name must be at least 2 characters";
       }
 
       if (!formData.email.trim()) {
@@ -113,21 +121,34 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Final validation
-    if (!validateStep(1)) {
-      setCurrentStep(1);
+    // Only submit if we're on the final step
+    if (currentStep !== totalSteps) {
+      // If not on final step, just advance to next step
+      handleNext();
       return;
     }
 
+    // Validate all steps before submission
+    if (!validateStep(1)) {
+      setCurrentStep(1);
+      toast.error("Please fill in all required fields in Step 1");
+      return;
+    }
+
+    // Step 2 fields are optional, so no validation needed
+
     setIsLoading(true);
     try {
+      // Combine firstName and lastName into name for API
+      const fullName = `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim();
+      
       const response = await fetch("/api/admin/users/create-trainer", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: formData.name.trim(),
+          name: fullName,
           email: formData.email.trim().toLowerCase(),
           employeeNumber: formData.employeeNumber.trim() || undefined,
           phone: formData.phone.trim() || undefined,
@@ -154,7 +175,7 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
           });
           setErrors(validationErrors);
           // Go back to step 1 if there are errors in required fields
-          if (validationErrors.name || validationErrors.email) {
+          if (validationErrors.firstName || validationErrors.lastName || validationErrors.email) {
             setCurrentStep(1);
           }
         }
@@ -170,7 +191,8 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
   const handleClose = () => {
     if (!isLoading) {
       setFormData({
-        name: "",
+        firstName: "",
+        lastName: "",
         email: "",
         employeeNumber: "",
         phone: "",
@@ -186,7 +208,8 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
   const handleCloseCredentials = () => {
     setGeneratedCredentials(null);
     setFormData({
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       employeeNumber: "",
       phone: "",
@@ -266,19 +289,36 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
             </div>
 
             <div className={styles.fieldsGroup}>
-              <div className={styles.formField}>
-                <Input
-                  label="Full Name"
-                  name="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={handleChange}
-                  error={errors.name}
-                  required
-                  disabled={isLoading}
-                  placeholder="Enter trainer's full name"
-                  helperText="This will be displayed on their profile"
-                />
+              <div className={styles.nameFieldsRow}>
+                <div className={styles.formField}>
+                  <Input
+                    label="First Name"
+                    name="firstName"
+                    type="text"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    error={errors.firstName}
+                    required
+                    disabled={isLoading}
+                    placeholder="John"
+                    helperText="Trainer's first name"
+                  />
+                </div>
+
+                <div className={styles.formField}>
+                  <Input
+                    label="Last Name"
+                    name="lastName"
+                    type="text"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    error={errors.lastName}
+                    required
+                    disabled={isLoading}
+                    placeholder="Doe"
+                    helperText="Trainer's last name"
+                  />
+                </div>
               </div>
 
               <div className={styles.formField}>

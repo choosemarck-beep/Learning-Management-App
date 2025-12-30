@@ -1,15 +1,17 @@
-import { Resend } from "resend";
+import sgMail from "@sendgrid/mail";
 
-// Initialize Resend client
+// Initialize SendGrid client
 // This abstraction allows easy switching to other email services later
-export const resend = new Resend(process.env.RESEND_API_KEY);
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 // Email service abstraction
 export async function sendEmail({
   to,
   subject,
   html,
-  from = "Learning Management <onboarding@resend.dev>",
+  from = "Learning Management <noreply@sendgrid.net>",
 }: {
   to: string;
   subject: string;
@@ -17,48 +19,53 @@ export async function sendEmail({
   from?: string;
 }) {
   // Check if API key is configured
-  if (!process.env.RESEND_API_KEY) {
+  if (!process.env.SENDGRID_API_KEY) {
     const errorMsg = "Email service is not configured. Please contact support.";
-    console.error("❌ Email service configuration error: RESEND_API_KEY is not set");
+    console.error("❌ Email service configuration error: SENDGRID_API_KEY is not set");
     throw new Error(errorMsg);
   }
 
-  // Warning about Resend free tier limitations
-  if (from.includes("onboarding@resend.dev")) {
-    console.warn("⚠️  Using onboarding@resend.dev - This can only send to your Resend account email.");
-    console.warn("⚠️  To send to any email, verify a domain at https://resend.com/domains");
-  }
+  // Note: SendGrid free tier allows sending to any email address
+  // Default "from" address works for testing, but domain verification recommended for production
 
   try {
     console.log("📧 Attempting to send email to:", to);
-    const { data, error } = await resend.emails.send({
-      from,
+    
+    const msg = {
       to,
+      from,
       subject,
       html,
-    });
+    };
 
-    if (error) {
-      console.error("❌ Email sending error:", {
-        message: error.message,
-        name: error.name,
-      });
-      // Don't expose internal error details to client
-      throw new Error("Failed to send email. Please try again later.");
-    }
+    const [response, body] = await sgMail.send(msg);
 
     console.log("✅ Email sent successfully:", {
       to,
-      id: data?.id,
+      statusCode: response.statusCode,
+      headers: response.headers,
     });
-    return data;
-  } catch (error) {
+
+    return {
+      id: response.headers["x-message-id"]?.[0] || undefined,
+      statusCode: response.statusCode,
+    };
+  } catch (error: any) {
+    // SendGrid errors have a response property with error details
+    const errorMessage = error?.response?.body?.errors?.[0]?.message || 
+                        error?.message || 
+                        "Failed to send email";
+    
     console.error("❌ Email sending error:", {
-      error: error instanceof Error ? error.message : String(error),
+      message: errorMessage,
+      code: error?.code,
+      response: error?.response?.body,
       to,
       from,
     });
-    throw error;
+    
+    // Don't expose internal error details to client
+    throw new Error("Failed to send email. Please try again later.");
   }
 }
 

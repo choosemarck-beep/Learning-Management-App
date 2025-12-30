@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendEmail } from "@/lib/email/client";
 
 /**
- * Test endpoint to verify Resend email configuration
+ * Test endpoint to verify SendGrid email configuration
  * Usage: POST /api/test-email with { "to": "your-email@example.com" }
  */
 export async function POST(request: NextRequest) {
@@ -17,9 +17,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if RESEND_API_KEY is set
-    if (!process.env.RESEND_API_KEY) {
-      console.error("RESEND_API_KEY not configured");
+    // Check if SENDGRID_API_KEY is set
+    if (!process.env.SENDGRID_API_KEY) {
+      console.error("SENDGRID_API_KEY not configured");
       return NextResponse.json(
         {
           error: "Email service is not configured",
