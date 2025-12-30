@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
+import { UserRole } from "@prisma/client";
 
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
       // Build where clause - exclude ADMIN and SUPER_ADMIN
       const employeeWhere = {
         role: {
-          notIn: ["ADMIN", "SUPER_ADMIN"],
+          notIn: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
         },
         status: "APPROVED",
       };
