@@ -33,7 +33,7 @@ export default async function ReelsPage() {
   const dashboardRoute = getDashboardRoute();
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} data-reels-page="true">
       <ReelsPageClient />
       <ProfileBottomNav
         userRole={currentUser.role}

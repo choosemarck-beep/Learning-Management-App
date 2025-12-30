@@ -38,6 +38,16 @@
   min-height: 100%;
 }
 
+.videoIframe {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: none;
+  background: #000;
+}
+
 .playOverlay {
   position: absolute;
   top: 0;
@@ -49,7 +59,8 @@
   justify-content: center;
   background: rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  z-index: 1;
+  z-index: 2;
+  pointer-events: auto;
 }
 
 .playIcon {
@@ -68,9 +79,9 @@
 /* Video Info Overlay (Bottom Left) */
 .infoOverlay {
   position: absolute;
-  bottom: 80px; /* Above action buttons */
+  bottom: 100px; /* Above bottom nav */
   left: 0;
-  right: 80px; /* Avoid action buttons */
+  right: 100px; /* Avoid action buttons */
   padding: var(--spacing-md);
   background: linear-gradient(
     to top,
@@ -78,7 +89,7 @@
     rgba(0, 0, 0, 0.4) 50%,
     transparent 100%
   );
-  z-index: 2;
+  z-index: 1000;
   pointer-events: none;
 }
 
@@ -111,12 +122,13 @@
 .actions {
   position: absolute;
   right: var(--spacing-md);
-  bottom: var(--spacing-md); /* Above bottom nav */
+  bottom: 100px; /* Above bottom nav (80px nav + 20px spacing) */
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
-  z-index: 3;
+  z-index: 1001; /* Above bottom nav (z-index: 1000) */
   align-items: center;
+  pointer-events: auto;
 }
 
 .actionButton {
@@ -128,10 +140,14 @@
   border: none;
   color: var(--color-text-primary);
   cursor: pointer;
-  padding: 0;
+  padding: var(--spacing-xs);
   transition: transform var(--transition-normal) ease;
   min-width: 44px;
   min-height: 44px;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1002;
+  touch-action: manipulation;
 }
 
 .actionButton:active {

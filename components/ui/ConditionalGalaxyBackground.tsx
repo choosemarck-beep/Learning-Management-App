@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { GalaxyBackground } from "@/components/ui/GalaxyBackground";
 
 interface ConditionalGalaxyBackgroundProps {
@@ -13,8 +14,15 @@ export const ConditionalGalaxyBackground: React.FC<ConditionalGalaxyBackgroundPr
   meteorCount = 3 
 }) => {
   const [galaxyEnabled, setGalaxyEnabled] = useState<boolean>(true);
+  const pathname = usePathname();
 
   useEffect(() => {
+    // Disable galaxy background for Reels page (full screen videos)
+    if (pathname === "/reels") {
+      setGalaxyEnabled(false);
+      return;
+    }
+
     // Check theme settings from data attribute
     const checkTheme = () => {
       const root = document.documentElement;
@@ -33,7 +41,7 @@ export const ConditionalGalaxyBackground: React.FC<ConditionalGalaxyBackgroundPr
     });
 
     return () => observer.disconnect();
-  }, []);
+  }, [pathname]);
 
   if (!galaxyEnabled) {
     return null;

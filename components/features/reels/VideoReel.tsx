@@ -12,6 +12,28 @@ interface VideoReelProps {
   onPrevious: () => void;
 }
 
+// Detect if video URL is YouTube and convert to embed URL
+const getVideoEmbedUrl = (videoUrl: string): { isYouTube: boolean; embedUrl: string } => {
+  if (!videoUrl) {
+    return { isYouTube: false, embedUrl: videoUrl };
+  }
+
+  // Check if it's a YouTube URL
+  const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = videoUrl.match(youtubeRegex);
+  
+  if (match && match[1]) {
+    const videoId = match[1];
+    // YouTube embed URL with autoplay, mute, loop, and controls
+    return {
+      isYouTube: true,
+      embedUrl: `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1&rel=0&playsinline=1`,
+    };
+  }
+
+  return { isYouTube: false, embedUrl: videoUrl };
+};
+
 export const VideoReel: React.FC<VideoReelProps> = ({
   video,
   isActive,
@@ -22,19 +44,38 @@ export const VideoReel: React.FC<VideoReelProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const { isYouTube, embedUrl } = getVideoEmbedUrl(video.videoUrl);
 
   // Auto-play when video becomes active
   useEffect(() => {
-    if (isActive && videoRef.current) {
-      videoRef.current.play().catch((error) => {
-        console.error("Error playing video:", error);
-      });
-      setIsPlaying(true);
-    } else if (!isActive && videoRef.current) {
-      videoRef.current.pause();
-      setIsPlaying(false);
+    if (isActive) {
+      if (isYouTube && iframeRef.current) {
+        // For YouTube iframes, autoplay is handled by URL parameters in embed URL
+        // Reload iframe to trigger autoplay if needed
+        const currentSrc = iframeRef.current.src;
+        if (!currentSrc.includes("autoplay=1")) {
+          iframeRef.current.src = embedUrl;
+        }
+        setIsPlaying(true);
+      } else if (!isYouTube && videoRef.current) {
+        videoRef.current.play().catch((error) => {
+          console.error("[VideoReel] Error playing video:", error);
+          setIsPlaying(false);
+        });
+        setIsPlaying(true);
+      }
+    } else {
+      if (!isYouTube && videoRef.current) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      }
+      // YouTube iframes pause automatically when not visible
+      if (isYouTube) {
+        setIsPlaying(false);
+      }
     }
-  }, [isActive]);
+  }, [isActive, isYouTube, embedUrl]);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -47,7 +88,11 @@ export const VideoReel: React.FC<VideoReelProps> = ({
   };
 
   const handleVideoClick = () => {
-    if (videoRef.current) {
+    if (isYouTube) {
+      // YouTube iframes handle play/pause through their own controls
+      // Toggle play state for UI feedback
+      setIsPlaying(!isPlaying);
+    } else if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
         setIsPlaying(false);
@@ -61,20 +106,52 @@ export const VideoReel: React.FC<VideoReelProps> = ({
   return (
     <div className={styles.reelContainer}>
       <div className={styles.videoWrapper}>
-        <video
-          ref={videoRef}
-          src={video.videoUrl}
-          className={styles.video}
-          loop
-          playsInline
-          autoPlay
-          muted={true}
-          onClick={handleVideoClick}
-        />
-        {!isPlaying && (
-          <div className={styles.playOverlay} onClick={handleVideoClick}>
-            <div className={styles.playIcon}>▶</div>
-          </div>
+        {isYouTube ? (
+          <iframe
+            ref={iframeRef}
+            src={embedUrl}
+            className={styles.videoIframe}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            title={video.title}
+            style={{ width: "100%", height: "100%", border: "none" }}
+            onLoad={() => {
+              console.log("[VideoReel] YouTube iframe loaded:", video.title);
+              setIsPlaying(true);
+            }}
+            onError={(e) => {
+              console.error("[VideoReel] YouTube iframe error:", e);
+            }}
+          />
+        ) : (
+          <>
+            <video
+              ref={videoRef}
+              src={embedUrl}
+              className={styles.video}
+              loop
+              playsInline
+              autoPlay
+              muted={true}
+              onClick={handleVideoClick}
+              onLoadedData={() => {
+                console.log("[VideoReel] Video loaded:", video.title);
+                if (isActive) {
+                  setIsPlaying(true);
+                }
+              }}
+              onError={(e) => {
+                console.error("[VideoReel] Video error:", e, video.videoUrl);
+              }}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+            />
+            {!isPlaying && (
+              <div className={styles.playOverlay} onClick={handleVideoClick}>
+                <div className={styles.playIcon}>▶</div>
+              </div>
+            )}
+          </>
         )}
       </div>
 

@@ -11,6 +11,16 @@
   background-color: transparent; /* Background handled by GalaxyBackground */
 }
 
+/* Reels page: Full width container, no max-width constraint */
+.container:has([data-reels-page="true"]) {
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+  background-color: #000;
+  position: relative;
+  z-index: 1;
+}
+
 /* Admin pages: Completely hide container div when adminWrapper is present (nested in main) */
 .container:has(.adminWrapper),
 .container:has(main .adminWrapper),
@@ -116,6 +126,13 @@
   width: 100%;
   padding: var(--spacing-md);
   padding-bottom: calc(var(--spacing-2xl) + var(--spacing-lg));
+}
+
+/* Reels page: Remove all padding for full screen */
+.main:has([data-reels-page="true"]) {
+  padding: 0;
+  padding-bottom: 0;
+  overflow: hidden;
 }
 
 /* Admin pages: Remove bottom padding for desktop */
