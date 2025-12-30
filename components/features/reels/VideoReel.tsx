@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Heart, MessageCircle } from "lucide-react";
+import toast from "react-hot-toast";
 import { Video } from "./ReelsPageClient";
+import { ReelCommentsModal } from "./ReelCommentsModal";
 import styles from "./VideoReel.module.css";
 
 interface VideoReelProps {
