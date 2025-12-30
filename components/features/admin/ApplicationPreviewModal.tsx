@@ -20,6 +20,24 @@ export const ApplicationPreviewModal: React.FC<ApplicationPreviewModalProps> = (
 }) => {
   if (!user) return null;
 
+  // Safety check: ensure user has required fields
+  if (!user.id || !user.name || !user.email) {
+    console.error("[ApplicationPreviewModal] Invalid user data:", user);
+    return (
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Error"
+        showCloseButton={true}
+        closeOnBackdropClick={true}
+      >
+        <div style={{ padding: "var(--spacing-lg)" }}>
+          <p>Unable to display application preview. User data is incomplete.</p>
+        </div>
+      </Modal>
+    );
+  }
+
   const formatDate = (date: Date | string | null) => {
     if (!date) return "N/A";
     try {

@@ -22,7 +22,7 @@ export interface User {
   branch: string | null;
   hireDate: Date | null;
   status: "PENDING" | "APPROVED" | "REJECTED" | "RESIGNED";
-  role: "SUPER_ADMIN" | "ADMIN" | "REGIONAL_MANAGER" | "AREA_MANAGER" | "BRANCH_MANAGER" | "EMPLOYEE" | "TRAINER";
+  role: "SUPER_ADMIN" | "ADMIN" | "REGIONAL_MANAGER" | "AREA_MANAGER" | "BRANCH_MANAGER" | "EMPLOYEE" | "TRAINER" | null;
   createdAt: Date;
   company: {
     id: string;
@@ -623,7 +623,9 @@ export const UsersTable: React.FC<UsersTableProps> = ({
     return <span className={styles.employeeStatus}>{getEmployeeStatus(status)}</span>;
   };
 
-  const getRoleBadge = (role: string) => {
+  const getRoleBadge = (role: string | null | undefined) => {
+    if (!role) return null;
+    
     const roleColors: Record<string, string> = {
       SUPER_ADMIN: "var(--color-primary-purple)",
       ADMIN: "var(--color-primary-indigo)",

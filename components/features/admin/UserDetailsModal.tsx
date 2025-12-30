@@ -20,6 +20,24 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
 }) => {
   if (!user) return null;
 
+  // Safety check: ensure user has required fields
+  if (!user.id || !user.name || !user.email) {
+    console.error("[UserDetailsModal] Invalid user data:", user);
+    return (
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="Error"
+        showCloseButton={true}
+        closeOnBackdropClick={true}
+      >
+        <div style={{ padding: "var(--spacing-lg)" }}>
+          <p>Unable to display user details. User data is incomplete.</p>
+        </div>
+      </Modal>
+    );
+  }
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "APPROVED":
@@ -61,7 +79,8 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     }
   };
 
-  const formatRole = (role: string) => {
+  const formatRole = (role: string | null | undefined) => {
+    if (!role) return "N/A";
     return role.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
