@@ -2120,6 +2120,196 @@ try {
 - **2024-01-XX**: Added DatePicker mobile touch issues and future dates not disabled error
 - **2024-01-XX**: Added 500 Internal Server Error on Signup API route error and comprehensive debugging guide
 - **2024-12-29**: Added User Management Table 500 error and Carousel/Splash Screen upload errors with solutions
+- **2024-12-30**: Added User Management issues: Rejected tab filtering, blank employee details columns, missing approve buttons, and avatar upload errors
+
+---
+
+### 12. User Management Table Issues
+
+#### Error: Rejected Tab Showing Users When Should Be Empty
+**Symptoms:**
+- Rejected tab displays users when there are no rejected accounts
+- Tab shows data that doesn't match the status filter
+- Users with different statuses appearing in Rejected tab
+
+**Common Causes:**
+- API filtering logic not strictly enforcing status filter
+- Role-based filtering interfering with status filtering
+- Frontend not properly handling empty state
+
+**Solution:**
+- Add validation to ensure all returned users match the requested status filter
+- Filter out any mismatched users before returning response
+- Add logging to debug what users are being returned
+- Ensure role-based filtering only applies to APPROVED/ALL tabs, not PENDING/REJECTED
+
+**Example Fix:**
+```typescript
+// Validate that all returned users match the requested status filter
+if (status && (status === "PENDING" || status === "REJECTED" || status === "APPROVED")) {
+  const mismatchedUsers = users.filter(u => u.status !== status);
+  if (mismatchedUsers.length > 0) {
+    console.error("[Users API] ERROR: Found users with mismatched status:", {
+      requestedStatus: status,
+      mismatchedCount: mismatchedUsers.length,
+      mismatchedUsers: mismatchedUsers.map(u => ({ id: u.id, name: u.name, status: u.status }))
+    });
+    // Filter out mismatched users to ensure data integrity
+    users = users.filter(u => u.status === status);
+  }
+}
+```
+
+**Files Fixed:**
+- `app/api/admin/users/route.ts` - Added status validation and filtering
+
+---
+
+#### Error: Blank Employee Details Columns in User Management Table
+**Symptoms:**
+- Employee ID, Branch, Hire Type, Employee Status columns show as blank
+- Null values not displaying properly
+- Data exists in database but not showing in table
+
+**Common Causes:**
+- Frontend displaying empty strings for null values
+- API not returning all required fields
+- Serialization issues with null values
+
+**Solution:**
+- Display "N/A" instead of empty strings for null values
+- Ensure API selects and serializes all required fields
+- Update formatHireType to return "N/A" for null values
+- Add better logging to see what data is being returned
+
+**Example Fix:**
+```typescript
+// Frontend - show "N/A" for null values
+{user.employeeNumber || "N/A"}
+{user.branch || "N/A"}
+{formatHireType(user.hireType)} // Returns "N/A" if null
+
+// formatHireType function
+const formatHireType = (hireType: "DIRECT_HIRE" | "AGENCY" | null) => {
+  if (!hireType) return "N/A";
+  return hireType === "DIRECT_HIRE" ? "Direct Hire" : "Agency";
+};
+```
+
+**Files Fixed:**
+- `components/features/admin/UsersTable.tsx` - Updated display logic to show "N/A" for null values
+- `app/api/admin/users/route.ts` - Added logging for employee details fields
+
+---
+
+#### Error: Missing Approve/Reject Buttons in Application Preview Modal
+**Symptoms:**
+- Application Preview modal is read-only
+- No way to approve/reject users from the modal
+- Users must use context menu instead of modal actions
+
+**Common Causes:**
+- Modal component doesn't have action buttons
+- Handlers not passed to modal component
+- Missing UI for approve/reject actions
+
+**Solution:**
+- Add Approve and Reject buttons to modal footer
+- Pass onApprove and onReject handlers as props
+- Add loading states during approval/rejection
+- Close modal after successful action
+- Refresh user list after approval/rejection
+
+**Example Fix:**
+```typescript
+// Modal component
+interface ApplicationPreviewModalProps {
+  // ... existing props
+  onApprove?: (userId: string) => Promise<void>;
+  onReject?: (userId: string) => Promise<void>;
+  onRefresh?: () => void;
+}
+
+// Add action buttons in modal footer
+{(onApprove || onReject) && (
+  <div className={styles.actions}>
+    {onReject && (
+      <Button variant="danger" onClick={handleReject} disabled={isProcessing}>
+        Reject
+      </Button>
+    )}
+    {onApprove && (
+      <Button variant="primary" onClick={handleApprove} disabled={isProcessing}>
+        Approve
+      </Button>
+    )}
+  </div>
+)}
+```
+
+**Files Fixed:**
+- `components/features/admin/ApplicationPreviewModal.tsx` - Added approve/reject buttons and handlers
+- `components/features/admin/ApplicationPreviewModal.module.css` - Added action buttons styling
+- `components/features/admin/UsersTable.tsx` - Passed handlers to modal
+
+---
+
+#### Error: Avatar Upload Not Working
+**Symptoms:**
+- Avatar upload fails silently
+- No error messages shown to user
+- Upload appears to work but avatar doesn't update
+
+**Common Causes:**
+- Missing Cloudinary configuration
+- API endpoint errors not properly surfaced
+- Frontend not handling API errors correctly
+- File validation failures
+
+**Solution:**
+- Add comprehensive error logging throughout upload flow
+- Verify Cloudinary configuration is present
+- Improve error messages returned to frontend
+- Add detailed logging in both API and frontend
+- Check file validation logic
+
+**Example Fix:**
+```typescript
+// API - Enhanced logging
+console.log("[Avatar] Starting upload:", {
+  filename: file.name,
+  type: file.type,
+  size: `${(file.size / 1024).toFixed(2)}KB`,
+  hasCloudinaryConfig: !!(
+    process.env.CLOUDINARY_CLOUD_NAME &&
+    process.env.CLOUDINARY_API_KEY &&
+    process.env.CLOUDINARY_API_SECRET
+  ),
+});
+
+// Frontend - Better error handling
+console.log("[AvatarUploadModal] API response:", {
+  ok: response.ok,
+  success: data.success,
+  error: data.error,
+  hasAvatarUrl: !!data.avatarUrl,
+});
+
+if (!response.ok || !data.success) {
+  const errorMessage = data.error || data.details || "Failed to upload avatar";
+  throw new Error(errorMessage);
+}
+```
+
+**Files Fixed:**
+- `app/api/user/upload-avatar/route.ts` - Enhanced error logging and validation
+- `components/features/profile/AvatarUploadModal.tsx` - Improved error handling and user feedback
+
+**Prevention:**
+- Always check Cloudinary configuration before upload
+- Log all steps of upload process for debugging
+- Provide clear error messages to users
+- Test upload flow end-to-end after changes
 - **2024-12-29**: Added Cloudinary configuration missing error pattern and debugging steps
 - **2024-12-29**: Added Date serialization error pattern for Prisma queries in API responses
 - **2024-12-30**: Added Cloudinary error serialization pattern - handling `[object Object]` errors by properly extracting error properties from Cloudinary error objects

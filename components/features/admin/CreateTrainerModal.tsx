@@ -419,7 +419,7 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
         isOpen={isOpen && !generatedCredentials}
         onClose={handleClose}
         title="Create Trainer Account"
-        showCloseButton={true}
+        showCloseButton={false}
         closeOnBackdropClick={!isLoading}
         className={styles.modal}
       >

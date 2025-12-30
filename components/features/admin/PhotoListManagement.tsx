@@ -21,6 +21,7 @@ export interface CarouselImage {
   imageUrl: string;
   title: string | null;
   description: string | null;
+  redirectUrl: string | null;
   order: number;
   isActive: boolean;
 }
@@ -30,7 +31,7 @@ interface PhotoListManagementProps {
   onClose: () => void;
   images: CarouselImage[];
   onUpload: (file: File, order: number) => Promise<void>;
-  onEdit: (id: string, title: string, description: string) => Promise<void>;
+  onEdit: (id: string, title: string, description: string, redirectUrl: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onReorder: (id: string, direction: "up" | "down") => Promise<void>;
   onSave: () => Promise<void>;
@@ -54,6 +55,7 @@ export const PhotoListManagement: React.FC<PhotoListManagementProps> = ({
   const [editForm, setEditForm] = useState({
     title: "",
     description: "",
+    redirectUrl: "",
   });
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -110,12 +112,23 @@ export const PhotoListManagement: React.FC<PhotoListManagementProps> = ({
     setEditForm({
       title: image.title || "",
       description: image.description || "",
+      redirectUrl: image.redirectUrl || "",
     });
   };
 
   const handleSaveEdit = async (id: string) => {
+    // Validate URL if provided
+    if (editForm.redirectUrl && editForm.redirectUrl.trim() !== '') {
+      try {
+        new URL(editForm.redirectUrl);
+      } catch {
+        toast.error("Please enter a valid URL (e.g., https://example.com)");
+        return;
+      }
+    }
+    
     try {
-      await onEdit(id, editForm.title, editForm.description);
+      await onEdit(id, editForm.title, editForm.description, editForm.redirectUrl);
       toast.success("Photo updated");
       setEditingId(null);
     } catch (error) {
@@ -231,6 +244,15 @@ export const PhotoListManagement: React.FC<PhotoListManagementProps> = ({
                         }
                         placeholder="Optional description"
                       />
+                      <Input
+                        label="Redirect URL"
+                        type="url"
+                        value={editForm.redirectUrl}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, redirectUrl: e.target.value })
+                        }
+                        placeholder="https://example.com (optional)"
+                      />
                       <div className={styles.formActions}>
                         <Button
                           onClick={() => handleSaveEdit(slot.image!.id)}
@@ -255,6 +277,11 @@ export const PhotoListManagement: React.FC<PhotoListManagementProps> = ({
                       )}
                       {slot.image.description && (
                         <p className={styles.photoDescription}>{slot.image.description}</p>
+                      )}
+                      {slot.image.redirectUrl && (
+                        <p className={styles.photoUrl} title={slot.image.redirectUrl}>
+                          🔗 {slot.image.redirectUrl}
+                        </p>
                       )}
                     </div>
                   )}

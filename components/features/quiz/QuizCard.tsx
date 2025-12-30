@@ -161,6 +161,18 @@ export const QuizCard: React.FC<QuizCardProps> = ({
     // Show confirmation first
     setSelectedAnswerIndex(optionIndex);
     setShowConfirmation(true);
+    
+    // Scroll confirmation into view after a brief delay to ensure it's rendered
+    setTimeout(() => {
+      const confirmationElement = document.querySelector(`.${styles.confirmationContainer}`);
+      if (confirmationElement) {
+        confirmationElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'nearest',
+          inline: 'nearest'
+        });
+      }
+    }, 100);
   };
 
   const handleConfirmAnswer = () => {
@@ -302,7 +314,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
 
       {/* Question Card */}
       <Card className={styles.questionCard}>
-        <CardBody>
+        <CardBody className={styles.questionCardBody}>
           <h2 className={styles.questionText}>{currentQuestion?.question}</h2>
 
           {/* Answer Options */}

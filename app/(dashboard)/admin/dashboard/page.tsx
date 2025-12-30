@@ -115,72 +115,21 @@ export default async function AdminDashboardPage() {
       throw new Error("User data is incomplete - missing name or email");
     }
 
-    // Fetch all users for initial render with error handling
-    let allUsers: Array<{
-      id: string;
-      name: string;
-      email: string;
-      company: { id: string; name: string; type: string } | null;
-      position: { id: string; title: string; role: string } | null;
-    }> = [];
-    let companies: Array<{ id: string; name: string }> = [];
+    // Fetch stats only for dashboard analytics
     let totalUsers = 0;
     let rejectedUsers = 0;
     let pendingUsers = 0;
     
     try {
-      console.log("[AdminDashboard] Fetching dashboard data for admin:", user.id);
-      [allUsers, companies, totalUsers, rejectedUsers, pendingUsers] = await Promise.all([
-        prisma.user.findMany({
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            employeeNumber: true,
-            phone: true,
-            hireType: true,
-            department: true,
-            branch: true,
-            hireDate: true,
-            status: true,
-            role: true,
-            createdAt: true,
-            updatedAt: true,
-            approvedAt: true,
-            company: {
-              select: {
-                id: true,
-                name: true,
-                type: true,
-              },
-            },
-            position: {
-              select: {
-                id: true,
-                title: true,
-                role: true,
-              },
-            },
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        }),
-        // Fetch companies for trainer creation (positions no longer needed - default to Trainer)
-        prisma.company.findMany({
-          where: { isActive: true },
-          select: { id: true, name: true },
-          orderBy: { name: "asc" },
-        }),
+      console.log("[AdminDashboard] Fetching dashboard analytics for admin:", user.id);
+      [totalUsers, rejectedUsers, pendingUsers] = await Promise.all([
         // Get total counts for stats
-        prisma.user.count(),
+        prisma.user.count({ where: { status: "APPROVED" } }),
         prisma.user.count({ where: { status: "REJECTED" } }),
         prisma.user.count({ where: { status: "PENDING" } }),
       ]);
       
-      console.log("[AdminDashboard] Successfully fetched dashboard data:", {
-        usersCount: allUsers.length,
-        companiesCount: companies.length,
+      console.log("[AdminDashboard] Successfully fetched dashboard analytics:", {
         totalUsers,
         rejectedUsers,
         pendingUsers,
@@ -191,7 +140,7 @@ export default async function AdminDashboardPage() {
         ? { message: dbError.message, stack: dbError.stack, name: dbError.name }
         : { error: String(dbError) };
       
-      console.error("[AdminDashboard] Error fetching dashboard data:", {
+      console.error("[AdminDashboard] Error fetching dashboard analytics:", {
         userId: user.id,
         userRole: user.role,
         error: errorDetails,
@@ -199,35 +148,10 @@ export default async function AdminDashboardPage() {
       });
       
       // Use empty defaults if database query fails (graceful degradation)
-      allUsers = [];
-      companies = [];
       totalUsers = 0;
       rejectedUsers = 0;
       pendingUsers = 0;
     }
-
-    // Serialize allUsers data - ensure all values are primitives
-    const serializableUsers = allUsers.map((u) => ({
-      id: String(u.id),
-      name: String(u.name || ''),
-      email: String(u.email || ''),
-      company: u.company ? {
-        id: String(u.company.id),
-        name: String(u.company.name || ''),
-        type: String(u.company.type || ''),
-      } : null,
-      position: u.position ? {
-        id: String(u.position.id),
-        title: String(u.position.title || ''),
-        role: String(u.position.role || ''),
-      } : null,
-    }));
-
-    // Serialize companies data
-    const serializableCompanies = companies.map((c) => ({
-      id: String(c.id),
-      name: String(c.name || ''),
-    }));
 
     // Final validation before render
     if (!user || !user.name || !user.email) {
@@ -246,8 +170,9 @@ export default async function AdminDashboardPage() {
       hasUser: !!user,
       hasUserName: !!user.name,
       hasUserEmail: !!user.email,
-      usersCount: serializableUsers.length,
-      companiesCount: serializableCompanies.length,
+      totalUsers,
+      pendingUsers,
+      rejectedUsers,
     });
 
     return (
@@ -260,9 +185,7 @@ export default async function AdminDashboardPage() {
         pageDescription="Overview of users and system statistics."
       >
         <AdminDashboardClient
-          initialUsers={serializableUsers}
-          companies={serializableCompanies}
-          stats={{
+          initialStats={{
             totalUsers: typeof totalUsers === 'number' ? totalUsers : 0,
             rejectedUsers: typeof rejectedUsers === 'number' ? rejectedUsers : 0,
             pendingUsers: typeof pendingUsers === 'number' ? pendingUsers : 0,

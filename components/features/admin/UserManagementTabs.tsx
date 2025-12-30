@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { UsersTable } from "./UsersTable";
 import { UserSearchFilter } from "./UserSearchFilter";
 import { SearchResultsModal } from "./SearchResultsModal";
@@ -27,9 +27,41 @@ export const UserManagementTabs: React.FC<UserManagementTabsProps> = ({
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResultCount, setSearchResultCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [rejectedCount, setRejectedCount] = useState(0);
+
+  // Fetch stats (pending and rejected counts)
+  const fetchStats = async () => {
+    try {
+      const response = await fetch("/api/admin/stats");
+      const data = await response.json();
+      
+      if (data.success) {
+        setPendingCount(data.data.pendingUsers || 0);
+        setRejectedCount(data.data.rejectedUsers || 0);
+      }
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  };
+
+  // Initial fetch and when refresh happens
+  useEffect(() => {
+    fetchStats();
+  }, [refreshKey]);
+
+  // Update stats when tab changes (to get fresh counts)
+  useEffect(() => {
+    fetchStats();
+  }, [activeTab]);
 
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);
+    fetchStats(); // Refresh stats when table refreshes
+  };
+
+  const handleStatsUpdate = () => {
+    fetchStats(); // Update stats counter when approve/reject happens
   };
 
   const handleSearch = async (query: string) => {
@@ -160,9 +192,9 @@ export const UserManagementTabs: React.FC<UserManagementTabsProps> = ({
   };
 
   const tabs = [
-    { id: "ALL" as const, label: "All Users" },
-    { id: "PENDING" as const, label: "Pending" },
-    { id: "REJECTED" as const, label: "Rejected" },
+    { id: "ALL" as const, label: "All Users", count: null },
+    { id: "PENDING" as const, label: "Pending", count: pendingCount },
+    { id: "REJECTED" as const, label: "Rejected", count: rejectedCount },
   ];
 
   return (
@@ -177,6 +209,9 @@ export const UserManagementTabs: React.FC<UserManagementTabsProps> = ({
               onClick={() => setActiveTab(tab.id)}
             >
               {tab.label}
+              {tab.count !== null && tab.count > 0 && (
+                <span className={styles.tabBadge}>{tab.count}</span>
+              )}
             </button>
           ))}
         </div>
@@ -204,6 +239,7 @@ export const UserManagementTabs: React.FC<UserManagementTabsProps> = ({
           onRefresh={handleRefresh}
           onEdit={onEdit}
           onAdd={onAdd}
+          onStatsUpdate={handleStatsUpdate}
         />
       </div>
 
@@ -216,8 +252,14 @@ export const UserManagementTabs: React.FC<UserManagementTabsProps> = ({
         resultCount={searchResultCount}
         onRefresh={handleRefresh}
         onEdit={onEdit}
-        onApprove={handleApprove}
-        onReject={handleReject}
+        onApprove={async (userId: string) => {
+          await handleApprove(userId);
+          handleStatsUpdate(); // Update stats after approve
+        }}
+        onReject={async (userId: string) => {
+          await handleReject(userId);
+          handleStatsUpdate(); // Update stats after reject
+        }}
         onDelete={handleDelete}
       />
     </div>

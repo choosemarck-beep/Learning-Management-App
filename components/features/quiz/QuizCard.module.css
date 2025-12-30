@@ -41,6 +41,15 @@
   box-shadow: 
     0 8px 32px 0 rgba(0, 0, 0, 0.5),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  /* Allow content to overflow for confirmation popup */
+  overflow: visible;
+}
+
+/* Override CardBody overflow for quiz card */
+.questionCardBody {
+  overflow: visible !important;
+  overflow-y: auto !important;
+  max-height: none !important;
 }
 
 .questionText {
@@ -241,8 +250,14 @@
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
   border: 2px solid var(--color-primary-purple);
   border-radius: var(--radius-md);
+  margin-top: var(--spacing-md);
   margin-bottom: var(--spacing-sm);
+  position: relative;
+  z-index: 10;
   animation: slideIn 0.3s ease-out;
+  /* Ensure it's not clipped by parent overflow */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 @keyframes slideIn {

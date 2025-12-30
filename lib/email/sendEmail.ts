@@ -1,5 +1,5 @@
 import { render } from "@react-email/render";
-import { sendEmail as sendEmailViaResend } from "./client";
+import { sendEmail as sendEmailViaSendGrid } from "./client";
 import { OnboardingEmail } from "./templates/onboarding";
 import { TrainerOnboardingEmail } from "./templates/trainer-onboarding";
 import { ApprovalEmail } from "./templates/approval";
@@ -24,8 +24,8 @@ export async function sendOnboardingEmail(
       })
     );
 
-    // Send email via Resend
-    await sendEmailViaResend({
+    // Send email via SendGrid
+    await sendEmailViaSendGrid({
       to: email,
       subject: "Welcome to Learning Management - Account Pending Approval",
       html,
@@ -62,8 +62,8 @@ export async function sendTrainerOnboardingEmail(
       })
     );
 
-    // Send email via Resend
-    await sendEmailViaResend({
+    // Send email via SendGrid
+    await sendEmailViaSendGrid({
       to: email,
       subject: "Welcome to Learning Management - Your Trainer Account is Ready",
       html,
@@ -96,8 +96,8 @@ export async function sendApprovalEmail(
       })
     );
 
-    // Send email via SendGrid (function name is legacy from Resend migration)
-    await sendEmailViaResend({
+    // Send email via SendGrid
+    await sendEmailViaSendGrid({
       to: email,
       subject: "Your Account Has Been Approved - Welcome to Learning Management!",
       html,

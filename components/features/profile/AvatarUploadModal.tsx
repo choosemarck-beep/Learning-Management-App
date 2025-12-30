@@ -163,15 +163,24 @@ export const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
             formData.append("avatar", finalBlob, "avatar.jpg");
 
             // Upload to API
+            console.log("[AvatarUploadModal] Uploading to API...");
             const response = await fetch("/api/user/upload-avatar", {
               method: "POST",
               body: formData,
             });
 
             const data = await response.json();
+            console.log("[AvatarUploadModal] API response:", {
+              ok: response.ok,
+              success: data.success,
+              error: data.error,
+              hasAvatarUrl: !!data.avatarUrl,
+            });
 
             if (!response.ok || !data.success) {
-              throw new Error(data.error || "Failed to upload avatar");
+              const errorMessage = data.error || data.details || "Failed to upload avatar";
+              console.error("[AvatarUploadModal] Upload failed:", errorMessage);
+              throw new Error(errorMessage);
             }
 
             toast.success("Avatar updated successfully!");

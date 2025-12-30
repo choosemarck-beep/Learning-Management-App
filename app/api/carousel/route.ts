@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
           imageUrl: true,
           title: true,
           description: true,
+          redirectUrl: true,
         },
         take: 4, // Limit to 4 photos for photo carousel
       });
@@ -59,6 +60,7 @@ export async function GET(request: NextRequest) {
           imageUrl: true,
           title: true,
           description: true,
+          redirectUrl: true,
         },
         take: 4, // Limit to 4 photos
       });

@@ -1,23 +1,35 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Badge } from "@/components/ui/Badge";
-import { Clock } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Clock, CheckCircle, XCircle } from "lucide-react";
 import { User } from "./UsersTable";
+import toast from "react-hot-toast";
 import styles from "./ApplicationPreviewModal.module.css";
 
 interface ApplicationPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: User | null;
+  onApprove?: (userId: string) => Promise<void>;
+  onReject?: (userId: string) => Promise<void>;
+  onRefresh?: () => void;
+  onStatsUpdate?: () => void;
 }
 
 export const ApplicationPreviewModal: React.FC<ApplicationPreviewModalProps> = ({
   isOpen,
   onClose,
   user,
+  onApprove,
+  onReject,
+  onRefresh,
+  onStatsUpdate,
 }) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+
   if (!user) return null;
 
   // Safety check: ensure user has required fields
@@ -54,6 +66,48 @@ export const ApplicationPreviewModal: React.FC<ApplicationPreviewModalProps> = (
   const formatHireType = (hireType: "DIRECT_HIRE" | "AGENCY" | null) => {
     if (!hireType) return "N/A";
     return hireType.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+  };
+
+  const handleApprove = async () => {
+    if (!onApprove || !user) return;
+    
+    setIsProcessing(true);
+    try {
+      await onApprove(user.id);
+      // Toast and refresh are handled in the parent component
+      onStatsUpdate?.(); // Update stats counter
+      onClose();
+    } catch (error) {
+      console.error("Error approving user:", error);
+      // Error toast is handled in the parent component
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!onReject || !user) return;
+    
+    if (
+      !confirm(
+        "Are you sure you want to reject this user? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      await onReject(user.id);
+      // Toast and refresh are handled in the parent component
+      onStatsUpdate?.(); // Update stats counter
+      onClose();
+    } catch (error) {
+      console.error("Error rejecting user:", error);
+      // Error toast is handled in the parent component
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -152,6 +206,36 @@ export const ApplicationPreviewModal: React.FC<ApplicationPreviewModalProps> = (
           </div>
         </section>
       </div>
+
+      {/* Action Buttons Footer */}
+      {(onApprove || onReject) && (
+        <div className={styles.actions}>
+          {onReject && (
+            <Button
+              variant="danger"
+              size="lg"
+              onClick={handleReject}
+              disabled={isProcessing}
+              className={styles.rejectButton}
+            >
+              <XCircle size={18} />
+              Reject
+            </Button>
+          )}
+          {onApprove && (
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={handleApprove}
+              disabled={isProcessing}
+              className={styles.approveButton}
+            >
+              <CheckCircle size={18} />
+              Approve
+            </Button>
+          )}
+        </div>
+      )}
     </Modal>
   );
 };

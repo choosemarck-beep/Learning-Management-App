@@ -43,6 +43,7 @@ interface UsersTableProps {
   onRefresh?: () => void;
   onEdit?: (user: User) => void;
   onAdd?: () => void;
+  onStatsUpdate?: () => void;
 }
 
 export const UsersTable: React.FC<UsersTableProps> = ({
@@ -52,6 +53,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
   onRefresh,
   onEdit,
   onAdd,
+  onStatsUpdate,
 }) => {
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [isLoading, setIsLoading] = useState(false);
@@ -341,6 +343,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
         toast.success("User approved successfully");
         fetchUsers();
         onRefresh?.();
+        onStatsUpdate?.(); // Update stats counter
       } else {
         toast.error(data.error || "Failed to approve user");
       }
@@ -372,6 +375,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
         toast.success("User rejected successfully");
         fetchUsers();
         onRefresh?.();
+        onStatsUpdate?.(); // Update stats counter
       } else {
         toast.error(data.error || "Failed to reject user");
       }
@@ -538,7 +542,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
   };
 
   const formatHireType = (hireType: "DIRECT_HIRE" | "AGENCY" | null) => {
-    if (!hireType) return "";
+    if (!hireType) return "N/A";
     return hireType === "DIRECT_HIRE" ? "Direct Hire" : "Agency";
   };
 
@@ -764,11 +768,11 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                 </td>
                 <td style={{ width: `${columnWidths[2]}px`, minWidth: `${columnWidths[2]}px`, maxWidth: `${columnWidths[2]}px` }}>
                   <span className={styles.employeeNumber}>
-                    {user.employeeNumber || ""}
+                    {user.employeeNumber || "N/A"}
                   </span>
                 </td>
                 <td style={{ width: `${columnWidths[3]}px`, minWidth: `${columnWidths[3]}px`, maxWidth: `${columnWidths[3]}px` }}>
-                  <span className={styles.branch}>{user.branch || ""}</span>
+                  <span className={styles.branch}>{user.branch || "N/A"}</span>
                 </td>
                 <td style={{ width: `${columnWidths[4]}px`, minWidth: `${columnWidths[4]}px`, maxWidth: `${columnWidths[4]}px` }}>
                   <span className={styles.position}>
@@ -777,7 +781,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                 </td>
                 <td style={{ width: `${columnWidths[5]}px`, minWidth: `${columnWidths[5]}px`, maxWidth: `${columnWidths[5]}px` }}>
                   <span className={styles.hireType}>
-                    {formatHireType(user.hireType) || ""}
+                    {formatHireType(user.hireType)}
                   </span>
                 </td>
                 <td style={{ width: `${columnWidths[6]}px`, minWidth: `${columnWidths[6]}px`, maxWidth: `${columnWidths[6]}px` }}>
@@ -832,6 +836,10 @@ export const UsersTable: React.FC<UsersTableProps> = ({
         isOpen={isApplicationPreviewModalOpen}
         onClose={handleCloseApplicationPreviewModal}
         user={selectedUser}
+          onApprove={handleApprove}
+          onReject={handleReject}
+          onRefresh={onRefresh}
+          onStatsUpdate={onStatsUpdate}
       />
     </>
   );

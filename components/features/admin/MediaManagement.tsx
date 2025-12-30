@@ -26,6 +26,7 @@ export interface CarouselImage {
   imageUrl: string;
   title: string | null;
   description: string | null;
+  redirectUrl: string | null;
   order: number;
   isActive: boolean;
   createdAt?: string | Date;
@@ -317,12 +318,12 @@ export const MediaManagement: React.FC = () => {
     }
   };
 
-  const handleEdit = async (id: string, title: string, description: string) => {
+  const handleEdit = async (id: string, title: string, description: string, redirectUrl: string) => {
     try {
       const response = await fetch(`/api/admin/carousel/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description }),
+        body: JSON.stringify({ title, description, redirectUrl: redirectUrl.trim() || null }),
       });
 
       const data = await response.json();

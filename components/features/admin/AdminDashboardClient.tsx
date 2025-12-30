@@ -1,38 +1,70 @@
 "use client";
 
-import React, { useState } from "react";
-import { Card, CardBody } from "@/components/ui/Card";
+import React, { useState, useEffect } from "react";
 import { StatsCard } from "./StatsCard";
-import { UserManagementTabs } from "./UserManagementTabs";
-import { CreateTrainerModal } from "./CreateTrainerModal";
 import styles from "./AdminDashboardClient.module.css";
 
 interface AdminDashboardClientProps {
-  initialUsers: any[];
-  companies: Array<{ id: string; name: string }>;
-  stats: {
+  initialStats: {
     totalUsers: number;
     rejectedUsers: number;
     pendingUsers: number;
   };
+  onStatsUpdate?: () => void;
 }
 
 export const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({
-  initialUsers,
-  companies,
-  stats,
+  initialStats,
+  onStatsUpdate,
 }) => {
-  const [isCreateTrainerModalOpen, setIsCreateTrainerModalOpen] =
-    useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [stats, setStats] = useState(initialStats);
 
-  const handleCreateTrainerSuccess = () => {
-    setRefreshKey((prev) => prev + 1);
-  };
+  // Fetch updated stats when onStatsUpdate is called
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("/api/admin/users?status=ALL&limit=1");
+        const data = await response.json();
+        
+        if (data.success) {
+          // Fetch counts from API
+          const [totalResponse, pendingResponse, rejectedResponse] = await Promise.all([
+            fetch("/api/admin/users?status=ALL"),
+            fetch("/api/admin/users?status=PENDING"),
+            fetch("/api/admin/users?status=REJECTED"),
+          ]);
+          
+          const [totalData, pendingData, rejectedData] = await Promise.all([
+            totalResponse.json(),
+            pendingResponse.json(),
+            rejectedResponse.json(),
+          ]);
+          
+          setStats({
+            totalUsers: totalData.data?.length || 0,
+            pendingUsers: pendingData.data?.length || 0,
+            rejectedUsers: rejectedData.data?.length || 0,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      }
+    };
+
+    if (onStatsUpdate) {
+      // Set up a way to trigger stats refresh
+      // This will be called from parent when needed
+    }
+  }, [onStatsUpdate]);
+
+  // Refresh stats when initialStats change (from parent)
+  useEffect(() => {
+    setStats(initialStats);
+  }, [initialStats]);
 
   return (
     <div className={styles.container}>
-      {/* Stats Grid */}
+      {/* Analytics Stats Grid */}
       <div className={styles.statsGrid}>
         <StatsCard
           label="Total Users"
@@ -48,24 +80,8 @@ export const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({
         />
       </div>
 
-      {/* User Management Table */}
-      <Card className={styles.tableSection}>
-        <CardBody>
-          <UserManagementTabs
-            key={refreshKey}
-            initialUsers={initialUsers}
-            onAdd={() => setIsCreateTrainerModalOpen(true)}
-          />
-        </CardBody>
-      </Card>
-
-      {/* Create Trainer Modal */}
-      <CreateTrainerModal
-        isOpen={isCreateTrainerModalOpen}
-        onClose={() => setIsCreateTrainerModalOpen(false)}
-        onSuccess={handleCreateTrainerSuccess}
-        companies={companies}
-      />
+      {/* Additional Analytics Widgets can be added here */}
+      {/* Charts, graphs, metrics, etc. */}
     </div>
   );
 };

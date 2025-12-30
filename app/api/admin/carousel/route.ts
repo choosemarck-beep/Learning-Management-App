@@ -96,10 +96,23 @@ export async function POST(request: NextRequest) {
     const file = formData.get("image") as File;
     const title = formData.get("title") as string | null;
     const description = formData.get("description") as string | null;
+    const redirectUrl = formData.get("redirectUrl") as string | null;
     const orderParam = formData.get("order");
     const isActiveParam = formData.get("isActive");
     const order = orderParam ? parseInt(orderParam as string, 10) : undefined;
     const isActive = isActiveParam ? isActiveParam === "true" : true;
+    
+    // Validate redirectUrl if provided (must be a valid URL)
+    if (redirectUrl && redirectUrl.trim() !== '') {
+      try {
+        new URL(redirectUrl);
+      } catch {
+        return NextResponse.json(
+          { success: false, error: "Invalid redirect URL format" },
+          { status: 400 }
+        );
+      }
+    }
 
     if (!file) {
       return NextResponse.json(
@@ -262,6 +275,7 @@ export async function POST(request: NextRequest) {
           imageUrl,
           title: title || null,
           description: description || null,
+          redirectUrl: redirectUrl && redirectUrl.trim() !== '' ? redirectUrl.trim() : null,
           order: newOrder,
           isActive,
           createdBy: currentUser.id,

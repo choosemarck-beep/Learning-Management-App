@@ -50,9 +50,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(
-      `Uploading avatar: ${file.type}, ${(file.size / 1024).toFixed(2)}KB`
-    );
+    console.log("[Avatar] Starting upload:", {
+      filename: file.name,
+      type: file.type,
+      size: `${(file.size / 1024).toFixed(2)}KB`,
+      hasCloudinaryConfig: !!(
+        process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET
+      ),
+    });
 
     // Validate file name
     if (!file.name || typeof file.name !== 'string' || file.name.trim() === '') {

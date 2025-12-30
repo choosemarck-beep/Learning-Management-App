@@ -47,6 +47,18 @@ export async function PATCH(
       );
     }
 
+    // Validate redirectUrl if provided (must be a valid URL)
+    if (body.redirectUrl !== undefined && body.redirectUrl !== null && body.redirectUrl.trim() !== '') {
+      try {
+        new URL(body.redirectUrl);
+      } catch {
+        return NextResponse.json(
+          { success: false, error: "Invalid redirect URL format" },
+          { status: 400 }
+        );
+      }
+    }
+
     // Wrap Prisma queries in try-catch
     try {
       const carouselImage = await prisma.carouselImage.update({
@@ -54,6 +66,7 @@ export async function PATCH(
         data: {
           title: body.title !== undefined ? body.title : undefined,
           description: body.description !== undefined ? body.description : undefined,
+          redirectUrl: body.redirectUrl !== undefined ? (body.redirectUrl && body.redirectUrl.trim() !== '' ? body.redirectUrl.trim() : null) : undefined,
           order: body.order !== undefined ? body.order : undefined,
           isActive: body.isActive !== undefined ? body.isActive : undefined,
         },

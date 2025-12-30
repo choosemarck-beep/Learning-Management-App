@@ -87,6 +87,7 @@ export async function GET(request: NextRequest) {
     // Log where clause for debugging
     console.log("[Users API] Where clause:", JSON.stringify(where, null, 2));
     console.log("[Users API] Query params:", { status, role, search, page, limit });
+    console.log("[Users API] Status filter applied:", status, "→ where.status =", where.status);
 
     // Wrap Prisma queries in try-catch
     let total, users;
@@ -175,9 +176,28 @@ export async function GET(request: NextRequest) {
         email: users[0].email,
         status: users[0].status,
         role: users[0].role,
+        employeeNumber: users[0].employeeNumber,
+        branch: users[0].branch,
+        hireType: users[0].hireType,
+        department: users[0].department,
         hasCompany: !!users[0].company,
         hasPosition: !!users[0].position,
       } : "No users");
+      
+      // Validate that all returned users match the requested status filter
+      if (status && (status === "PENDING" || status === "REJECTED" || status === "APPROVED")) {
+        const mismatchedUsers = users.filter(u => u.status !== status);
+        if (mismatchedUsers.length > 0) {
+          console.error("[Users API] ERROR: Found users with mismatched status:", {
+            requestedStatus: status,
+            mismatchedCount: mismatchedUsers.length,
+            mismatchedUsers: mismatchedUsers.map(u => ({ id: u.id, name: u.name, status: u.status }))
+          });
+          // Filter out mismatched users to ensure data integrity
+          users = users.filter(u => u.status === status);
+          console.log("[Users API] Filtered to", users.length, "users with correct status");
+        }
+      }
 
       // Serialize Date objects to ISO strings for JSON response
       // Explicitly construct the response object to avoid serialization issues

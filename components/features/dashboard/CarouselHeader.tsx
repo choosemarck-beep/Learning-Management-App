@@ -9,6 +9,7 @@ export interface CarouselImage {
   imageUrl: string;
   title?: string | null;
   description?: string | null;
+  redirectUrl?: string | null;
 }
 
 export type CarouselMode = "PHOTO_CAROUSEL" | "VIDEO";
@@ -165,7 +166,15 @@ export const CarouselHeader: React.FC<CarouselHeaderProps> = ({
             <img
               src={images[currentIndex].imageUrl}
               alt={images[currentIndex].title || "Carousel image"}
-              className={styles.image}
+              className={`${styles.image} ${images[currentIndex].redirectUrl ? styles.clickable : ''}`}
+              onClick={() => {
+                if (images[currentIndex].redirectUrl) {
+                  window.location.href = images[currentIndex].redirectUrl!;
+                }
+              }}
+              style={{
+                cursor: images[currentIndex].redirectUrl ? 'pointer' : 'default',
+              }}
               onError={(e) => {
                 // Fallback to placeholder on error
                 e.currentTarget.src = '/placeholder-carousel.png';

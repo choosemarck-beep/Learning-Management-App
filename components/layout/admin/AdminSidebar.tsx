@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
-  UserCheck,
   Settings,
   Shield,
   Image as ImageIcon,
@@ -34,13 +33,8 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     },
     {
       href: userRole === "SUPER_ADMIN" ? "/super-admin/users" : "/admin/users",
-      label: "Users",
+      label: "Users Management",
       icon: Users,
-    },
-    {
-      href: userRole === "SUPER_ADMIN" ? "/super-admin/pending" : "/admin/pending",
-      label: "Pending Approvals",
-      icon: UserCheck,
     },
     {
       href: userRole === "SUPER_ADMIN" ? "/super-admin/media" : "/admin/media",

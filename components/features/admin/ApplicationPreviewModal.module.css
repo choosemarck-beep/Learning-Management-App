@@ -97,3 +97,26 @@
   }
 }
 
+/* Action Buttons */
+.actions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
+  padding: var(--spacing-lg);
+  border-top: 1px solid rgba(139, 92, 246, 0.2);
+  margin-top: var(--spacing-md);
+}
+
+.approveButton,
+.rejectButton {
+  min-width: 120px;
+}
+
+.rejectButton {
+  order: 1;
+}
+
+.approveButton {
+  order: 2;
+}
+
