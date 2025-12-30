@@ -2975,3 +2975,58 @@ if (view === "BRANCH" && userData.branch) {
 - If you need to add counts from different models, wrap each pair in Promise.all first
 
 ---
+
+#### Error: Property does not exist in Prisma model (Nested Relation Field Access)
+**Symptoms:**
+- Build fails with TypeScript error: `Object literal may only specify known properties, and 'fieldName' does not exist in type 'ModelWhereInput'`
+- Error occurs when trying to use a field in a Prisma `where` clause that doesn't exist on that model
+- Common with nested relations where the field exists on a related model, not the current model
+
+**Common Causes:**
+- Using a field name that exists on a related model but not on the current model
+- Forgetting that some models use nested relations (e.g., `MiniQuiz` → `MiniTraining` → `Training`)
+- Not understanding the relationship structure in Prisma schema
+- Trying to filter by `trainingId` on `MiniQuiz` when it only has `miniTrainingId` (which relates to `MiniTraining` that has `trainingId`)
+
+**Solution:**
+- Check Prisma schema to understand model relationships
+- Use nested where clauses for related models: `relatedModel: { field: value }`
+- For models with indirect relationships, use nested where: `modelA: { modelB: { field: value } }`
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - trainingId doesn't exist on MiniQuiz
+const miniQuizzes = await prisma.miniQuiz.findMany({
+  where: {
+    trainingId: { in: trainingIds }, // ERROR: trainingId doesn't exist
+  },
+});
+
+// ✅ CORRECT - use nested relation to access trainingId
+const miniQuizzes = await prisma.miniQuiz.findMany({
+  where: {
+    miniTraining: {
+      trainingId: { in: trainingIds }, // Access trainingId through MiniTraining relation
+    },
+  },
+  select: {
+    id: true,
+    title: true,
+    miniTrainingId: true, // Use actual field name, not trainingId
+  },
+});
+```
+
+**Files Fixed:**
+- `app/api/trainer/analytics/quizzes/route.ts` - Fixed MiniQuiz query to use nested `miniTraining.trainingId` instead of direct `trainingId`
+
+**Prevention:**
+- Always check Prisma schema to see what fields exist on each model
+- Understand model relationships before writing queries
+- Use nested where clauses for related models
+- Check Prisma client types to see available fields
+- When in doubt, use `prisma.model.findFirst()` with a simple where clause to see what fields are available
+- **Pattern**: For indirect relationships (A → B → C), use nested where: `modelA: { modelB: { fieldC: value } }`
+- **2025-01-01**: Added Prisma model field access error - always check schema for actual field names, use nested where clauses for related models
+
+---

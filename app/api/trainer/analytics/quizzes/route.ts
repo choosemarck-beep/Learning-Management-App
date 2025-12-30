@@ -57,12 +57,14 @@ export async function GET(request: NextRequest) {
 
     const miniQuizzes = await prisma.miniQuiz.findMany({
       where: {
-        trainingId: { in: trainingIds },
+        miniTraining: {
+          trainingId: { in: trainingIds },
+        },
       },
       select: {
         id: true,
         title: true,
-        trainingId: true,
+        miniTrainingId: true,
       },
     });
 
