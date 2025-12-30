@@ -179,7 +179,7 @@ export async function GET(request: NextRequest) {
               prisma.courseProgress.count({
                 where: {
                   isCompleted: true,
-                  completedAt: {
+                  updatedAt: {
                     gte: date,
                     lt: nextDate,
                   },
