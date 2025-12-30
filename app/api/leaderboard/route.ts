@@ -23,6 +23,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    // Fetch full user data from database to get branch, area, region fields
+    const userData = await prisma.user.findUnique({
+      where: { id: currentUser.id },
+      select: {
+        id: true,
+        branch: true,
+        area: true,
+        region: true,
+      },
+    });
+
+    if (!userData) {
+      return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
+    }
+
     const { searchParams } = new URL(request.url);
     const view = (searchParams.get("view") || "INDIVIDUAL") as LeaderboardView;
     const period = (searchParams.get("period") || "DAILY") as LeaderboardPeriod;
@@ -60,12 +75,12 @@ export async function GET(request: NextRequest) {
     };
 
     // Filter by view (Branch, Area, Regional)
-    if (view === "BRANCH" && currentUser.branch) {
-      whereClause.branch = currentUser.branch;
-    } else if (view === "AREA" && currentUser.area) {
-      whereClause.area = currentUser.area;
-    } else if (view === "REGIONAL" && currentUser.region) {
-      whereClause.region = currentUser.region;
+    if (view === "BRANCH" && userData.branch) {
+      whereClause.branch = userData.branch;
+    } else if (view === "AREA" && userData.area) {
+      whereClause.area = userData.area;
+    } else if (view === "REGIONAL" && userData.region) {
+      whereClause.region = userData.region;
     }
     // INDIVIDUAL view shows all users (no additional filter)
 
