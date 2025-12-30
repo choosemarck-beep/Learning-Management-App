@@ -57,11 +57,62 @@ export const VideoReel: React.FC<VideoReelProps> = ({
   onPrevious,
 }) => {
   const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [commentCount, setCommentCount] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { isYouTube, embedUrl } = getVideoEmbedUrl(video.videoUrl);
+
+  // Extract video ID for API calls (YouTube video ID or our video ID)
+  const getVideoId = (): string => {
+    if (isYouTube) {
+      const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+      const match = video.videoUrl.match(youtubeRegex);
+      return match && match[1] ? match[1] : video.id;
+    }
+    return video.id;
+  };
+
+  const videoId = getVideoId();
+
+  // Fetch likes and comments when video becomes active
+  useEffect(() => {
+    if (isActive && videoId) {
+      fetchLikes();
+      fetchCommentCount();
+    }
+  }, [isActive, videoId]);
+
+  const fetchLikes = async () => {
+    try {
+      const response = await fetch(`/api/reels/${videoId}/likes`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setIsLiked(data.data.userLiked);
+          setLikeCount(data.data.likeCount);
+        }
+      }
+    } catch (error) {
+      console.error("[VideoReel] Error fetching likes:", error);
+    }
+  };
+
+  const fetchCommentCount = async () => {
+    try {
+      const response = await fetch(`/api/reels/${videoId}/comments?limit=1`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setCommentCount(data.data.pagination.total);
+        }
+      }
+    } catch (error) {
+      console.error("[VideoReel] Error fetching comment count:", error);
+    }
+  };
 
   // Auto-play when video becomes active
   useEffect(() => {
@@ -93,14 +144,29 @@ export const VideoReel: React.FC<VideoReelProps> = ({
     }
   }, [isActive, isYouTube, embedUrl]);
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    // TODO: Implement API call to save like
+  const handleLike = async () => {
+    try {
+      const response = await fetch(`/api/reels/${videoId}/like`, {
+        method: "POST",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setIsLiked(data.liked);
+          // Refresh like count
+          fetchLikes();
+        }
+      } else {
+        toast.error("Failed to like video");
+      }
+    } catch (error) {
+      console.error("[VideoReel] Error liking video:", error);
+      toast.error("Failed to like video");
+    }
   };
 
   const handleComment = () => {
     setShowComments(!showComments);
-    // TODO: Implement comment modal/section
   };
 
   const handleVideoClick = () => {
@@ -123,22 +189,26 @@ export const VideoReel: React.FC<VideoReelProps> = ({
     <div className={styles.reelContainer}>
       <div className={styles.videoWrapper}>
         {isYouTube ? (
-          <iframe
-            ref={iframeRef}
-            src={embedUrl}
-            className={styles.videoIframe}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            title={video.title}
-            style={{ width: "100%", height: "100%", border: "none" }}
-            onLoad={() => {
-              console.log("[VideoReel] YouTube iframe loaded:", video.title);
-              setIsPlaying(true);
-            }}
-            onError={(e) => {
-              console.error("[VideoReel] YouTube iframe error:", e);
-            }}
-          />
+          <>
+            <iframe
+              ref={iframeRef}
+              src={embedUrl}
+              className={styles.videoIframe}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              sandbox="allow-scripts allow-same-origin allow-presentation"
+              title={video.title}
+              style={{ width: "100%", height: "100%", border: "none", pointerEvents: "none" }}
+              onLoad={() => {
+                console.log("[VideoReel] YouTube iframe loaded:", video.title);
+                setIsPlaying(true);
+              }}
+              onError={(e) => {
+                console.error("[VideoReel] YouTube iframe error:", e);
+              }}
+            />
+            {/* Overlay to prevent clicks on YouTube UI elements */}
+            <div className={styles.youtubeOverlay} />
+          </>
         ) : (
           <>
             <video
@@ -189,7 +259,7 @@ export const VideoReel: React.FC<VideoReelProps> = ({
           aria-label="Like"
         >
           <Heart size={28} fill={isLiked ? "currentColor" : "none"} />
-          <span className={styles.actionCount}>0</span>
+          <span className={styles.actionCount}>{likeCount}</span>
         </button>
 
         <button
@@ -198,9 +268,22 @@ export const VideoReel: React.FC<VideoReelProps> = ({
           aria-label="Comment"
         >
           <MessageCircle size={28} />
-          <span className={styles.actionCount}>0</span>
+          <span className={styles.actionCount}>{commentCount}</span>
         </button>
       </div>
+
+      {/* Comments Modal */}
+      {showComments && (
+        <ReelCommentsModal
+          videoId={videoId}
+          videoTitle={video.title}
+          isOpen={showComments}
+          onClose={() => setShowComments(false)}
+          onCommentAdded={() => {
+            fetchCommentCount();
+          }}
+        />
+      )}
     </div>
   );
 };

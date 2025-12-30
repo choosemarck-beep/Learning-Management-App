@@ -184,6 +184,18 @@ function LoginForm() {
             };
             localStorage.setItem("rememberedUser", JSON.stringify(userData));
           }
+
+          // Create welcome message in inbox for new users (non-blocking)
+          // Only for mobile users (employees, managers) - not admins/trainers
+          const mobileRoles = ["EMPLOYEE", "BRANCH_MANAGER", "AREA_MANAGER", "REGIONAL_MANAGER"];
+          if (userRole && mobileRoles.includes(userRole)) {
+            fetch("/api/inbox/welcome", {
+              method: "POST",
+            }).catch((error) => {
+              console.error("[Login] Error creating welcome message:", error);
+              // Don't block login if welcome message creation fails
+            });
+          }
           
           // Determine redirect URL based on role
           let redirectUrl = callbackUrl;

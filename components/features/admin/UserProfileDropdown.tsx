@@ -45,6 +45,7 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
           {userAvatar ? (
             <>
               <img 
+                key={userAvatar}
                 src={userAvatar} 
                 alt={userName}
                 onError={(e) => {

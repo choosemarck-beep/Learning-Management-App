@@ -104,6 +104,13 @@
   border-radius: 0 0 var(--radius-sm) var(--radius-sm);
 }
 
+.iconWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .icon {
   flex-shrink: 0;
   transition: transform var(--transition-normal) ease;
@@ -111,6 +118,26 @@
 
 .navLink.active .icon {
   transform: scale(1.1);
+}
+
+.badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: var(--color-status-error);
+  color: var(--color-text-primary);
+  border-radius: 9px;
+  font-size: 0.625rem; /* 10px */
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-bg-dark);
+  line-height: 1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .label {

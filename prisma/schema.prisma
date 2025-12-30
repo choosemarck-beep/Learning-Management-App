@@ -65,6 +65,8 @@ model User {
   position                        Position?                    @relation(fields: [positionId], references: [id])
   videoWatchProgresses            VideoWatchProgress[]
   reelsPlaylistSettingsUpdated    ReelsPlaylistSettings[]        @relation("ReelsPlaylistUpdater")
+  reelLikes                       ReelLike[]                     @relation("ReelLikes")
+  reelComments                    ReelComment[]                  @relation("ReelComments")
 
   @@index([email])
   @@index([xp])
@@ -392,6 +394,30 @@ model ReelsPlaylistSettings {
 
   @@unique([id])
   @@index([isActive])
+}
+
+model ReelLike {
+  id        String   @id @default(cuid())
+  userId    String
+  videoId   String   // YouTube video ID or our video ID
+  createdAt DateTime @default(now())
+  user      User     @relation("ReelLikes", fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, videoId])
+  @@index([videoId])
+}
+
+model ReelComment {
+  id        String   @id @default(cuid())
+  userId    String
+  videoId   String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation("ReelComments", fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([videoId])
+  @@index([userId])
 }
 
 model Notification {

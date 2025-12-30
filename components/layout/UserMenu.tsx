@@ -195,6 +195,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
               <div className={styles.profileAvatar}>
                 {userAvatar ? (
                   <img
+                    key={userAvatar}
                     src={userAvatar}
                     alt={userName}
                     className={styles.profileAvatarImage}

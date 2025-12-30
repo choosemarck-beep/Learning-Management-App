@@ -29,6 +29,28 @@ export const TrainerHeader: React.FC<TrainerHeaderProps> = ({
   // Use session avatar if available (real-time updates), fallback to prop (SSR)
   const userAvatar = session?.user?.avatar || propAvatar || null;
 
+  // Fetch unread notification count
+  useEffect(() => {
+    const fetchNotificationCount = async () => {
+      try {
+        const response = await fetch("/api/inbox");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data?.unreadCounts) {
+            setNotificationCount(data.data.unreadCounts.total || 0);
+          }
+        }
+      } catch (error) {
+        console.error("[TrainerHeader] Error fetching notification count:", error);
+      }
+    };
+
+    fetchNotificationCount();
+    // Poll every 30 seconds for updates
+    const interval = setInterval(fetchNotificationCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -71,7 +93,9 @@ export const TrainerHeader: React.FC<TrainerHeaderProps> = ({
         >
           <Bell size={20} />
           {notificationCount > 0 && (
-            <span className={styles.notificationBadge}>{notificationCount}</span>
+            <span className={styles.notificationBadge}>
+              {notificationCount > 99 ? '99+' : notificationCount}
+            </span>
           )}
         </button>
 
@@ -86,6 +110,7 @@ export const TrainerHeader: React.FC<TrainerHeaderProps> = ({
               {userAvatar ? (
                 <>
                   <img 
+                    key={userAvatar}
                     src={userAvatar} 
                     alt={userName}
                     onError={(e) => {

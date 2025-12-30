@@ -102,6 +102,28 @@ export const ProfileBottomNav: React.FC<ProfileBottomNavProps> = ({
     };
   }, []);
 
+  // Fetch unread inbox count
+  useEffect(() => {
+    const fetchInboxCount = async () => {
+      try {
+        const response = await fetch("/api/inbox");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data?.unreadCounts) {
+            setInboxUnreadCount(data.data.unreadCounts.total || 0);
+          }
+        }
+      } catch (error) {
+        console.error("[ProfileBottomNav] Error fetching inbox count:", error);
+      }
+    };
+
+    fetchInboxCount();
+    // Poll every 30 seconds for updates
+    const interval = setInterval(fetchInboxCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleAvatarClick = () => {
     // Open User Menu
     setShowUserMenu(true);
@@ -158,21 +180,25 @@ export const ProfileBottomNav: React.FC<ProfileBottomNavProps> = ({
       href: dashboardRoute,
       label: "Dashboard",
       icon: LayoutDashboard,
+      badge: undefined,
     },
     {
       href: "/reels",
       label: "Reels",
       icon: Video,
+      badge: undefined,
     },
     {
       href: "/courses",
       label: "Courses",
       icon: BookOpen,
+      badge: undefined,
     },
     {
       href: "/inbox",
       label: "Inbox",
       icon: Mail,
+      badge: inboxUnreadCount,
     },
     ...(showManagement
       ? [
@@ -226,7 +252,12 @@ export const ProfileBottomNav: React.FC<ProfileBottomNavProps> = ({
                 }
               }}
             >
-              <Icon size={20} className={styles.icon} />
+              <div className={styles.iconWrapper}>
+                <Icon size={20} className={styles.icon} />
+                {link.badge !== undefined && link.badge > 0 && (
+                  <span className={styles.badge}>{link.badge > 99 ? '99+' : link.badge}</span>
+                )}
+              </div>
               <span className={styles.label}>{link.label}</span>
             </Link>
           );
@@ -241,6 +272,7 @@ export const ProfileBottomNav: React.FC<ProfileBottomNavProps> = ({
           >
             {userAvatar ? (
               <img
+                key={userAvatar}
                 src={userAvatar}
                 alt={userName}
                 className={styles.avatarImage}
