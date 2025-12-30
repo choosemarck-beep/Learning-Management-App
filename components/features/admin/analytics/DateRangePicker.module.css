@@ -1,0 +1,23 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) 0;
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.buttons {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.button {
+  min-width: 80px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+

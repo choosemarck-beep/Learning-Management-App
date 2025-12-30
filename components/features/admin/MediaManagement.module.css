@@ -3,8 +3,9 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xl);
+  gap: var(--spacing-lg);
   width: 100%;
+  padding: var(--spacing-md);
 }
 
 .twoColumnLayout {
@@ -18,7 +19,7 @@
 .fourColumnLayout {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-xl);
+  gap: var(--spacing-lg);
   width: 100%;
   align-items: flex-start;
 }
@@ -53,18 +54,30 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  transition: all var(--transition-normal) ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sectionCard:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.15);
+  transform: translateY(-2px);
 }
 
 .sectionCard > :global(.cardBody) {
   flex: 1;
   display: flex;
   flex-direction: column;
-    align-items: center;
-  justify-content: center;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
 .cardHeaderWithPreview {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-lg) var(--spacing-lg);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
 }
 
 .headerContent {
@@ -90,16 +103,18 @@
 }
 
 .sectionTitle {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: var(--font-size-xl); /* Facebook H3: 20px */
+  font-weight: var(--font-weight-semibold); /* 600 */
   color: var(--color-text-primary);
   margin: 0;
+  line-height: 1.4; /* Facebook H3: 1.4x */
+  letter-spacing: -0.01em; /* Slight tightening for headings */
 }
 
 .sectionDescription {
-  font-size: 0.875rem;
+  font-size: var(--font-size-base); /* Facebook Body: 16px */
   color: var(--color-text-secondary);
-  line-height: 1.6;
+  line-height: 1.6; /* Facebook Body: 1.6x */
   margin: 0;
 }
 
@@ -107,50 +122,59 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: auto;
-  height: auto;
+  width: 36px;
+  height: 36px;
   padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 0;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: var(--radius-md);
   color: var(--color-text-primary);
   cursor: pointer;
-  transition: opacity var(--transition-normal) ease;
+  transition: all var(--transition-normal) ease;
   flex-shrink: 0;
 }
 
 .previewIconButton:hover:not(:disabled) {
-  opacity: 0.7;
+  background: rgba(139, 92, 246, 0.2);
+  border-color: var(--color-primary-purple);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
 }
 
 .previewIconButton:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .saveButton {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 36px;
+  height: 36px;
   padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  color: var(--color-text-primary);
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--color-status-success);
   cursor: pointer;
-  transition: opacity var(--transition-normal) ease;
-  width: auto;
-  height: auto;
-  min-width: auto;
+  transition: all var(--transition-normal) ease;
+  flex-shrink: 0;
 }
 
 .saveButton:hover:not(:disabled) {
-  opacity: 0.7;
+  background: rgba(16, 185, 129, 0.25);
+  border-color: var(--color-status-success);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .saveButton:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(139, 92, 246, 0.1);
 }
 
 /* Radio Button Group */
@@ -236,9 +260,10 @@
 }
 
 .radioLabel small {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs); /* Facebook Captions: 12px */
   color: var(--color-text-secondary);
   margin-left: auto;
+  line-height: 1.4; /* Facebook Captions: 1.4x */
 }
 
 /* Upload Label Wrapper */
@@ -272,10 +297,9 @@
 .uploadSection {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-md);
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
 }
 
@@ -284,21 +308,30 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
   background: var(--color-primary-purple);
   color: var(--color-text-primary);
   border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
+  font-weight: var(--font-weight-semibold); /* 600 */
+  line-height: 1.4; /* Facebook Buttons: 1.4x */
   cursor: pointer;
   transition: all var(--transition-normal) ease;
   border: none;
   width: 100%;
-  min-height: 44px;
+  min-height: 48px; /* More prominent touch target */
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
 }
 
 .uploadLabel:hover {
   background: var(--color-primary-indigo);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.uploadLabel:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
 }
 
 .fileInput {
@@ -309,32 +342,35 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
   color: var(--color-text-secondary);
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 .fileRequirements {
-  margin-top: var(--spacing-sm);
-  padding: var(--spacing-xs);
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.25);
   border-radius: var(--radius-md);
   width: 100%;
+  backdrop-filter: blur(4px);
 }
 
 .fileRequirementsTitle {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-size: var(--font-size-xs); /* Facebook Captions: 12px */
+  font-weight: var(--font-weight-semibold); /* 600 */
   color: var(--color-text-primary);
   margin: 0 0 var(--spacing-xs) 0;
+  line-height: 1.4; /* Facebook Captions: 1.4x */
 }
 
 .fileRequirementsList {
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-xs); /* Facebook Captions: 12px */
   color: var(--color-text-secondary);
   margin: 0;
-  padding-left: var(--spacing-sm);
-  line-height: 1.4;
+  padding-left: var(--spacing-md);
+  line-height: 1.4; /* Facebook Captions: 1.4x */
 }
 
 .fileRequirementsList li {
@@ -346,11 +382,14 @@
 }
 
 .warning {
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
   color: var(--color-status-warning);
-  padding: var(--spacing-xs);
+  padding: var(--spacing-sm);
   background: rgba(251, 191, 36, 0.1);
-  border-radius: var(--radius-sm);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: var(--radius-md);
+  line-height: 1.4; /* Facebook Labels: 1.4x */
+  text-align: center;
 }
 
 /* Images List */
@@ -429,25 +468,30 @@
 }
 
 .imageInfo {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 .imageInfo h3 {
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
+  font-weight: var(--font-weight-semibold); /* 600 */
   color: var(--color-text-primary);
   margin-bottom: var(--spacing-xs);
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 .imageInfo p {
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
   color: var(--color-text-secondary);
   margin-bottom: var(--spacing-xs);
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 .imageMeta {
-  font-size: 0.875rem;
+  font-size: var(--font-size-xs); /* Facebook Captions: 12px */
   color: var(--color-text-secondary);
   opacity: 0.7;
+  line-height: 1.4; /* Facebook Captions: 1.4x */
 }
 
 /* Video Preview */
@@ -463,9 +507,11 @@
 }
 
 .videoInfo {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
   color: var(--color-text-secondary);
-  margin-top: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+  line-height: 1.4; /* Facebook Labels: 1.4x */
+  text-align: center;
 }
 
 /* Splash Screen Preview */
@@ -523,9 +569,10 @@
 }
 
 .previewText {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
   color: var(--color-text-secondary);
   text-align: center;
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 .noImageContainer {
@@ -547,15 +594,17 @@
 }
 
 .noImageText {
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: var(--font-size-base); /* Facebook Body: 16px */
+  font-weight: var(--font-weight-semibold); /* 600 */
   color: var(--color-text-primary);
+  line-height: 1.6; /* Facebook Body: 1.6x */
 }
 
 .noImageSubtext {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
   color: var(--color-text-secondary);
   text-align: center;
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 /* Carousel Preview */
@@ -583,17 +632,18 @@
   justify-content: center;
   gap: var(--spacing-xs);
   width: 100%;
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
   background: rgba(139, 92, 246, 0.1);
   border: 2px dashed rgba(139, 92, 246, 0.3);
   border-radius: var(--radius-md);
   color: var(--color-text-primary);
   cursor: pointer;
   transition: all var(--transition-normal) ease;
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: var(--font-size-xs); /* Facebook Captions: 12px */
+  font-weight: var(--font-weight-medium); /* 500 */
+  line-height: 1.4; /* Facebook Buttons: 1.4x */
   position: relative;
-  min-height: 36px;
+  min-height: 44px; /* Better touch target */
 }
 
 /* Green background when image is uploaded */
@@ -619,10 +669,11 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: var(--font-size-base); /* Facebook Body: 16px */
+  font-weight: var(--font-weight-semibold); /* 600 */
   color: var(--color-text-primary);
   margin-bottom: var(--spacing-md);
+  line-height: 1.6; /* Facebook Body: 1.6x */
 }
 
 .carouselPreview {
@@ -636,10 +687,11 @@
 }
 
 .previewHint {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
   color: var(--color-text-secondary);
   text-align: center;
   margin-top: var(--spacing-sm);
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 .noPreviewContainer {
@@ -661,15 +713,17 @@
 }
 
 .noPreviewText {
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: var(--font-size-base); /* Facebook Body: 16px */
+  font-weight: var(--font-weight-semibold); /* 600 */
   color: var(--color-text-primary);
+  line-height: 1.6; /* Facebook Body: 1.6x */
 }
 
 .noPreviewSubtext {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
   color: var(--color-text-secondary);
   text-align: center;
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 /* Loading */
@@ -681,6 +735,12 @@
   padding: var(--spacing-2xl);
   gap: var(--spacing-md);
   color: var(--color-text-secondary);
+}
+
+.loading p {
+  font-size: var(--font-size-base); /* Facebook Body: 16px */
+  color: var(--color-text-secondary);
+  line-height: 1.6; /* Facebook Body: 1.6x */
 }
 
 .spinner {

@@ -13,10 +13,11 @@
 }
 
 .previewDescription {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
   color: var(--color-text-secondary);
   text-align: center;
   margin: 0;
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 .imageWrapper {
@@ -46,5 +47,7 @@
   color: var(--color-text-secondary);
   background: rgba(0, 0, 0, 0.1);
   border-radius: var(--radius-md);
+  font-size: var(--font-size-base); /* Facebook Body: 16px */
+  line-height: 1.6; /* Facebook Body: 1.6x */
 }
 

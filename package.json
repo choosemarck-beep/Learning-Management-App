@@ -30,6 +30,7 @@
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.0.0",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "framer-motion": "^11.5.0",
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.427.0",
@@ -41,6 +42,7 @@
     "react-email": "^5.1.0",
     "react-hook-form": "^7.52.0",
     "react-hot-toast": "^2.6.0",
+    "recharts": "^3.6.0",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"
   },

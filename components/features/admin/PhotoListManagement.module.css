@@ -36,9 +36,10 @@
 }
 
 .photoNumber {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold); /* 600 */
   color: var(--color-text-primary);
-  font-size: 0.9375rem;
+  font-size: var(--font-size-base); /* Facebook Body: 16px */
+  line-height: 1.6; /* Facebook Body: 1.6x */
 }
 
 .photoActions {
@@ -108,19 +109,21 @@
 }
 
 .photoInfo {
-  padding: var(--spacing-xs);
-  font-size: 0.8125rem;
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 .photoTitle {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold); /* 600 */
   color: var(--color-text-primary);
   margin-bottom: var(--spacing-xs);
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 .photoDescription {
   color: var(--color-text-secondary);
-  line-height: 1.4;
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 .emptySlot {
@@ -148,12 +151,17 @@
   color: var(--color-text-primary);
   cursor: pointer;
   transition: all var(--transition-normal) ease;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
+  font-weight: var(--font-weight-semibold); /* 600 */
+  line-height: 1.4; /* Facebook Buttons: 1.4x */
+  min-height: 44px; /* Better touch target */
 }
 
 .uploadButton:hover:not(:disabled) {
   background: rgba(139, 92, 246, 0.2);
   border-color: var(--color-primary-purple);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
 }
 
 .uploadButton:disabled {

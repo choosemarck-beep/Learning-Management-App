@@ -253,15 +253,31 @@ A space/cosmic-themed design system with galaxy-inspired colors, starry backgrou
 - **Semibold (600)**: `var(--font-weight-semibold)` - Buttons, links, labels
 - **Bold (700)**: `var(--font-weight-bold)` - Headings, strong emphasis
 
+**Facebook Mobile Typography System** (Applied Globally)
+- **CRITICAL**: All typography follows Facebook's mobile app typography standards for optimal readability
+- **Font Size Mapping**:
+  - Facebook Body (16-18px) → `--font-size-base` (16px) or `--font-size-lg` (18px)
+  - Facebook H1 (24-32px) → `--font-size-2xl` (24px) or `--font-size-3xl` (32px)
+  - Facebook H2 (20-24px) → `--font-size-xl` (20px) or `--font-size-2xl` (24px)
+  - Facebook H3 (18-20px) → `--font-size-lg` (18px) or `--font-size-xl` (20px)
+  - Facebook Buttons (14-18px) → `--font-size-sm` (14px) or `--font-size-base` (16px)
+  - Facebook Captions (12-14px) → `--font-size-xs` (12px) or `--font-size-sm` (14px)
+- **Line Height Standards** (Facebook-Optimized):
+  - Body Text: 1.6x font size (e.g., 16px font = 25.6px line-height)
+  - Headings (h1, h2, h3): 1.2-1.4x font size (h1: 1.2x, h2: 1.3x, h3: 1.4x)
+  - Buttons: 1.4x font size for optimal touch target readability
+  - Labels/Captions: 1.4-1.5x font size for small text readability
+- **Rule**: All future components MUST follow Facebook mobile typography system
+
 **Typography Rules**
 - **MANDATORY**: Always use CSS variables for font sizes (`var(--font-size-*)`) - never hardcode pixel values
 - **MANDATORY**: Always use CSS variables for font weights (`var(--font-weight-*)`) - never hardcode weight values
 - **Consistent Hierarchy**: Follow the standardized font size hierarchy across ALL components
-- Generous line-height (1.3-1.4 for headings, 1.6-1.8 for body)
+- **Line Height**: Follow Facebook-optimized line heights (1.6x for body, 1.2-1.4x for headings, 1.4x for buttons)
 - Standard letter-spacing and word-spacing (no excessive spacing)
 - Adequate padding to prevent text truncation
 - Never cut off text at the bottom
-- **Future Components**: All new components MUST use the standardized font size and weight variables
+- **Future Components**: All new components MUST use the standardized font size and weight variables and follow Facebook mobile typography system
 
 ### Spacing System (8px Grid)
 

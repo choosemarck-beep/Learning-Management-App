@@ -48,30 +48,40 @@ export async function GET(request: NextRequest) {
     // "ALL" means show only APPROVED users (for "All Users" tab)
     if (status === "ALL") {
       where.status = "APPROVED";
+      // "All Users" tab should NOT show Admin or Super Admin accounts
+      // Only show employees, managers, trainers, etc.
+      where.role = {
+        notIn: ["ADMIN", "SUPER_ADMIN"],
+      };
     } else if (status === "PENDING") {
       // STRICT: Only show PENDING users in PENDING tab
       where.status = "PENDING";
+      // PENDING tab should also exclude Admin/Super Admin (they don't need approval)
+      where.role = {
+        notIn: ["ADMIN", "SUPER_ADMIN"],
+      };
     } else if (status === "REJECTED") {
       // STRICT: Only show REJECTED users in REJECTED tab
       where.status = "REJECTED";
+      // REJECTED tab should also exclude Admin/Super Admin (they don't get rejected)
+      where.role = {
+        notIn: ["ADMIN", "SUPER_ADMIN"],
+      };
     } else if (status) {
       // For any other status value, use it as-is
       where.status = status;
     } else {
       // Default to APPROVED if no status specified
       where.status = "APPROVED";
-    }
-
-    // Role-based filtering: Regular admins cannot see other admins or super admins
-    // This applies ONLY to "ALL" (which is APPROVED) and "APPROVED" status
-    // Do NOT apply role filtering to PENDING or REJECTED tabs - they should show all users with that status
-    if (user.role === "ADMIN" && (status === "ALL" || status === "APPROVED" || !status)) {
-      // Filter out ADMIN and SUPER_ADMIN roles for regular admins
+      // Also exclude Admin/Super Admin by default
       where.role = {
         notIn: ["ADMIN", "SUPER_ADMIN"],
       };
-    } else if (role) {
-      // If a specific role filter is provided, use it
+    }
+
+    // Role-based filtering: If a specific role filter is provided, use it
+    // Note: This will override the notIn filter above if a role is specified
+    if (role) {
       where.role = role;
     }
 

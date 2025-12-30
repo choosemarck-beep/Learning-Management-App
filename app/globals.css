@@ -244,28 +244,46 @@ input[type="radio"] {
 }
 
 /* Responsive Typography - Using Standardized Font Sizes */
+/* Facebook Mobile Typography System - Applied Globally */
+/* Line Heights: 1.6x for body, 1.2-1.4x for headings, 1.4x for buttons */
+
 h1 {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
-  line-height: 1.2;
+  line-height: 1.2; /* Facebook H1: 1.2-1.3x */
 }
 
 h2 {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
-  line-height: 1.3;
+  line-height: 1.3; /* Facebook H2: 1.2-1.4x */
 }
 
 h3 {
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
-  line-height: 1.4;
+  line-height: 1.4; /* Facebook H3: 1.2-1.4x */
 }
 
 p {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-regular);
-  line-height: 1.6;
+  line-height: 1.6; /* Facebook Body: 1.6x font size */
+}
+
+/* Facebook Typography: Button Line Heights */
+button,
+.btn,
+input[type="button"],
+input[type="submit"] {
+  line-height: 1.4; /* Facebook Buttons: 1.4x font size */
+}
+
+/* Facebook Typography: Label/Caption Line Heights */
+label,
+small,
+.caption {
+  line-height: 1.4; /* Facebook Labels/Captions: 1.4-1.5x font size */
 }
 
 /* Desktop typography scaling (admin/trainer pages only) */

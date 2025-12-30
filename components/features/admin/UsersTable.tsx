@@ -99,11 +99,9 @@ export const UsersTable: React.FC<UsersTableProps> = ({
   const tableRef = useRef<HTMLTableElement>(null);
 
   useEffect(() => {
-    if (initialUsers.length > 0) {
-      setUsers(initialUsers);
-    } else {
-      fetchUsers();
-    }
+    // Always fetch users when statusFilter changes to ensure correct filtering
+    // Don't rely on initialUsers as they may not be filtered by the current status
+    fetchUsers();
     // Reset to page 1 when status filter changes
     setCurrentPage(1);
   }, [statusFilter]);

@@ -7,6 +7,14 @@
   display: flex;
   flex-direction: column;
   overflow: visible !important;
+  transition: all var(--transition-normal) ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.sectionCard:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.15);
+  transform: translateY(-2px);
 }
 
 .sectionCard > :global(.cardBody) {
@@ -15,11 +23,14 @@
   flex-direction: column;
   overflow: visible;
   max-height: none;
+  padding: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
 .cardHeader {
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  padding: var(--spacing-lg) var(--spacing-lg);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
 }
 
 .headerContent {
@@ -45,10 +56,12 @@
 }
 
 .sectionTitle {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: var(--font-size-xl); /* Facebook H3: 20px */
+  font-weight: var(--font-weight-semibold); /* 600 */
   color: var(--color-text-primary);
   margin: 0;
+  line-height: 1.4; /* Facebook H3: 1.4x */
+  letter-spacing: -0.01em; /* Slight tightening for headings */
 }
 
 .saveButton,
@@ -56,43 +69,47 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-sm);
-  font-size: 0.75rem;
-  font-weight: 500;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-normal) ease;
   border: none;
+  flex-shrink: 0;
 }
 
 .saveButton {
-  gap: 0;
-  padding: 0;
-  height: auto;
-  background: transparent;
-  color: var(--color-text-primary);
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: var(--color-status-success);
 }
 
 .saveButton:hover:not(:disabled) {
-  opacity: 0.7;
+  background: rgba(16, 185, 129, 0.25);
+  border-color: var(--color-status-success);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .saveButton:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(139, 92, 246, 0.1);
 }
 
 .resetButton {
-  gap: 0;
-  padding: 0;
-  width: auto;
-  height: auto;
-  background: transparent;
-  border: none;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
   color: var(--color-text-primary);
 }
 
 .resetButton:hover {
-  opacity: 0.7;
+  background: rgba(139, 92, 246, 0.2);
+  border-color: var(--color-primary-purple);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
 }
 
 .resetButton svg {
@@ -104,9 +121,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  padding: var(--spacing-sm) var(--spacing-md);
   overflow: visible;
   position: relative;
+  width: 100%;
 }
 
 .simpleColorRow {
@@ -151,11 +168,12 @@
 }
 
 .backgroundSelect :global(select) {
-  font-size: 0.65rem;
-  padding: 4px 6px;
+  font-size: var(--font-size-xs); /* Facebook Captions: 12px */
+  padding: var(--spacing-xs) var(--spacing-sm);
   min-height: auto;
   height: auto;
   width: 100%;
+  line-height: 1.4; /* Facebook Buttons: 1.4x */
 }
 
 .plainColorPickerInline {
@@ -186,21 +204,24 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 6px 8px;
+  padding: var(--spacing-sm) var(--spacing-md);
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-normal) ease;
-  font-size: 0.65rem;
+  font-size: var(--font-size-xs); /* Facebook Captions: 12px */
+  font-weight: var(--font-weight-medium); /* 500 */
   color: var(--color-text-secondary);
-  min-width: 60px;
+  min-width: 70px;
+  line-height: 1.4; /* Facebook Captions: 1.4x */
 }
 
 .simpleColorButton:hover {
-  background: rgba(139, 92, 246, 0.1);
+  background: rgba(139, 92, 246, 0.15);
   border-color: rgba(139, 92, 246, 0.4);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
 }
 
 .simpleColorSwatch {
@@ -212,10 +233,11 @@
 }
 
 .simpleColorLabel {
-  font-size: 0.65rem;
+  font-size: var(--font-size-xs); /* Facebook Captions: 12px */
   color: var(--color-text-secondary);
   text-align: center;
   white-space: nowrap;
+  line-height: 1.4; /* Facebook Captions: 1.4x */
 }
 
 .colorPickerDropdown {
@@ -238,9 +260,10 @@
   margin-bottom: 4px;
   padding-bottom: 4px;
   border-bottom: 1px solid rgba(139, 92, 246, 0.2);
-  font-size: 0.65rem;
-  font-weight: 600;
+  font-size: var(--font-size-xs); /* Facebook Captions: 12px */
+  font-weight: var(--font-weight-semibold); /* 600 */
   color: var(--color-text-primary);
+  line-height: 1.4; /* Facebook Captions: 1.4x */
 }
 
 .closePickerButton {
@@ -283,9 +306,10 @@
 }
 
 .groupedColorLabel {
-  font-size: 0.6rem;
+  font-size: var(--font-size-xs); /* Facebook Captions: 12px */
   color: var(--color-text-secondary);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium); /* 500 */
+  line-height: 1.4; /* Facebook Captions: 1.4x */
 }
 
 .colorInput {
@@ -314,10 +338,11 @@
 }
 
 .sectionSubtitle {
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
+  font-weight: var(--font-weight-semibold); /* 600 */
   color: var(--color-text-primary);
   margin-bottom: var(--spacing-sm);
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 .backgroundControls {
@@ -347,8 +372,9 @@
 }
 
 .toggleText {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs); /* Facebook Captions: 12px */
   color: var(--color-text-secondary);
+  line-height: 1.4; /* Facebook Captions: 1.4x */
 }
 
 .plainBgColorPicker {
@@ -362,9 +388,10 @@
 }
 
 .colorPickerLabel {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs); /* Facebook Captions: 12px */
   color: var(--color-text-secondary);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium); /* 500 */
+  line-height: 1.4; /* Facebook Captions: 1.4x */
 }
 
 .plainColorRow {
@@ -398,21 +425,23 @@
 }
 
 .plainColorHex :global(input) {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs); /* Facebook Captions: 12px */
   font-family: monospace;
   padding: var(--spacing-xs) var(--spacing-sm);
+  line-height: 1.4; /* Facebook Captions: 1.4x */
 }
 
 .previewNote {
-  margin-top: var(--spacing-sm);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: rgba(139, 92, 246, 0.1);
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background: rgba(139, 92, 246, 0.08);
   border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: var(--radius-sm);
-  font-size: 0.7rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs); /* Facebook Captions: 12px */
   color: var(--color-text-secondary);
   text-align: center;
-  line-height: 1.4;
+  line-height: 1.4; /* Facebook Captions: 1.4x */
+  backdrop-filter: blur(4px);
 }
 
 
@@ -421,10 +450,15 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
   padding: var(--spacing-xl);
   color: var(--color-text-secondary);
-  font-size: 0.875rem;
+}
+
+.loading p {
+  font-size: var(--font-size-base); /* Facebook Body: 16px */
+  color: var(--color-text-secondary);
+  line-height: 1.6; /* Facebook Body: 1.6x */
 }
 
 .spinner {
@@ -449,10 +483,10 @@
 }
 
 .passwordPrompt {
-  font-size: 0.875rem;
+  font-size: var(--font-size-base); /* Facebook Body: 16px */
   color: var(--color-text-secondary);
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6; /* Facebook Body: 1.6x */
 }
 
 .passwordActions {
@@ -464,10 +498,11 @@
 .cancelButton,
 .submitButton {
   flex: 1;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
+  font-weight: var(--font-weight-semibold); /* 600 */
+  line-height: 1.4; /* Facebook Buttons: 1.4x */
   cursor: pointer;
   transition: all var(--transition-normal) ease;
   border: none;
@@ -475,26 +510,37 @@
   align-items: center;
   justify-content: center;
   gap: var(--spacing-xs);
-  min-height: 36px;
+  min-height: 48px; /* Better touch target */
 }
 
 .cancelButton {
   background: rgba(139, 92, 246, 0.1);
   border: 1px solid rgba(139, 92, 246, 0.3);
   color: var(--color-text-primary);
+  box-shadow: 0 2px 6px rgba(139, 92, 246, 0.1);
 }
 
 .cancelButton:hover:not(:disabled) {
   background: rgba(139, 92, 246, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.2);
 }
 
 .submitButton {
   background: var(--color-primary-purple);
   color: var(--color-text-primary);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
 }
 
 .submitButton:hover:not(:disabled) {
   background: var(--color-primary-indigo);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
 }
 
 .submitButton:disabled {

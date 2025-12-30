@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { StatsCard } from "./StatsCard";
+import { AnalyticsDashboard } from "./analytics/AnalyticsDashboard";
 import styles from "./AdminDashboardClient.module.css";
 
 interface AdminDashboardClientProps {
@@ -64,7 +65,7 @@ export const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({
 
   return (
     <div className={styles.container}>
-      {/* Analytics Stats Grid */}
+      {/* Quick Stats Grid */}
       <div className={styles.statsGrid}>
         <StatsCard
           label="Total Users"
@@ -80,8 +81,8 @@ export const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({
         />
       </div>
 
-      {/* Additional Analytics Widgets can be added here */}
-      {/* Charts, graphs, metrics, etc. */}
+      {/* Comprehensive Analytics Dashboard */}
+      <AnalyticsDashboard />
     </div>
   );
 };

@@ -77,11 +77,26 @@ Galaxy-inspired color scheme:
   - **Medium (500)**: `var(--font-weight-medium)` - Optional, for subtle emphasis
   - **Semibold (600)**: `var(--font-weight-semibold)` - Buttons, links, labels
   - **Bold (700)**: `var(--font-weight-bold)` - Headings, strong emphasis
+- **Facebook Mobile Typography System** (Applied Globally):
+  - **CRITICAL**: All typography follows Facebook's mobile app typography standards for optimal readability and user experience
+  - **Font Size Mapping**:
+    - Facebook Body (16-18px) → `--font-size-base` (16px) or `--font-size-lg` (18px)
+    - Facebook H1 (24-32px) → `--font-size-2xl` (24px) or `--font-size-3xl` (32px)
+    - Facebook H2 (20-24px) → `--font-size-xl` (20px) or `--font-size-2xl` (24px)
+    - Facebook H3 (18-20px) → `--font-size-lg` (18px) or `--font-size-xl` (20px)
+    - Facebook Buttons (14-18px) → `--font-size-sm` (14px) or `--font-size-base` (16px)
+    - Facebook Captions (12-14px) → `--font-size-xs` (12px) or `--font-size-sm` (14px)
+  - **Line Height Standards** (Facebook-Optimized):
+    - **Body Text**: 1.6x font size (e.g., 16px font = 25.6px line-height)
+    - **Headings (h1, h2, h3)**: 1.2-1.4x font size (h1: 1.2x, h2: 1.3x, h3: 1.4x)
+    - **Buttons**: 1.4x font size for optimal touch target readability
+    - **Labels/Captions**: 1.4-1.5x font size for small text readability
+  - **Rule**: All future components MUST follow Facebook mobile typography system
 - **Typography Standards**:
   - **MANDATORY**: Always use CSS variables for font sizes (`var(--font-size-*)`) - never hardcode pixel values
   - **MANDATORY**: Always use CSS variables for font weights (`var(--font-weight-*)`) - never hardcode weight values
   - **Consistent Hierarchy**: Follow the standardized font size hierarchy across ALL components
-  - **Line Height**: Generous (1.6-1.8 for body, 1.2-1.4 for headings) for readability
+  - **Line Height**: Follow Facebook-optimized line heights (1.6x for body, 1.2-1.4x for headings, 1.4x for buttons)
   - **Consistent Spacing**: Maintain consistent letter-spacing and word-spacing (avoid excessive spacing)
   - **Text Truncation**: Never cut off text at the bottom - ensure proper line-height and padding
   - **Professional Standards**: Follow UI/UX typography best practices:
@@ -90,7 +105,7 @@ Galaxy-inspired color scheme:
     - Adequate contrast for readability
     - No text overflow or clipping
     - Proper text wrapping for long content
-  - **Future Components**: All new components MUST use the standardized font size and weight variables
+  - **Future Components**: All new components MUST use the standardized font size and weight variables and follow Facebook mobile typography system
 
 ### UI/UX Principles
 1. **Mobile-Only Design**: All user-facing pages must be designed and optimized exclusively for mobile viewports (320px - 428px width). Elements, sizes, positioning, and layouts must be contained within mobile constraints. NO desktop scaling or responsive breakpoints for user-facing content.

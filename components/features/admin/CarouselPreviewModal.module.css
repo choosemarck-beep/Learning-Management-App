@@ -13,10 +13,11 @@
 }
 
 .previewDescription {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
   color: var(--color-text-secondary);
   text-align: center;
   margin: 0;
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 .carouselWrapper {
@@ -44,5 +45,7 @@
   padding: var(--spacing-xl);
   text-align: center;
   color: var(--color-text-secondary);
+  font-size: var(--font-size-base); /* Facebook Body: 16px */
+  line-height: 1.6; /* Facebook Body: 1.6x */
 }
 
