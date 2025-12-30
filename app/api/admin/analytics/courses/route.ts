@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
             title: true,
             isPublished: true,
             totalXP: true,
-            trainingProgressesNew: {
+            trainingProgress: {
               select: {
                 isCompleted: true,
               },
@@ -149,11 +149,11 @@ export async function GET(request: NextRequest) {
           },
           take: 10,
         }).then(trainings =>
-          trainings.sort((a, b) => b.trainingProgressesNew.length - a.trainingProgressesNew.length)
+          trainings.sort((a, b) => b.trainingProgress.length - a.trainingProgress.length)
         ).then(trainings =>
           trainings.map(training => {
-            const total = training.trainingProgressesNew.length;
-            const completed = training.trainingProgressesNew.filter(p => p.isCompleted).length;
+            const total = training.trainingProgress.length;
+            const completed = training.trainingProgress.filter(p => p.isCompleted).length;
             return {
               trainingId: training.id,
               title: training.title,
@@ -172,7 +172,7 @@ export async function GET(request: NextRequest) {
             title: true,
             isPublished: true,
             totalXP: true,
-            trainingProgressesNew: {
+            trainingProgress: {
               select: {
                 isCompleted: true,
               },
@@ -180,11 +180,11 @@ export async function GET(request: NextRequest) {
           },
           take: 10,
         }).then(trainings =>
-          trainings.sort((a, b) => a.trainingProgressesNew.length - b.trainingProgressesNew.length)
+          trainings.sort((a, b) => a.trainingProgress.length - b.trainingProgress.length)
         ).then(trainings =>
           trainings.map(training => {
-            const total = training.trainingProgressesNew.length;
-            const completed = training.trainingProgressesNew.filter(p => p.isCompleted).length;
+            const total = training.trainingProgress.length;
+            const completed = training.trainingProgress.filter(p => p.isCompleted).length;
             return {
               trainingId: training.id,
               title: training.title,

@@ -18,6 +18,10 @@ export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
 }
 
+export interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
+  children: React.ReactNode;
+}
+
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, children, ...props }, ref) => {
     return (
@@ -65,4 +69,16 @@ export const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
 );
 
 CardFooter.displayName = "CardFooter";
+
+export const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
+  ({ className, children, ...props }, ref) => {
+    return (
+      <h3 ref={ref} className={cn(styles.title, className)} {...props}>
+        {children}
+      </h3>
+    );
+  }
+);
+
+CardTitle.displayName = "CardTitle";
 
