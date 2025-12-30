@@ -2316,6 +2316,152 @@ if (!response.ok || !data.success) {
 - **2024-12-30**: Added Cloudinary Invalid API Key error (401) - placeholder values in environment variables causing authentication failures
 - **2024-12-30**: Added placeholder detection validation in Cloudinary config - prevents uploads with placeholder API keys
 - **2024-12-30**: Standardized error handling across all file upload endpoints (carousel, avatar, splash, logo, video, thumbnails)
+
+---
+
+#### Error: Quiz Confirmation Popup Hidden/Not Visible
+**Symptoms:**
+- Confirmation popup appears but is not visible when user selects an answer
+- Popup is clipped or hidden behind other elements
+- User cannot see "Confirm" or "Change Answer" buttons
+- Popup appears to be pushed out of viewport
+
+**Common Causes:**
+- Parent container has `overflow: hidden` that clips child elements
+- Missing z-index causing popup to be behind other elements
+- Popup positioned outside visible viewport
+- CardBody component has `overflow: hidden` by default
+
+**Solution:**
+- Override parent container overflow for specific components that need visible overflow
+- Add explicit z-index to confirmation container
+- Add scroll-into-view behavior when popup appears
+- Use CSS class override: `.questionCardBody { overflow: visible !important; overflow-y: auto !important; }`
+- Add `position: relative` and `z-index: 10` to confirmation container
+- Use `scrollIntoView()` with smooth behavior when confirmation appears
+
+**Example Fix:**
+```css
+/* Override CardBody overflow for quiz card */
+.questionCardBody {
+  overflow: visible !important;
+  overflow-y: auto !important;
+  max-height: none !important;
+}
+
+/* Confirmation Container */
+.confirmationContainer {
+  position: relative;
+  z-index: 10;
+  margin-top: var(--spacing-md);
+  transform: translateZ(0);
+  will-change: transform;
+}
+```
+
+```typescript
+// Scroll confirmation into view when it appears
+const handleOptionClick = (optionIndex: number) => {
+  setSelectedAnswerIndex(optionIndex);
+  setShowConfirmation(true);
+  
+  setTimeout(() => {
+    const confirmationElement = document.querySelector(`.${styles.confirmationContainer}`);
+    if (confirmationElement) {
+      confirmationElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest',
+        inline: 'nearest'
+      });
+    }
+  }, 100);
+};
+```
+
+**Files Fixed:**
+- `components/features/quiz/QuizCard.tsx` - Added scroll-into-view behavior
+- `components/features/quiz/QuizCard.module.css` - Override CardBody overflow, add z-index and positioning
+
+**Prevention:**
+- Always check parent container overflow settings when child elements are clipped
+- Use `overflow: visible` or `overflow-y: auto` for containers with dynamic content
+- Add z-index to elements that need to appear above others
+- Test confirmation modals and popups on mobile viewports
+- Use scroll-into-view for dynamically appearing elements
+- **2024-12-30**: Added overflow hidden clipping pattern - parent containers with `overflow: hidden` can clip child elements, requiring explicit overflow overrides
 - **2024-12-30**: Added placeholder detection validation in Cloudinary config - prevents uploads with placeholder API keys
 - **2024-12-30**: Standardized error handling across all file upload endpoints (carousel, avatar, splash, logo, video, thumbnails)
+
+---
+
+#### Error: Quiz Confirmation Popup Hidden/Not Visible
+**Symptoms:**
+- Confirmation popup appears but is not visible when user selects an answer
+- Popup is clipped or hidden behind other elements
+- User cannot see "Confirm" or "Change Answer" buttons
+- Popup appears to be pushed out of viewport
+
+**Common Causes:**
+- Parent container has `overflow: hidden` that clips child elements
+- Missing z-index causing popup to be behind other elements
+- Popup positioned outside visible viewport
+- CardBody component has `overflow: hidden` by default
+
+**Solution:**
+- Override parent container overflow for specific components that need visible overflow
+- Add explicit z-index to confirmation container
+- Add scroll-into-view behavior when popup appears
+- Use CSS class override: `.questionCardBody { overflow: visible !important; overflow-y: auto !important; }`
+- Add `position: relative` and `z-index: 10` to confirmation container
+- Use `scrollIntoView()` with smooth behavior when confirmation appears
+
+**Example Fix:**
+```css
+/* Override CardBody overflow for quiz card */
+.questionCardBody {
+  overflow: visible !important;
+  overflow-y: auto !important;
+  max-height: none !important;
+}
+
+/* Confirmation Container */
+.confirmationContainer {
+  position: relative;
+  z-index: 10;
+  margin-top: var(--spacing-md);
+  transform: translateZ(0);
+  will-change: transform;
+}
+```
+
+```typescript
+// Scroll confirmation into view when it appears
+const handleOptionClick = (optionIndex: number) => {
+  setSelectedAnswerIndex(optionIndex);
+  setShowConfirmation(true);
+  
+  setTimeout(() => {
+    const confirmationElement = document.querySelector(`.${styles.confirmationContainer}`);
+    if (confirmationElement) {
+      confirmationElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest',
+        inline: 'nearest'
+      });
+    }
+  }, 100);
+};
+```
+
+**Files Fixed:**
+- `components/features/quiz/QuizCard.tsx` - Added scroll-into-view behavior
+- `components/features/quiz/QuizCard.module.css` - Override CardBody overflow, add z-index and positioning
+
+**Prevention:**
+- Always check parent container overflow settings when child elements are clipped
+- Use `overflow: visible` or `overflow-y: auto` for containers with dynamic content
+- Add z-index to elements that need to appear above others
+- Test confirmation modals and popups on mobile viewports
+- Use scroll-into-view for dynamically appearing elements
+- **2024-12-30**: Added overflow hidden clipping pattern - parent containers with `overflow: hidden` can clip child elements, requiring explicit overflow overrides
 
