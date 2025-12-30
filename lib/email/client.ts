@@ -11,7 +11,7 @@ export async function sendEmail({
   to,
   subject,
   html,
-  from = "Learning Management <noreply@sendgrid.net>",
+  from,
 }: {
   to: string;
   subject: string;
@@ -25,22 +25,25 @@ export async function sendEmail({
     throw new Error(errorMsg);
   }
 
-  // Note: SendGrid free tier allows sending to any email address
+  // Use environment variable for sender email if available, otherwise use default
   // For production, verify your sender domain in SendGrid dashboard
   // Default "from" address may not work - use a verified sender email
+  const defaultFrom = process.env.SENDGRID_FROM_EMAIL || "Learning Management <noreply@sendgrid.net>";
+  const senderEmail = from || defaultFrom;
 
   try {
     console.log("📧 Attempting to send email:", {
       to,
-      from,
+      from: senderEmail,
       subject,
       hasApiKey: !!process.env.SENDGRID_API_KEY,
       apiKeyLength: process.env.SENDGRID_API_KEY?.length || 0,
+      hasFromEmailEnv: !!process.env.SENDGRID_FROM_EMAIL,
     });
     
     const msg = {
       to,
-      from,
+      from: senderEmail,
       subject,
       html,
     };
@@ -68,7 +71,7 @@ export async function sendEmail({
       code: error?.code,
       response: error?.response?.body,
       to,
-      from,
+      from: senderEmail,
     });
     
     // Don't expose internal error details to client

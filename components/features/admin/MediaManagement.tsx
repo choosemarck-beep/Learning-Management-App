@@ -135,7 +135,7 @@ export const MediaManagement: React.FC = () => {
     }
   };
 
-  const handleFileUpload = async (file: File, order: number) => {
+  const handleFileUpload = async (file: File, order: number, redirectUrl?: string) => {
     // Validation checks - return early with toast, don't throw
     if (!file.type.startsWith("image/")) {
       setTimeout(() => {
@@ -170,6 +170,9 @@ export const MediaManagement: React.FC = () => {
       formData.append("image", file);
       formData.append("order", order.toString());
       formData.append("isActive", "false"); // Upload as inactive, will be activated on Save
+      if (redirectUrl && redirectUrl.trim() !== '') {
+        formData.append("redirectUrl", redirectUrl.trim());
+      }
 
       const response = await fetch("/api/admin/carousel", {
         method: "POST",

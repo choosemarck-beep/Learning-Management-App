@@ -30,7 +30,7 @@ interface PhotoListManagementProps {
   isOpen: boolean;
   onClose: () => void;
   images: CarouselImage[];
-  onUpload: (file: File, order: number) => Promise<void>;
+  onUpload: (file: File, order: number, redirectUrl?: string) => Promise<void>;
   onEdit: (id: string, title: string, description: string, redirectUrl: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onReorder: (id: string, direction: "up" | "down") => Promise<void>;
@@ -57,6 +57,7 @@ export const PhotoListManagement: React.FC<PhotoListManagementProps> = ({
     description: "",
     redirectUrl: "",
   });
+  const [uploadRedirectUrls, setUploadRedirectUrls] = useState<Record<number, string>>({});
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Get all images sorted by order (active and inactive)
@@ -95,13 +96,29 @@ export const PhotoListManagement: React.FC<PhotoListManagementProps> = ({
       return;
     }
 
+    // Validate redirect URL if provided
+    const redirectUrl = uploadRedirectUrls[slotIndex] || "";
+    if (redirectUrl && redirectUrl.trim() !== '') {
+      try {
+        new URL(redirectUrl);
+      } catch {
+        toast.error("Please enter a valid URL (e.g., https://example.com)");
+        return;
+      }
+    }
+
     try {
-      await onUpload(file, slotIndex);
+      await onUpload(file, slotIndex, redirectUrl.trim() || "");
       toast.success("Photo uploaded");
-      // Reset input
+      // Reset input and redirect URL
       if (fileInputRefs.current[slotIndex]) {
         fileInputRefs.current[slotIndex]!.value = "";
       }
+      setUploadRedirectUrls((prev) => {
+        const newUrls = { ...prev };
+        delete newUrls[slotIndex];
+        return newUrls;
+      });
     } catch (error) {
       toast.error("Failed to upload photo");
     }
@@ -288,6 +305,19 @@ export const PhotoListManagement: React.FC<PhotoListManagementProps> = ({
                 </div>
               ) : (
                 <div className={styles.emptySlot}>
+                  <Input
+                    label="Redirect URL (Optional)"
+                    type="url"
+                    value={uploadRedirectUrls[slot.index] || ""}
+                    onChange={(e) =>
+                      setUploadRedirectUrls((prev) => ({
+                        ...prev,
+                        [slot.index]: e.target.value,
+                      }))
+                    }
+                    placeholder="https://example.com"
+                    disabled={isUploading}
+                  />
                   <input
                     ref={(el) => { fileInputRefs.current[idx] = el; }}
                     type="file"

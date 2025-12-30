@@ -314,8 +314,8 @@
 }
 
 .fileRequirements {
-  margin-top: var(--spacing-md);
-  padding: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-xs);
   background: rgba(245, 158, 11, 0.1);
   border: 1px solid rgba(245, 158, 11, 0.3);
   border-radius: var(--radius-md);
@@ -323,22 +323,22 @@
 }
 
 .fileRequirementsTitle {
-  font-size: 0.875rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--color-text-primary);
   margin: 0 0 var(--spacing-xs) 0;
 }
 
 .fileRequirementsList {
-  font-size: 0.875rem;
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   margin: 0;
-  padding-left: var(--spacing-md);
-  line-height: 1.6;
+  padding-left: var(--spacing-sm);
+  line-height: 1.4;
 }
 
 .fileRequirementsList li {
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: 2px;
 }
 
 .fileRequirementsList li:last-child {

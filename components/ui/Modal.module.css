@@ -100,7 +100,7 @@
   }
   
   .content {
-    padding: 0;
+    padding: var(--spacing-lg);
   }
 }
 
@@ -115,7 +115,7 @@
   }
   
   .content {
-    padding: 0;
+    padding: var(--spacing-lg);
   }
 }
 

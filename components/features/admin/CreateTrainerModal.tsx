@@ -168,6 +168,18 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
           password: data.password,
         });
         toast.success("Trainer account created successfully!");
+        
+        // Check if email was sent successfully
+        if (data.emailSent === false) {
+          toast.error(
+            "Trainer created successfully, but email notification failed to send. Please share credentials manually.",
+            { duration: 6000 }
+          );
+          console.warn("Email sending failed for trainer:", {
+            email: formData.email.trim().toLowerCase(),
+            trainerId: data.data?.id,
+          });
+        }
       } else {
         toast.error(data.error || "Failed to create trainer account");
         if (data.details) {
