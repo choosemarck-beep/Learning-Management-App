@@ -391,8 +391,20 @@ export const MediaManagement: React.FC = () => {
       throw new Error("Image not found");
     }
 
+    // Only allow reordering of active images
+    if (!image.isActive) {
+      throw new Error("Can only reorder active images");
+    }
+
     const newOrder = direction === "up" ? image.order - 1 : image.order + 1;
-    const swapImage = images.find((img) => img.order === newOrder);
+    
+    // Validate new order is within bounds (0-3)
+    if (newOrder < 0 || newOrder > 3) {
+      throw new Error("Cannot move image outside valid range");
+    }
+
+    // Find the image at the target order (only check active images for swapping)
+    const swapImage = images.find((img) => img.order === newOrder && img.isActive);
 
     try {
       await Promise.all([

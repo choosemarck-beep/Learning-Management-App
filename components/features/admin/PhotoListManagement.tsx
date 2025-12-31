@@ -63,6 +63,10 @@ export const PhotoListManagement: React.FC<PhotoListManagementProps> = ({
   // Get all images sorted by order (active and inactive)
   const allImages = [...images].sort((a, b) => a.order - b.order);
   
+  // Get active images only for reorder logic
+  const activeImages = images.filter((img) => img.isActive).sort((a, b) => a.order - b.order);
+  const maxOrder = activeImages.length > 0 ? Math.max(...activeImages.map(img => img.order)) : 0;
+  
   // Create 4 slots (0-3) with images mapped to their order
   // Show active images first, then inactive images, then empty slots
   const slots = Array.from({ length: 4 }, (_, index) => {
@@ -200,30 +204,46 @@ export const PhotoListManagement: React.FC<PhotoListManagementProps> = ({
                 {slot.image && (
                   <div className={styles.photoActions}>
                     <button
-                      onClick={() => handleReorder(slot.image!.id, "up")}
-                      disabled={slot.image!.order === 0}
+                      onClick={() => {
+                        if (slot.image) {
+                          handleReorder(slot.image.id, "up");
+                        }
+                      }}
+                      disabled={!slot.image || slot.image.order === 0 || !slot.image.isActive}
                       className={styles.actionButton}
                       title="Move up"
                     >
                       <ArrowUp size={14} />
                     </button>
                     <button
-                      onClick={() => handleReorder(slot.image!.id, "down")}
-                      disabled={slot.image!.order === slots.filter(s => s.image).length - 1}
+                      onClick={() => {
+                        if (slot.image) {
+                          handleReorder(slot.image.id, "down");
+                        }
+                      }}
+                      disabled={!slot.image || slot.image.order >= maxOrder || !slot.image.isActive}
                       className={styles.actionButton}
                       title="Move down"
                     >
                       <ArrowDown size={14} />
                     </button>
                     <button
-                      onClick={() => handleEditClick(slot.image!)}
+                      onClick={() => {
+                        if (slot.image) {
+                          handleEditClick(slot.image);
+                        }
+                      }}
                       className={styles.actionButton}
                       title="Edit"
                     >
                       <Edit2 size={14} />
                     </button>
                     <button
-                      onClick={() => handleDelete(slot.image!.id)}
+                      onClick={() => {
+                        if (slot.image) {
+                          handleDelete(slot.image.id);
+                        }
+                      }}
                       className={styles.actionButton}
                       title="Delete"
                     >
