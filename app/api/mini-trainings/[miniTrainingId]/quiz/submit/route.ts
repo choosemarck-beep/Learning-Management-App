@@ -39,6 +39,7 @@ export async function POST(
           select: {
             id: true,
             courseId: true,
+            totalXP: true, // Needed for XP calculation
           },
         },
       },

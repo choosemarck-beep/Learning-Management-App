@@ -3058,3 +3058,71 @@ const miniQuizzes = await prisma.miniQuiz.findMany({
 - **2025-01-01**: Added Prisma model field access error - always check schema for actual field names, use nested where clauses for related models
 
 ---
+
+#### Error: Property does not exist on Prisma relation select type (Missing Field in Select)
+**Symptoms:**
+- Build fails with TypeScript error: `Property 'fieldName' does not exist on type '{ id: string; otherField: string; }'`
+- Error occurs when trying to access a field from a Prisma relation that wasn't included in the `select` statement
+- Error message indicates the field is missing from the selected fields type
+
+**Common Causes:**
+- Using `select` in Prisma relation but forgetting to include a field that's needed later in the code
+- Field exists in the database but wasn't added to the `select` statement
+- Code was updated to use a new field but the Prisma query wasn't updated to include it
+
+**Solution:**
+- Add the missing field to the `select` statement in the Prisma query
+- Check all fields that are accessed from the relation and ensure they're all included in `select`
+- If using `include` instead of `select`, all fields are included by default (but less efficient)
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - totalXP not included in select
+const miniTraining = await prisma.miniTraining.findUnique({
+  where: { id: miniTrainingId },
+  include: {
+    miniQuiz: true,
+    training: {
+      select: {
+        id: true,
+        courseId: true,
+        // totalXP missing - will cause error when accessed
+      },
+    },
+  },
+});
+
+// Later in code:
+const trainingTotalXP = miniTraining.training.totalXP || 0; // ERROR: totalXP doesn't exist
+
+// ✅ CORRECT - include totalXP in select
+const miniTraining = await prisma.miniTraining.findUnique({
+  where: { id: miniTrainingId },
+  include: {
+    miniQuiz: true,
+    training: {
+      select: {
+        id: true,
+        courseId: true,
+        totalXP: true, // Include all fields that will be accessed
+      },
+    },
+  },
+});
+
+// Now this works:
+const trainingTotalXP = miniTraining.training.totalXP || 0; // ✅ Works
+```
+
+**Files Fixed:**
+- `app/api/mini-trainings/[miniTrainingId]/quiz/submit/route.ts` - Added `totalXP: true` to training select statement
+
+**Prevention:**
+- Always include all fields that will be accessed later in the code in Prisma `select` statements
+- Review code that uses relation data to ensure all needed fields are selected
+- Use TypeScript errors to catch missing fields during development
+- Consider using `include` instead of `select` if you need most fields (less efficient but safer)
+- **Pattern**: When adding new code that accesses relation fields, update the Prisma query to include those fields
+- **2025-01-01**: Added Prisma relation select field error - always include all fields that will be accessed in select statements
+
+---
