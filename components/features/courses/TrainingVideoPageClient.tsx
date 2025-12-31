@@ -171,12 +171,19 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
         // Only update overall progress if quiz is completed (for progress calculation)
         // But always save watch position for resume functionality
         if (result.data.progress !== undefined && progress.quizCompleted) {
+          const newProgress = result.data.progress || progress.progress;
+          const wasCompleted = progress.isCompleted;
           setProgress((prev) => ({
             ...prev,
             videoProgress: result.data.videoProgress || prev.videoProgress,
             videoWatchedSeconds: result.data.watchedSeconds || prev.videoWatchedSeconds,
-            progress: result.data.progress || prev.progress,
+            progress: newProgress,
+            isCompleted: newProgress >= 100,
           }));
+          // Refresh router if training was just completed
+          if (!wasCompleted && newProgress >= 100) {
+            router.refresh();
+          }
         } else {
           // Still update videoWatchedSeconds even if quiz not completed
           setProgress((prev) => ({
@@ -714,7 +721,7 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
   const handleMiniTrainingComplete = () => {
     // Refresh progress after completion
     // This will trigger a re-render with updated progress
-    window.location.reload(); // Simple approach - could be optimized with state management
+    router.refresh(); // Refresh to update course page progress
   };
 
   // Check if description needs "See More" (more than 4 lines)
@@ -1076,6 +1083,8 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
                         setWatchedSeconds(finalDuration);
                         // Save final progress immediately - always save (force=true)
                         saveProgressImmediately(finalDuration, false, true);
+                        // Refresh router to update course page progress
+                        router.refresh();
                       }}
                       onError={(e) => {
                         console.error("[Direct Video] Video error:", e);

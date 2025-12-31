@@ -16,6 +16,8 @@ interface Training {
   order: number;
   totalXP: number;
   miniTrainingCount: number;
+  progress?: number;
+  isCompleted?: boolean;
 }
 
 interface Course {

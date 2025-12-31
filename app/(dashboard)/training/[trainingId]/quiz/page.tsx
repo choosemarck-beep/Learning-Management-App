@@ -195,6 +195,7 @@ export default async function TrainingQuizPage({ params }: PageProps) {
       passingScore: training.quiz.passingScore,
       timeLimit: training.quiz.timeLimit,
       questions: finalQuestions,
+      maxAttempts: training.quiz.maxAttempts,
     };
 
     const trainingData = {
@@ -216,6 +217,8 @@ export default async function TrainingQuizPage({ params }: PageProps) {
             quiz={quizData}
             training={trainingData}
             course={courseData}
+            attemptNumber={attemptNumber}
+            totalAttempts={existingAttempts.length}
           />
         </div>
         <ProfileBottomNav

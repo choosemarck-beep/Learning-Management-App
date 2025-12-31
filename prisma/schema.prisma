@@ -15,7 +15,7 @@ model User {
   avatar                          String?
   xp                              Int                          @default(0)
   level                           Int                          @default(1)
-  rank                            String                       @default("Deckhand")
+  rank                            String                       @default("Stellar Cadet")
   streak                          Int                          @default(0)
   diamonds                        Int                          @default(0)
   createdAt                       DateTime                     @default(now())

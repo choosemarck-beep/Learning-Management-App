@@ -421,11 +421,33 @@ export const ThemeManagement: React.FC = () => {
                       if (newType === "galaxy") {
                         setGalaxyEnabled(true);
                         root.setAttribute("data-galaxy-enabled", "true");
+                        root.removeAttribute("data-background-type");
+                        // Clear all background styles to allow galaxy to show
                         document.body.style.backgroundColor = "";
+                        document.body.style.background = "";
+                        document.body.style.backgroundSize = "";
+                        document.body.style.animation = "";
                         document.documentElement.style.backgroundColor = "";
+                        document.documentElement.style.background = "";
+                        document.documentElement.style.backgroundSize = "";
+                        document.documentElement.style.animation = "";
+                        // Also clear layout background
+                        const layoutElement = document.querySelector('[class*="layout"]');
+                        if (layoutElement) {
+                          (layoutElement as HTMLElement).style.backgroundColor = "";
+                          (layoutElement as HTMLElement).style.background = "";
+                        }
                       } else if (newType === "plain") {
                         setGalaxyEnabled(false);
                         root.setAttribute("data-galaxy-enabled", "false");
+                        root.removeAttribute("data-background-type");
+                        // Clear gradient styles
+                        document.body.style.background = "";
+                        document.body.style.backgroundSize = "";
+                        document.body.style.animation = "";
+                        document.documentElement.style.background = "";
+                        document.documentElement.style.backgroundSize = "";
+                        document.documentElement.style.animation = "";
                         // Apply the saved plain background color
                         const bgColor = plainBgColor || "#000000";
                         document.body.style.backgroundColor = bgColor;
@@ -434,11 +456,15 @@ export const ThemeManagement: React.FC = () => {
                         const layoutElement = document.querySelector('[class*="layout"]');
                         if (layoutElement) {
                           (layoutElement as HTMLElement).style.backgroundColor = bgColor;
+                          (layoutElement as HTMLElement).style.background = "";
                         }
                       } else if (newType === "gradient") {
                         setGalaxyEnabled(false);
                         root.setAttribute("data-galaxy-enabled", "false");
                         root.setAttribute("data-background-type", "gradient");
+                        // Clear plain background color
+                        document.body.style.backgroundColor = "";
+                        document.documentElement.style.backgroundColor = "";
                         // Apply animated gradient background using custom gradient colors
                         document.body.style.background = `linear-gradient(45deg, ${gradientColor1}, ${gradientColor2}, ${gradientColor3})`;
                         document.body.style.backgroundSize = "400% 400%";
@@ -446,6 +472,14 @@ export const ThemeManagement: React.FC = () => {
                         document.documentElement.style.background = `linear-gradient(45deg, ${gradientColor1}, ${gradientColor2}, ${gradientColor3})`;
                         document.documentElement.style.backgroundSize = "400% 400%";
                         document.documentElement.style.animation = "gradientShift 15s ease infinite";
+                        // Also apply to admin layout if it exists
+                        const layoutElement = document.querySelector('[class*="layout"]');
+                        if (layoutElement) {
+                          (layoutElement as HTMLElement).style.backgroundColor = "";
+                          (layoutElement as HTMLElement).style.background = `linear-gradient(45deg, ${gradientColor1}, ${gradientColor2}, ${gradientColor3})`;
+                          (layoutElement as HTMLElement).style.backgroundSize = "400% 400%";
+                          (layoutElement as HTMLElement).style.animation = "gradientShift 15s ease infinite";
+                        }
                       }
                     }}
                     className={styles.backgroundSelect}

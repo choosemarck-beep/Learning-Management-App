@@ -35,8 +35,14 @@ interface QuizCardProps {
   legacyQuestions?: LegacyQuizQuestion[];
   onComplete?: (score: number, totalQuestions: number) => void;
   onRestart?: () => void;
+  onTakeLater?: () => void;
+  onExit?: () => void;
   onSubmit?: (answers: Record<string, string>) => Promise<void>;
   trainingId?: string;
+  attemptNumber?: number;
+  maxAttempts?: number | null;
+  totalAttempts?: number;
+  passed?: boolean;
 }
 
 // Test data initialization
@@ -116,8 +122,14 @@ export const QuizCard: React.FC<QuizCardProps> = ({
   legacyQuestions,
   onComplete,
   onRestart,
+  onTakeLater,
+  onExit,
   onSubmit,
   trainingId,
+  attemptNumber,
+  maxAttempts,
+  totalAttempts,
+  passed,
 }) => {
   // Memoize converted questions to prevent unnecessary re-renders
   const convertedQuestions = useMemo(() => {
@@ -236,7 +248,8 @@ export const QuizCard: React.FC<QuizCardProps> = ({
       setShowRationale(false);
     } else {
       // Quiz is complete - submit if onSubmit handler provided
-      if (onSubmit) {
+      // Only submit if not already complete to prevent duplicate submissions
+      if (!isComplete && onSubmit) {
         setIsSubmitting(true);
         try {
           await onSubmit(userAnswerMap);
@@ -249,7 +262,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
           console.error("Error submitting quiz:", error);
           setIsSubmitting(false);
         }
-      } else {
+      } else if (!isComplete) {
         // No submit handler, just mark as complete
         setIsComplete(true);
         const score = userAnswers.filter(answer => answer).length;
@@ -261,12 +274,21 @@ export const QuizCard: React.FC<QuizCardProps> = ({
   };
 
   const handleRestart = () => {
+    // Reset all quiz state
     setCurrentQuestionIndex(0);
     setSelectedAnswerIndex(null);
     setIsAnswered(false);
     setUserAnswers([]);
+    setUserAnswerMap({});
+    setShowConfirmation(false);
+    setShowAnswer(false);
     setShowRationale(false);
     setIsComplete(false);
+    setIsSubmitting(false);
+    // Reset previous question tracking
+    previousQuestionsLengthRef.current = convertedQuestions.length;
+    previousQuestionIndexRef.current = 0;
+    // Call parent restart handler if provided
     if (onRestart) {
       onRestart();
     }
@@ -291,6 +313,20 @@ export const QuizCard: React.FC<QuizCardProps> = ({
           <CardBody>
             <div className={styles.completionContent}>
               <h2 className={styles.completionTitle}>Quiz Complete!</h2>
+              {/* Attempt Counter */}
+              {(attemptNumber !== undefined || maxAttempts) && (
+                <div className={styles.attemptCounter}>
+                  <span className={styles.attemptText}>
+                    Attempt {attemptNumber || 1} {maxAttempts ? `of ${maxAttempts}` : ""}
+                  </span>
+                  {maxAttempts && totalAttempts !== undefined && (
+                    <span className={styles.attemptsRemaining}>
+                      {maxAttempts - totalAttempts > 0 ? `${maxAttempts - totalAttempts} attempt${maxAttempts - totalAttempts !== 1 ? 's' : ''} remaining` : "No attempts remaining"}
+                    </span>
+                  )}
+                </div>
+              )}
+              
               <div className={styles.scoreContainer}>
                 <div className={styles.scoreText}>
                   You scored <span className={styles.scoreHighlight}>{finalScore}</span> out of{" "}
@@ -300,14 +336,43 @@ export const QuizCard: React.FC<QuizCardProps> = ({
                   {finalPercentage}%
                 </div>
               </div>
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={handleRestart}
-                className={styles.restartButton}
-              >
-                Restart Quiz
-              </Button>
+              
+              <div className={styles.actionButtons}>
+                {/* When PASSED: Show Exit button */}
+                {passed && onExit && (
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={onExit}
+                    className={styles.exitButton}
+                  >
+                    Exit
+                  </Button>
+                )}
+                {/* When FAILED: Show Take Later button */}
+                {!passed && onTakeLater && (
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={onTakeLater}
+                    className={styles.takeLaterButton}
+                  >
+                    Take the quiz Later
+                  </Button>
+                )}
+                {/* Always show Restart Quiz if attempts remaining */}
+                {onRestart && (
+                  <Button
+                    variant={passed ? "outline" : "primary"}
+                    size="lg"
+                    onClick={handleRestart}
+                    className={styles.restartButton}
+                    disabled={maxAttempts ? (totalAttempts || 0) >= maxAttempts : false}
+                  >
+                    Restart Quiz
+                  </Button>
+                )}
+              </div>
             </div>
           </CardBody>
         </Card>

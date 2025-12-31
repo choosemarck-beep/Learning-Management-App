@@ -84,7 +84,7 @@ export default async function EmployeeProfilePage({
 
   const userLevel = employeeData.level || 1;
   const userXP = employeeData.xp || 0;
-  const userRank = employeeData.rank || "Deckhand";
+  const userRank = employeeData.rank || "Stellar Cadet";
   const userStreak = employeeData.streak || 0;
   const userDiamonds = employeeData.diamonds || 0;
   const accountStatus = employeeData.status;

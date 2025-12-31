@@ -30,6 +30,7 @@ interface Quiz {
   passingScore: number;
   timeLimit: number | null;
   questions: QuizQuestion[];
+  maxAttempts?: number | null;
 }
 
 interface Training {
@@ -59,6 +60,8 @@ interface TrainingQuizPageClientProps {
   quiz: Quiz;
   training: Training;
   course: Course;
+  attemptNumber: number;
+  totalAttempts: number;
 }
 
 export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
@@ -66,6 +69,8 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
   quiz,
   training,
   course,
+  attemptNumber,
+  totalAttempts,
 }) => {
   const router = useRouter();
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -74,6 +79,7 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
   const [results, setResults] = useState<QuizResult[] | null>(null);
   const [score, setScore] = useState<number | null>(null);
   const [xpEarned, setXpEarned] = useState<number | null>(null);
+  const [passed, setPassed] = useState<boolean | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [quizStartTime, setQuizStartTime] = useState<Date | null>(null);
   const [quizTiming, setQuizTiming] = useState<{
@@ -97,8 +103,9 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
         setTimeRemaining((prev) => {
           if (prev === null || prev <= 1) {
             clearInterval(interval);
-            if (prev === 1) {
-              handleSubmit(); // Auto-submit when time runs out
+            if (prev === 1 && !results && !isSubmitting) {
+              // Only auto-submit if not already showing results
+              handleSubmit();
             }
             return 0;
           }
@@ -130,7 +137,12 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
   };
 
   const handleSubmit = async () => {
-    // Check if all questions are answered
+    // Don't submit if already showing results
+    if (results !== null) {
+      return;
+    }
+
+    // Check if all displayed questions are answered (quiz.questions already contains only displayed questions)
     const unansweredQuestions = quiz.questions.filter(
       (q) => !answers[q.id]
     );
@@ -159,11 +171,15 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
         setResults(data.data.results);
         setScore(data.data.score);
         setXpEarned(data.data.xpEarned);
+        setPassed(data.data.passed || false);
         setQuizTiming({
           startedAt: data.data.startedAt || null,
           completedAt: data.data.completedAt || null,
           timeSpent: data.data.timeSpent || null,
         });
+        
+        // Refresh router to update course page progress
+        router.refresh();
         
         if (data.data.passed) {
           toast.success(`Quiz passed! Score: ${data.data.score}%`);
@@ -218,9 +234,20 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
 
   // Handle quiz submission from QuizCard
   const handleQuizSubmit = async (userAnswers: Record<string, string>) => {
+    // Don't submit if already showing results
+    if (results !== null) {
+      return;
+    }
     // Set answers and submit
     setAnswers(userAnswers);
     await handleSubmit();
+  };
+
+  // Handle quiz restart - fetch new randomized questions
+  const handleRestart = async () => {
+    // Reload the quiz page to get new randomized questions with incremented attempt number
+    // This ensures questions are re-randomized and attempt count is tracked
+    router.push(`/training/${trainingId}/quiz?restart=${Date.now()}`);
   };
 
   // Show results screen
@@ -347,6 +374,17 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
     );
   }
 
+  // Handle "Take the quiz Later" - navigate back to video page
+  const handleTakeLater = () => {
+    router.push(`/training/${trainingId}/video`);
+  };
+
+  // Handle "Exit" - navigate back to video page when quiz is passed
+  const handleExit = () => {
+    router.push(`/training/${trainingId}/video`);
+    router.refresh(); // Ensure progress is updated
+  };
+
   // Show quiz questions using QuizCard
   return (
     <div className={styles.container}>
@@ -355,6 +393,13 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
           legacyQuestions={legacyQuestions}
           trainingId={trainingId}
           onSubmit={handleQuizSubmit}
+          onRestart={handleRestart}
+          onTakeLater={handleTakeLater}
+          onExit={handleExit}
+          attemptNumber={attemptNumber}
+          maxAttempts={quiz.maxAttempts}
+          totalAttempts={totalAttempts}
+          passed={passed ?? undefined}
           onComplete={(score, total) => {
             // Quiz completion is handled by handleSubmit
             console.log(`Quiz completed: ${score}/${total}`);

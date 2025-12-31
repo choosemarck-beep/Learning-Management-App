@@ -45,16 +45,24 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
   const handleUploadComplete = async (avatarUrl: string) => {
     try {
+      console.log("[ProfileHeader] Avatar upload complete, updating session...");
+      
       // Trigger session update - this will cause JWT callback to fetch latest user data from database
+      // In NextAuth v5, calling update() triggers the JWT callback with trigger === "update"
       await update();
       
-      // Small delay to ensure session propagates to all components
-      await new Promise(resolve => setTimeout(resolve, 100));
+      console.log("[ProfileHeader] Session update triggered, waiting for propagation...");
       
-      // Refresh router to update server-rendered components with new avatar
+      // Wait for session to propagate to all components
+      // Use a longer delay to ensure all components receive the update
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Force a router refresh to update server-rendered components with new avatar
       router.refresh();
+      
+      console.log("[ProfileHeader] Session update and router refresh completed");
     } catch (error) {
-      console.error("Error updating session after avatar upload:", error);
+      console.error("[ProfileHeader] Error updating session after avatar upload:", error);
       // Still refresh router even if update fails
       router.refresh();
     }
@@ -72,7 +80,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         >
           {currentAvatar ? (
             <img
-              key={currentAvatar}
+              key={`avatar-${session?.user?.avatar || currentAvatar}`}
               src={currentAvatar}
               alt={name}
               className={styles.avatar}

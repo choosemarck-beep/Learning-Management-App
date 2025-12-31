@@ -110,7 +110,7 @@ export const TrainerHeader: React.FC<TrainerHeaderProps> = ({
               {userAvatar ? (
                 <>
                   <img 
-                    key={userAvatar}
+                    key={`avatar-${session?.user?.avatar || userAvatar}`}
                     src={userAvatar} 
                     alt={userName}
                     onError={(e) => {

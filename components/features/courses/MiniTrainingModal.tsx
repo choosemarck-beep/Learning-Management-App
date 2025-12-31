@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { X, Play, Lock, CheckCircle2, FileQuestion, Maximize, Minimize } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
@@ -47,6 +48,7 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
   trainingId,
   onComplete,
 }) => {
+  const router = useRouter();
   const [miniTraining, setMiniTraining] = useState<MiniTrainingData | null>(null);
   const [progress, setProgress] = useState<ProgressData | null>(null);
   const [isLoading, setIsLoading] = useState(true); // Start as true when modal opens
@@ -456,11 +458,18 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
         // Only update overall progress if quiz is completed (for progress calculation)
         // But always save watch position for resume functionality
         if (result.data.progress !== undefined && progress?.quizCompleted) {
+          const newProgress = result.data.progress || (progress?.videoProgress || 0);
+          const wasCompleted = progress?.isCompleted || false;
           setProgress((prev) => (prev ? { 
             ...prev, 
             videoProgress: result.data.videoProgress || prev.videoProgress,
-            videoWatchedSeconds: result.data.watchedSeconds || prev.videoProgress 
+            videoWatchedSeconds: result.data.watchedSeconds || prev.videoWatchedSeconds,
+            isCompleted: newProgress >= 100,
           } : null));
+          // Refresh router if mini-training was just completed
+          if (!wasCompleted && newProgress >= 100) {
+            router.refresh();
+          }
         } else {
           // Still update videoWatchedSeconds even if quiz not completed
           // This is stored in progress for resume functionality
@@ -594,6 +603,8 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
     // Use setTimeout to defer callbacks to avoid render-time updates
     setTimeout(async () => {
       await fetchMiniTraining();
+      // Refresh router to update course page progress
+      router.refresh();
       if (onComplete) {
         onComplete();
       }
@@ -769,6 +780,8 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
                           setWatchedSeconds(duration);
                           // Save final progress - always save (force=true)
                           saveProgressImmediately(duration, false, true);
+                          // Refresh router to update course page progress
+                          router.refresh();
                         }}
                       />
                     )}

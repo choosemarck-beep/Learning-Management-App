@@ -13,6 +13,8 @@ interface Module {
   totalXP: number;
   miniTrainingCount?: number;
   lessonCount?: number; // For backward compatibility
+  progress?: number;
+  isCompleted?: boolean;
 }
 
 interface Course {
@@ -65,6 +67,20 @@ export const NetflixTrainingCard: React.FC<NetflixTrainingCardProps> = ({
         >
           <BookOpen size={40} className={styles.placeholderIcon} />
         </div>
+
+        {/* Completion indicator */}
+        {module.isCompleted && (
+          <div className={styles.completionBadge}>
+            <CheckCircle2 size={24} className={styles.completionIcon} />
+          </div>
+        )}
+
+        {/* Progress indicator */}
+        {module.progress !== undefined && module.progress > 0 && !module.isCompleted && (
+          <div className={styles.progressBadge}>
+            {Math.round(module.progress)}%
+          </div>
+        )}
 
         {/* Hover overlay with play button */}
         {isHovered && (

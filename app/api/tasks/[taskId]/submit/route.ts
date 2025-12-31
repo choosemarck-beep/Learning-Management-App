@@ -178,30 +178,18 @@ export async function POST(
       },
     });
 
-    // Update user XP
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        xp: {
-          increment: xpEarned,
-        },
-      },
-    });
-
-    // Recalculate level and rank (simplified - you may want to use your gamification constants)
-    const updatedUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { xp: true },
-    });
-
-    if (updatedUser) {
-      const newLevel = Math.floor(updatedUser.xp / 1000) + 1;
-      await prisma.user.update({
+    // Update all gamification stats (XP, level, rank, diamonds)
+    if (xpEarned > 0) {
+      const currentUser = await prisma.user.findUnique({
         where: { id: user.id },
-        data: {
-          level: newLevel,
-        },
+        select: { xp: true },
       });
+
+      if (currentUser) {
+        const newTotalXP = currentUser.xp + xpEarned;
+        const { updateGamificationStats } = await import("@/lib/utils/gamification");
+        await updateGamificationStats(user.id, newTotalXP);
+      }
     }
 
     return NextResponse.json(

@@ -8,6 +8,11 @@
   gap: var(--spacing-xs);
 }
 
+/* Remove max-width constraint in modal contexts */
+:global(.modal) .wrapper {
+  max-width: 100%;
+}
+
 .label {
   font-size: 0.875rem; /* 14px */
   font-weight: 600;

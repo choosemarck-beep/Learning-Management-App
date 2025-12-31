@@ -77,7 +77,7 @@ export default async function AreaManagerProfilePage({
 
   const userLevel = userData.level || 1;
   const userXP = userData.xp || 0;
-  const userRank = userData.rank || "Deckhand";
+  const userRank = userData.rank || "Stellar Cadet";
   const userStreak = userData.streak || 0;
   const userDiamonds = userData.diamonds || 0;
   const accountStatus = userData.status;

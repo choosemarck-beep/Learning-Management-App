@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma/client";
 import { GAMIFICATION } from "@/lib/constants/gamification";
+import { updateGamificationStats } from "@/lib/utils/gamification";
 
 /**
  * Calculate training progress based on video, quiz, and mini-trainings
@@ -206,29 +207,21 @@ export async function awardTrainingXP(
   const xpEarned = Math.round(baseXP * scoreMultiplier);
 
   if (xpEarned > 0) {
-    // Update user XP
-    const updatedUser = await prisma.user.update({
+    // Get current XP
+    const currentUser = await prisma.user.findUnique({
       where: { id: userId },
-      data: {
-        xp: {
-          increment: xpEarned,
-        },
-        diamonds: {
-          increment: Math.round(xpEarned * GAMIFICATION.REWARD_CRYSTALS_PER_XP),
-        },
-      },
+      select: { xp: true },
     });
 
-    // Recalculate level
-    const newLevel = Math.floor(updatedUser.xp / GAMIFICATION.XP_PER_LEVEL) + 1;
-    if (newLevel !== updatedUser.level) {
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          level: newLevel,
-        },
-      });
+    if (!currentUser) {
+      throw new Error("User not found");
     }
+
+    // Calculate new total XP
+    const newTotalXP = currentUser.xp + xpEarned;
+
+    // Update all gamification stats (XP, level, rank, diamonds)
+    await updateGamificationStats(userId, newTotalXP);
   }
 
   return xpEarned;

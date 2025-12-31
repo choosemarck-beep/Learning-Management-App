@@ -75,6 +75,27 @@ export default async function CourseDetailPage({
     redirect("/courses");
   }
 
+  // Fetch training progress for all trainings in the course
+  const trainingIds = course.trainings.map((t) => t.id);
+  const trainingProgresses = await prisma.trainingProgressNew.findMany({
+    where: {
+      userId: currentUser.id,
+      trainingId: {
+        in: trainingIds,
+      },
+    },
+    select: {
+      trainingId: true,
+      progress: true,
+      isCompleted: true,
+    },
+  });
+
+  // Create a map of trainingId -> progress for easy lookup
+  const progressMap = new Map(
+    trainingProgresses.map((tp) => [tp.trainingId, { progress: tp.progress, isCompleted: tp.isCompleted }])
+  );
+
   // Get user's progress for this course (auto-enroll if not enrolled)
   let courseProgress = course.courseProgresses[0];
   if (!courseProgress) {
@@ -102,15 +123,20 @@ export default async function CourseDetailPage({
     progress,
     isCompleted,
     isEnrolled,
-    trainings: course.trainings.map((training) => ({
-      id: training.id,
-      title: training.title,
-      description: training.shortDescription || "",
-      thumbnail: training.videoThumbnail || null,
-      order: training.order,
-      totalXP: training.totalXP,
-      miniTrainingCount: training._count.miniTrainings,
-    })),
+    trainings: course.trainings.map((training) => {
+      const trainingProgress = progressMap.get(training.id);
+      return {
+        id: training.id,
+        title: training.title,
+        description: training.shortDescription || "",
+        thumbnail: training.videoThumbnail || null,
+        order: training.order,
+        totalXP: training.totalXP,
+        miniTrainingCount: training._count.miniTrainings,
+        progress: trainingProgress?.progress || 0,
+        isCompleted: trainingProgress?.isCompleted || false,
+      };
+    }),
   };
 
   return (

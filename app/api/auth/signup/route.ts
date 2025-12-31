@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
         onboardingCompleted: false,
         xp: 0,
         level: 1,
-        rank: "Deckhand",
+        rank: "Stellar Cadet",
         streak: 0,
         diamonds: 0,
       },

@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       totalCoursesCompleted: userData.courseProgresses.length,
       totalXP: userData.xp || 0,
       currentLevel: userData.level || 1,
-      currentRank: userData.rank || "Deckhand",
+      currentRank: userData.rank || "Stellar Cadet",
       badgesEarned: userData.badges.length,
       longestStreak: userData.streak || 0,
       firstCourseDate,

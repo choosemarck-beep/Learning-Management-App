@@ -273,7 +273,7 @@ export const ProfileBottomNav: React.FC<ProfileBottomNavProps> = ({
           >
             {userAvatar ? (
               <img
-                key={userAvatar}
+                key={`avatar-${session?.user?.avatar || userAvatar}`}
                 src={userAvatar}
                 alt={userName}
                 className={styles.avatarImage}

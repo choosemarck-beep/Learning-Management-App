@@ -466,14 +466,52 @@
   }
 }
 
+.attemptCounter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: var(--radius-md);
+  animation: fadeIn 0.5s ease-out 0.3s both;
+}
+
+.attemptText {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary-purple);
+}
+
+.attemptsRemaining {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+  margin-top: var(--spacing-md);
+  animation: fadeIn 0.5s ease-out 0.6s both;
+}
+
 .restartButton {
   width: 100%;
   min-height: 56px;
-  margin-top: var(--spacing-sm);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   border-radius: var(--radius-lg);
-  animation: fadeIn 0.5s ease-out 0.6s both;
+}
+
+.takeLaterButton {
+  width: 100%;
+  min-height: 56px;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-lg);
 }
 
 /* Desktop Responsive (max-width-md ~ 600-700px) */
