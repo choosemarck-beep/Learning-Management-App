@@ -3284,3 +3284,62 @@ const handleSubmit = async (e: React.FormEvent) => {
 - **2025-01-01**: Added multi-step form premature submission error - prevent Enter key submission on intermediate steps, use navigation flags
 
 ---
+
+#### Error: Cannot find name 'styleName' (Missing Style Definition)
+**Symptoms:**
+- Build fails with TypeScript error: `Cannot find name 'styleName'`
+- Error occurs when using `style={styleName}` in React Email components
+- Style object is referenced but not defined in the styles section
+
+**Common Causes:**
+- Style object was used in JSX but not defined in the styles section
+- Style was removed during refactoring but usage wasn't updated
+- Copy-paste error where style was used from another file but not copied
+- Style name typo (e.g., `infoBox` vs `infoBoxx`)
+
+**Solution:**
+- Add the missing style definition to the styles section
+- Ensure style object matches the expected structure (React Email style objects)
+- Check other similar files for the correct style definition if copying from another template
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - style used but not defined
+<Text style={infoBox}>
+  Security tip: Please save these credentials securely.
+</Text>
+
+// Styles section missing infoBox definition
+const paragraph = { ... };
+
+// ✅ CORRECT - add missing style definition
+<Text style={infoBox}>
+  Security tip: Please save these credentials securely.
+</Text>
+
+// Add style definition
+const infoBox = {
+  color: "#FBBF24",
+  fontSize: "14px",
+  lineHeight: "1.6",
+  marginTop: "20px",
+  marginBottom: "20px",
+  padding: "12px",
+  backgroundColor: "rgba(251, 191, 36, 0.1)",
+  borderRadius: "6px",
+  borderLeft: "3px solid #FBBF24",
+};
+```
+
+**Files Fixed:**
+- `lib/email/templates/trainer-onboarding.tsx` - Added missing `infoBox` style definition
+
+**Prevention:**
+- Always define all styles used in JSX before using them
+- Use TypeScript to catch undefined style references during development
+- When copying styles from other files, ensure all referenced styles are copied
+- Review style usage when refactoring email templates
+- **Pattern**: All `style={styleName}` references must have corresponding `const styleName = { ... }` definitions
+- **2025-01-01**: Added missing style definition error - ensure all style objects used in JSX are defined in the styles section
+
+---

@@ -185,6 +185,18 @@ const warningText = {
   borderLeft: "3px solid #FBBF24",
 };
 
+const infoBox = {
+  color: "#FBBF24",
+  fontSize: "14px",
+  lineHeight: "1.6",
+  marginTop: "20px",
+  marginBottom: "20px",
+  padding: "12px",
+  backgroundColor: "rgba(251, 191, 36, 0.1)",
+  borderRadius: "6px",
+  borderLeft: "3px solid #FBBF24",
+};
+
 const listItem = {
   color: "#CBD5E1",
   fontSize: "16px",
