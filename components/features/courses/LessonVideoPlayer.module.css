@@ -139,3 +139,33 @@
   padding: 0 var(--spacing-sm);
 }
 
+/* Fullscreen Button */
+.fullscreenButton {
+  position: absolute;
+  bottom: var(--spacing-md);
+  right: var(--spacing-md);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.fullscreenButton:hover {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: var(--color-primary-purple);
+}
+
+.fullscreenButton:active {
+  transform: scale(0.95);
+}
+

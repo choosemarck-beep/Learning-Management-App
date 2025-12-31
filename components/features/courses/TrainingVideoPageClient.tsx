@@ -510,21 +510,12 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
 
   // Handle fullscreen changes
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
+    const { setupFullscreenListeners } = require("@/lib/utils/fullscreen");
+    const cleanup = setupFullscreenListeners((isFs: boolean) => {
+      setIsFullscreen(isFs);
+    });
 
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
-    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
-    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
-      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
-      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
-    };
+    return cleanup;
   }, []);
 
   // Toggle play/pause
@@ -617,34 +608,20 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
 
   // Toggle fullscreen
   const handleFullscreen = async () => {
-    if (!videoContainerRef.current) return;
-
     try {
-      if (!isFullscreen) {
-        // Enter fullscreen
-        if (videoContainerRef.current.requestFullscreen) {
-          await videoContainerRef.current.requestFullscreen();
-        } else if ((videoContainerRef.current as any).webkitRequestFullscreen) {
-          await (videoContainerRef.current as any).webkitRequestFullscreen();
-        } else if ((videoContainerRef.current as any).mozRequestFullScreen) {
-          await (videoContainerRef.current as any).mozRequestFullScreen();
-        } else if ((videoContainerRef.current as any).msRequestFullscreen) {
-          await (videoContainerRef.current as any).msRequestFullscreen();
-        }
+      // For YouTube videos, use container fullscreen (YouTube iframe handles its own fullscreen)
+      // For direct videos, try video element first (better mobile support), then container
+      if (isYouTube) {
+        // YouTube: fullscreen the container (YouTube iframe will handle its own fullscreen button)
+        const { toggleFullscreen } = await import("@/lib/utils/fullscreen");
+        await toggleFullscreen(null, videoContainerRef.current);
       } else {
-        // Exit fullscreen
-        if (document.exitFullscreen) {
-          await document.exitFullscreen();
-        } else if ((document as any).webkitExitFullscreen) {
-          await (document as any).webkitExitFullscreen();
-        } else if ((document as any).mozCancelFullScreen) {
-          await (document as any).mozCancelFullScreen();
-        } else if ((document as any).msExitFullscreen) {
-          await (document as any).msExitFullscreen();
-        }
+        // Direct video: try video element first, then container
+        const { toggleFullscreen } = await import("@/lib/utils/fullscreen");
+        await toggleFullscreen(videoRef.current, videoContainerRef.current);
       }
     } catch (error) {
-      console.error("Error toggling fullscreen:", error);
+      console.error("[TrainingVideo] Error toggling fullscreen:", error);
       toast.error("Failed to toggle fullscreen. Please try again.");
     }
   };

@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
-import { Play, Pause, HelpCircle } from "lucide-react";
+import { Play, Pause, HelpCircle, Maximize, Minimize } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useVideoWatchTimer } from "@/lib/hooks/useVideoWatchTimer";
+import toast from "react-hot-toast";
 import styles from "./LessonVideoPlayer.module.css";
 
 interface LessonVideoPlayerProps {
@@ -33,9 +34,11 @@ export const LessonVideoPlayer: React.FC<LessonVideoPlayerProps> = ({
   onQuizClick,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const {
     watchedSeconds,
@@ -117,6 +120,27 @@ export const LessonVideoPlayer: React.FC<LessonVideoPlayerProps> = ({
     }
   }, [isTracking, updateProgress]);
 
+  // Handle fullscreen changes
+  useEffect(() => {
+    const { setupFullscreenListeners } = require("@/lib/utils/fullscreen");
+    const cleanup = setupFullscreenListeners((isFs: boolean) => {
+      setIsFullscreen(isFs);
+    });
+
+    return cleanup;
+  }, []);
+
+  // Toggle fullscreen
+  const handleFullscreen = async () => {
+    try {
+      const { toggleFullscreen } = await import("@/lib/utils/fullscreen");
+      await toggleFullscreen(videoRef.current, videoContainerRef.current);
+    } catch (error) {
+      console.error("[LessonVideo] Error toggling fullscreen:", error);
+      toast.error("Failed to toggle fullscreen. Please try again.");
+    }
+  };
+
   // Format time helper
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -143,7 +167,7 @@ export const LessonVideoPlayer: React.FC<LessonVideoPlayerProps> = ({
 
   return (
     <div className={styles.container}>
-      <div className={styles.videoWrapper}>
+      <div ref={videoContainerRef} className={styles.videoWrapper}>
         <video
           ref={videoRef}
           src={videoUrl}
@@ -157,6 +181,15 @@ export const LessonVideoPlayer: React.FC<LessonVideoPlayerProps> = ({
           playsInline
           controls
         />
+        
+        {/* Fullscreen Button Overlay */}
+        <button
+          className={styles.fullscreenButton}
+          onClick={handleFullscreen}
+          aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+        >
+          {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+        </button>
 
         {isLoading && (
           <div className={styles.loadingOverlay}>
