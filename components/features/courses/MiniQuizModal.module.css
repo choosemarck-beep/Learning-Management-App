@@ -61,6 +61,32 @@
   margin: 0;
 }
 
+/* Timer Container */
+.timerContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  width: fit-content;
+}
+
+.timerIcon {
+  color: var(--color-status-error);
+  flex-shrink: 0;
+}
+
+.timerText {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-status-error);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.05em;
+}
+
 .progressBar {
   width: 100%;
   height: 4px;
@@ -141,6 +167,73 @@
 .optionSelected {
   background: rgba(139, 92, 246, 0.2);
   border-color: var(--color-primary-purple);
+}
+
+.optionPending {
+  border-color: var(--color-star-gold);
+  background: rgba(251, 191, 36, 0.15);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(251, 191, 36, 0);
+  }
+}
+
+/* Confirmation Container (like QuizCard) */
+.confirmationContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+  border: 2px solid var(--color-primary-purple);
+  border-radius: var(--radius-md);
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  position: relative;
+  z-index: 10;
+  animation: slideIn 0.3s ease-out;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.confirmationMessage {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  text-align: center;
+  line-height: 1.4;
+  margin-bottom: var(--spacing-xs);
+}
+
+.confirmationActions {
+  display: flex;
+  gap: var(--spacing-xs);
+  width: 100%;
+}
+
+.cancelButton,
+.confirmButton {
+  flex: 1;
+  min-height: 40px;
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
 }
 
 .optionText {
@@ -231,6 +324,62 @@
   font-size: var(--font-size-base);
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-medium);
+}
+
+/* XP Earned Display */
+.xpEarned {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--color-star-gold);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+.xpEarned svg {
+  color: var(--color-star-gold);
+}
+
+/* Quiz Timing Display */
+.quizTiming {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+}
+
+.timingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.timingItem:last-child {
+  border-bottom: none;
+}
+
+.timingLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.timingValue {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
 }
 
 .resultsList {

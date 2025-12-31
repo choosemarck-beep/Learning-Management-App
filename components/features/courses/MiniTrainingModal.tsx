@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { X, Play, Lock, CheckCircle2, FileQuestion } from "lucide-react";
+import { X, Play, Lock, CheckCircle2, FileQuestion, Maximize, Minimize } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
 import toast from "react-hot-toast";
@@ -60,6 +60,12 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
   const youtubePlayerRef = useRef<any>(null);
   const youtubeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoContainerRef = useRef<HTMLDivElement | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [hasResumed, setHasResumed] = useState(false);
+  const [actualVideoDuration, setActualVideoDuration] = useState<number | null>(null);
+  const saveProgressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSavedSecondsRef = useRef<number>(0);
 
   // Video type detection
   const videoUrl = miniTraining?.videoUrl;
@@ -155,6 +161,8 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
         ? Math.floor((result.data.progress.videoProgress / 100) * (miniTrainingData.videoDuration || 0))
         : 0;
       setWatchedSeconds(initialWatchedSeconds);
+      lastSavedSecondsRef.current = initialWatchedSeconds;
+      setHasResumed(false); // Reset resume flag when fetching new data
     } catch (error) {
       console.error("Error fetching mini training:", error);
       toast.error("Failed to load mini training");
@@ -282,6 +290,31 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
         events: {
           onReady: (event: any) => {
             console.log("[Mini Training YouTube] Player ready");
+            // Try to get video duration from player if not available
+            try {
+              const duration = youtubePlayerRef.current?.getDuration();
+              if (duration && duration > 0) {
+                console.log("[Mini Training YouTube] Got duration from player:", duration);
+                setActualVideoDuration(duration);
+                // Set saved position when player is ready (but don't auto-play)
+                const savedPosition = progress?.videoProgress 
+                  ? Math.floor((progress.videoProgress / 100) * duration)
+                  : 0;
+                if (savedPosition > 0 && savedPosition < duration * 0.95) {
+                  try {
+                    console.log("[Mini Training YouTube] Setting saved position on ready:", savedPosition);
+                    youtubePlayerRef.current.seekTo(savedPosition, true);
+                    setHasResumed(true);
+                  } catch (error) {
+                    console.error("[Mini Training YouTube] Error seeking to saved position on ready:", error);
+                  }
+                }
+              } else {
+                console.log("[Mini Training YouTube] Duration not available yet, will try again on state change");
+              }
+            } catch (error) {
+              console.warn("[Mini Training YouTube] Could not get duration:", error);
+            }
           },
           onStateChange: (event: any) => {
             // YouTube player states: -1 (unstarted), 0 (ended), 1 (playing), 2 (paused), 3 (buffering), 5 (cued)
@@ -293,20 +326,32 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
                 startYouTubeTracking();
               }
             } else if (event.data === 2) {
-              // Paused
+              // Paused - save progress immediately
               setIsPlaying(false);
               setIsVideoPlaying(false);
               stopYouTubeTracking();
-            } else if (event.data === 0) {
-              // Ended
-              setIsPlaying(false);
-              setIsVideoPlaying(false);
-              stopYouTubeTracking();
-              const duration = miniTraining?.videoDuration || 0;
-              setWatchedSeconds(duration);
-              if (progress?.quizCompleted) {
-                updateVideoProgress(duration, false);
+              // Save progress when paused - always save (force=true) to capture exact position
+              try {
+                const currentTime = youtubePlayerRef.current?.getCurrentTime?.() || 0;
+                if (currentTime > 0) {
+                  saveProgressImmediately(Math.floor(currentTime), false, true);
+                }
+              } catch (error) {
+                console.error("[Mini Training YouTube] Error getting current time on pause:", error);
+                // Fallback to watchedSeconds if getCurrentTime fails
+                if (watchedSeconds > 0) {
+                  saveProgressImmediately(watchedSeconds, false, true);
+                }
               }
+            } else if (event.data === 0) {
+              // Ended - save final progress
+              setIsPlaying(false);
+              setIsVideoPlaying(false);
+              stopYouTubeTracking();
+              const duration = actualVideoDuration || miniTraining?.videoDuration || 0;
+              setWatchedSeconds(duration);
+              // Save final progress - always save (force=true)
+              saveProgressImmediately(duration, false, true);
             } else if (event.data === 3) {
               // Buffering - keep tracking if it was playing
               if (isPlaying && youtubePlayerRef.current && typeof youtubePlayerRef.current.getPlayerState === 'function') {
@@ -349,11 +394,8 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
             const currentTime = youtubePlayerRef.current.getCurrentTime();
             const seconds = Math.floor(currentTime);
             setWatchedSeconds(seconds);
-            // Update progress every 5 seconds (only if quiz passed)
-            // The updateVideoProgress function checks if quiz is passed
-            if (seconds % 5 === 0) {
-              updateVideoProgress(seconds, true);
-            }
+            // Use debounced save for time updates (saves every 1 second if position changed)
+            debouncedSaveProgress(seconds, true, 1000);
           }
         } catch (error) {
           console.error("[Mini Training YouTube] Error tracking:", error);
@@ -370,36 +412,98 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
   };
 
   // Update video progress on server
-  // Disabled until quiz is passed (same as main training)
-  const updateVideoProgress = async (seconds: number, playing: boolean) => {
-    // Don't update progress if quiz is not passed
-    if (!progress?.quizCompleted) {
-      return;
-    }
-
+  // Saves watch position regardless of quiz status to enable resume functionality
+  const updateVideoProgress = async (seconds: number, playing: boolean, immediate: boolean = false) => {
     try {
+      // Ensure seconds is a valid integer
+      const watchedSeconds = Math.floor(seconds);
+      if (isNaN(watchedSeconds) || !isFinite(watchedSeconds) || watchedSeconds < 0) {
+        console.error("Invalid watchedSeconds value:", seconds);
+        return;
+      }
+
       const response = await fetch(`/api/mini-trainings/${miniTrainingId}/watch-progress`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          watchedSeconds: seconds,
+          watchedSeconds: watchedSeconds,
           isPlaying: playing,
         }),
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result.data) {
-          setWatchedSeconds(result.data.watchedSeconds || seconds);
-          if (result.data.progress !== undefined) {
-            setProgress((prev) => (prev ? { ...prev, videoProgress: result.data.videoProgress || prev.videoProgress } : null));
-          }
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText || "Unknown error" };
+        }
+        console.error("Error updating video progress:", response.status, errorData);
+        if (response.status !== 500) {
+          toast.error(`Failed to save progress: ${errorData.error || "Unknown error"}`);
+        }
+        return;
+      }
+
+      const result = await response.json();
+      if (result.success && result.data) {
+        // Don't update watchedSeconds from API response - it causes timer to jump back and forth
+        // watchedSeconds should only be updated from video's actual current time
+        setCanTakeQuiz(result.data.canTakeQuiz || false);
+        // Only update overall progress if quiz is completed (for progress calculation)
+        // But always save watch position for resume functionality
+        if (result.data.progress !== undefined && progress?.quizCompleted) {
+          setProgress((prev) => (prev ? { 
+            ...prev, 
+            videoProgress: result.data.videoProgress || prev.videoProgress,
+            videoWatchedSeconds: result.data.watchedSeconds || prev.videoProgress 
+          } : null));
+        } else {
+          // Still update videoWatchedSeconds even if quiz not completed
+          // This is stored in progress for resume functionality
         }
       }
     } catch (error) {
-      console.error("Error updating mini training progress:", error);
+      console.error("Error updating video progress:", error);
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        toast.error("Network error: Could not save progress");
+      }
+    }
+  };
+
+  // Debounced save function to prevent excessive API calls
+  const debouncedSaveProgress = (seconds: number, playing: boolean, delay: number = 1000) => {
+    // Clear existing timeout
+    if (saveProgressTimeoutRef.current) {
+      clearTimeout(saveProgressTimeoutRef.current);
+    }
+
+    // Only save if position changed significantly (more than 1 second difference)
+    if (Math.abs(seconds - lastSavedSecondsRef.current) < 1) {
+      return;
+    }
+
+    saveProgressTimeoutRef.current = setTimeout(() => {
+      updateVideoProgress(seconds, playing);
+      lastSavedSecondsRef.current = seconds;
+    }, delay);
+  };
+
+  // Immediate save function for critical events (pause, end, page unload)
+  const saveProgressImmediately = (seconds: number, playing: boolean, force: boolean = false) => {
+    // Clear any pending debounced saves
+    if (saveProgressTimeoutRef.current) {
+      clearTimeout(saveProgressTimeoutRef.current);
+      saveProgressTimeoutRef.current = null;
+    }
+
+    // Always save on pause/end/unload (force=true), or if position changed significantly
+    if (force || Math.abs(seconds - lastSavedSecondsRef.current) >= 1) {
+      updateVideoProgress(seconds, playing);
+      lastSavedSecondsRef.current = seconds;
     }
   };
 
@@ -414,11 +518,68 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
     setCanTakeQuiz(watchedSeconds >= minimumWatchTime);
   }, [watchedSeconds, miniTraining?.videoDuration]);
 
+  // Handle fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
+    };
+  }, []);
+
+  // Toggle fullscreen
+  const handleFullscreen = async () => {
+    if (!videoContainerRef.current) return;
+
+    try {
+      if (!isFullscreen) {
+        // Enter fullscreen
+        if (videoContainerRef.current.requestFullscreen) {
+          await videoContainerRef.current.requestFullscreen();
+        } else if ((videoContainerRef.current as any).webkitRequestFullscreen) {
+          await (videoContainerRef.current as any).webkitRequestFullscreen();
+        } else if ((videoContainerRef.current as any).mozRequestFullScreen) {
+          await (videoContainerRef.current as any).mozRequestFullScreen();
+        } else if ((videoContainerRef.current as any).msRequestFullscreen) {
+          await (videoContainerRef.current as any).msRequestFullscreen();
+        }
+      } else {
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          await (document as any).webkitExitFullscreen();
+        } else if ((document as any).mozCancelFullScreen) {
+          await (document as any).mozCancelFullScreen();
+        } else if ((document as any).msExitFullscreen) {
+          await (document as any).msExitFullscreen();
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling fullscreen:", error);
+      toast.error("Failed to toggle fullscreen. Please try again.");
+    }
+  };
+
   const handleClose = () => {
     // Stop any tracking
     stopYouTubeTracking();
     setIsVideoPlaying(false);
     setIsPlaying(false);
+    // Save progress before closing
+    if (watchedSeconds > 0) {
+      saveProgressImmediately(watchedSeconds, false, true);
+    }
     onClose();
   };
 
@@ -497,7 +658,7 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
 
             {/* Video Player */}
             {videoUrl && embedUrl && (
-              <div className={styles.videoContainer}>
+              <div ref={videoContainerRef} className={styles.videoContainer}>
                 {isYouTube ? (
                   <>
                     <div id="mini-training-youtube-player" className={styles.youtubePlayer} />
@@ -510,6 +671,23 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
                             typeof youtubePlayerRef.current.playVideo === "function"
                           ) {
                             try {
+                              // Ensure position is set right before playing (backup in case onReady seek didn't work)
+                              const savedPosition = progress?.videoProgress 
+                                ? Math.floor((progress.videoProgress / 100) * (actualVideoDuration || miniTraining?.videoDuration || 0))
+                                : 0;
+                              const duration = actualVideoDuration || miniTraining?.videoDuration || 0;
+                              if (savedPosition > 0 && savedPosition < duration * 0.95 && duration > 0) {
+                                try {
+                                  // Always seek right before playing to ensure position is correct
+                                  youtubePlayerRef.current.seekTo(savedPosition, true);
+                                  if (!hasResumed) {
+                                    toast.success(`Resuming from ${formatTime(savedPosition)}`);
+                                    setHasResumed(true);
+                                  }
+                                } catch (error) {
+                                  console.error("[Mini Training YouTube] Error seeking to saved position:", error);
+                                }
+                              }
                               youtubePlayerRef.current.playVideo();
                               setIsVideoPlaying(true);
                               setIsPlaying(true);
@@ -531,11 +709,35 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
                       <div 
                         className={styles.videoThumbnail}
                         onClick={() => {
+                          console.log("[Direct Video] Thumbnail clicked - starting playback");
+                          // Ensure position is set right before playing (backup in case onLoadedMetadata didn't work)
+                          if (videoRef.current) {
+                            const savedPosition = progress?.videoProgress 
+                              ? Math.floor((progress.videoProgress / 100) * (actualVideoDuration || miniTraining?.videoDuration || 0))
+                              : 0;
+                            const duration = actualVideoDuration || miniTraining?.videoDuration || 0;
+                            if (savedPosition > 0 && savedPosition < duration * 0.95 && duration > 0) {
+                              // Always set currentTime right before playing to ensure position is correct
+                              videoRef.current.currentTime = savedPosition;
+                              if (!hasResumed) {
+                                toast.success(`Resuming from ${formatTime(savedPosition)}`);
+                                setHasResumed(true);
+                              }
+                            }
+                          }
                           setIsVideoPlaying(true);
                           setIsPlaying(true);
-                          if (videoRef.current) {
-                            videoRef.current.play();
-                          }
+                          // Small delay to ensure state is updated before playing
+                          setTimeout(() => {
+                            if (videoRef.current) {
+                              videoRef.current.play().catch((error) => {
+                                console.error("[Direct Video] Error playing video:", error);
+                                toast.error("Failed to play video. Please try again.");
+                                setIsVideoPlaying(false);
+                                setIsPlaying(false);
+                              });
+                            }
+                          }, 100);
                         }}
                         style={{ cursor: 'pointer' }}
                       />
@@ -545,6 +747,21 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
                         src={embedUrl}
                         controls
                         className={styles.video}
+                        onLoadedMetadata={() => {
+                          // Set saved position when video metadata is loaded
+                          if (videoRef.current && !hasResumed) {
+                            const savedPosition = progress?.videoProgress 
+                              ? Math.floor((progress.videoProgress / 100) * (videoRef.current.duration || miniTraining?.videoDuration || 0))
+                              : 0;
+                            const duration = videoRef.current.duration || miniTraining?.videoDuration || 0;
+                            if (savedPosition > 0 && savedPosition < duration * 0.95 && duration > 0) {
+                              videoRef.current.currentTime = savedPosition;
+                              setHasResumed(true);
+                              toast.success(`Resuming from ${formatTime(savedPosition)}`);
+                            }
+                            setActualVideoDuration(videoRef.current.duration || null);
+                          }
+                        }}
                         onPlay={() => {
                           setIsVideoPlaying(true);
                           setIsPlaying(true);
@@ -552,26 +769,44 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
                         onPause={() => {
                           setIsVideoPlaying(false);
                           setIsPlaying(false);
+                          // Save progress when pausing - always save (force=true) to capture exact position
+                          if (videoRef.current) {
+                            const currentTime = videoRef.current.currentTime || 0;
+                            if (currentTime > 0) {
+                              saveProgressImmediately(Math.floor(currentTime), false, true);
+                            } else if (watchedSeconds > 0) {
+                              // Fallback to watchedSeconds if currentTime is 0
+                              saveProgressImmediately(watchedSeconds, false, true);
+                            }
+                          }
                         }}
                         onTimeUpdate={(e) => {
                           const video = e.currentTarget;
                           const seconds = Math.floor(video.currentTime);
                           setWatchedSeconds(seconds);
-                          // Update progress every 5 seconds (only if quiz passed)
-                          if (seconds % 5 === 0 && progress?.quizCompleted) {
-                            updateVideoProgress(seconds, !video.paused);
-                          }
+                          // Use debounced save for time updates (saves every 1 second if position changed)
+                          debouncedSaveProgress(seconds, !video.paused, 1000);
                         }}
                         onEnded={() => {
-                          setWatchedSeconds(videoDuration);
-                          if (progress?.quizCompleted) {
-                            updateVideoProgress(videoDuration, false);
-                          }
+                          const duration = actualVideoDuration || miniTraining?.videoDuration || 0;
+                          setWatchedSeconds(duration);
+                          // Save final progress - always save (force=true)
+                          saveProgressImmediately(duration, false, true);
                         }}
                       />
                     )}
                   </div>
                 )}
+                {/* Fullscreen Button */}
+                <button
+                  className={styles.fullscreenButton}
+                  onClick={handleFullscreen}
+                  aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                >
+                  {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+                </button>
+              </div>
+            )}
 
                 {/* Progress Timer Overlay - Same as main training */}
                 {videoDuration > 0 && (

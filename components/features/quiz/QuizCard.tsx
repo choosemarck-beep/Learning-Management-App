@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -137,23 +137,40 @@ export const QuizCard: React.FC<QuizCardProps> = ({
   const [isComplete, setIsComplete] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userAnswerMap, setUserAnswerMap] = useState<Record<string, string>>({});
+  
+  // Use ref to track previous questions length to detect actual question changes
+  const previousQuestionsLengthRef = useRef<number>(convertedQuestions.length);
+  const previousQuestionIndexRef = useRef<number>(0);
 
   const currentQuestion = convertedQuestions[currentQuestionIndex];
   const totalQuestions = convertedQuestions.length;
   const progressPercentage = ((currentQuestionIndex + 1) / totalQuestions) * 100;
 
-  // Reset state when questions change
+  // Reset state only when questions actually change (length or content), not on every render
   useEffect(() => {
-    setCurrentQuestionIndex(0);
-    setSelectedAnswerIndex(null);
-    setIsAnswered(false);
-    setShowConfirmation(false);
-    setShowAnswer(false);
-    setUserAnswers([]);
-    setShowRationale(false);
-    setIsComplete(false);
-    setUserAnswerMap({});
-  }, [convertedQuestions]);
+    // Only reset if questions length changed or if we're on a different question index
+    // This prevents accidental resets when parent re-renders with same questions
+    const questionsChanged = previousQuestionsLengthRef.current !== convertedQuestions.length;
+    const questionIndexChanged = previousQuestionIndexRef.current !== currentQuestionIndex;
+    
+    // Only reset if questions actually changed, not just on re-render
+    if (questionsChanged) {
+      setCurrentQuestionIndex(0);
+      setSelectedAnswerIndex(null);
+      setIsAnswered(false);
+      setShowConfirmation(false);
+      setShowAnswer(false);
+      setUserAnswers([]);
+      setShowRationale(false);
+      setIsComplete(false);
+      setUserAnswerMap({});
+      previousQuestionsLengthRef.current = convertedQuestions.length;
+      previousQuestionIndexRef.current = 0;
+    } else {
+      // Update refs without resetting state
+      previousQuestionIndexRef.current = currentQuestionIndex;
+    }
+  }, [convertedQuestions.length, currentQuestionIndex]); // Only depend on length, not the full array
 
   const handleOptionClick = (optionIndex: number) => {
     if (isAnswered || showConfirmation) return; // Prevent re-selection

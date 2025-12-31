@@ -136,34 +136,26 @@ export async function POST(
       },
     });
 
-    // Only update progress if quiz is passed (same behavior as main training)
-    // Mini training is only completed when quiz is passed, not just by watching video
-    if (!existingProgress || !existingProgress.quizCompleted) {
-      // Don't update progress if quiz is not passed - just return current state
-      return NextResponse.json(
-        {
-          success: true,
-          data: {
-            watchedSeconds,
-            videoProgress: existingProgress?.videoProgress || 0,
-            isVideoCompleted: false,
-            isCompleted: false,
-          },
-        },
-        { status: 200 }
-      );
-    }
-
-    // Update mini-training progress (only if quiz passed)
-    // isCompleted is only set when quiz is passed (handled in quiz submission endpoint)
-    const progress = await prisma.miniTrainingProgress.update({
+    // Always save watch position for resume functionality (like main training)
+    // But only use videoProgress for progress calculation if quiz is passed
+    // Use upsert to create progress if it doesn't exist
+    const progress = await prisma.miniTrainingProgress.upsert({
       where: {
         userId_miniTrainingId: {
           userId: user.id,
           miniTrainingId: miniTrainingId,
         },
       },
-      data: {
+      create: {
+        userId: user.id,
+        miniTrainingId: miniTrainingId,
+        videoProgress: videoProgress, // Always save for resume calculation
+        quizCompleted: false,
+        isCompleted: false,
+      },
+      update: {
+        // Always update videoProgress for resume functionality
+        // But it's only used for progress calculation if quiz is passed
         videoProgress: videoProgress,
         // Don't update isCompleted here - it's only set when quiz is passed in quiz/submit route
       },
@@ -172,12 +164,17 @@ export async function POST(
     // Recalculate parent training progress
     await recalculateTrainingProgress(user.id, miniTraining.training.id);
 
+    // Calculate canTakeQuiz based on minimum watch time (50% of video duration)
+    const minimumWatchTime = videoDuration > 0 ? Math.floor(videoDuration * 0.5) : 0;
+    const canTakeQuiz = watchedSeconds >= minimumWatchTime;
+
     return NextResponse.json(
       {
         success: true,
         data: {
           watchedSeconds,
-          videoProgress,
+          videoProgress: videoProgress, // Always return the calculated progress (which was just saved)
+          canTakeQuiz,
           isCompleted: progress.isCompleted,
         },
       },

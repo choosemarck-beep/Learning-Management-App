@@ -196,6 +196,30 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Protect leaderboard route - restrict managers from accessing
+  if (pathname === "/leaderboard" || pathname.startsWith("/leaderboard")) {
+    if (!session) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    const userRole = session?.user?.role;
+    
+    // Redirect managers away from leaderboard
+    if (userRole === "BRANCH_MANAGER") {
+      return NextResponse.redirect(new URL("/employee/branch-manager/dashboard", request.url));
+    }
+    if (userRole === "AREA_MANAGER") {
+      return NextResponse.redirect(new URL("/employee/area-manager/dashboard", request.url));
+    }
+    if (userRole === "REGIONAL_MANAGER") {
+      return NextResponse.redirect(new URL("/employee/regional-manager/dashboard", request.url));
+    }
+    
+    // Allow: ADMIN, SUPER_ADMIN, TRAINER, EMPLOYEE
+    // Continue to page
+  }
+
   // Legacy dashboard route - redirect based on role
   if (pathname.startsWith("/dashboard")) {
     if (!session) {

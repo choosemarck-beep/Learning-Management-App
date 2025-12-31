@@ -186,7 +186,8 @@ export const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({
             toast.success("Avatar updated successfully!");
             // Update session to refresh avatar everywhere
             // The onUploadComplete callback will handle session update in ProfileHeader
-            onUploadComplete(data.avatarUrl);
+            // Await the callback to ensure session update completes before closing modal
+            await onUploadComplete(data.avatarUrl);
             onClose();
           } catch (uploadError) {
             console.error("Upload error:", uploadError);

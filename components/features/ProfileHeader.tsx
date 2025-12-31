@@ -44,10 +44,20 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   };
 
   const handleUploadComplete = async (avatarUrl: string) => {
-    // Trigger session update - this will cause JWT callback to fetch latest user data from database
-    await update();
-    // Refresh router to update server-rendered components with new avatar
-    router.refresh();
+    try {
+      // Trigger session update - this will cause JWT callback to fetch latest user data from database
+      await update();
+      
+      // Small delay to ensure session propagates to all components
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Refresh router to update server-rendered components with new avatar
+      router.refresh();
+    } catch (error) {
+      console.error("Error updating session after avatar upload:", error);
+      // Still refresh router even if update fails
+      router.refresh();
+    }
   };
 
   return (
@@ -62,6 +72,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         >
           {currentAvatar ? (
             <img
+              key={currentAvatar}
               src={currentAvatar}
               alt={name}
               className={styles.avatar}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
 import { randomizeQuizQuestions } from "@/lib/utils/quizRandomization";
+import { awardTrainingXP } from "@/lib/utils/trainingProgress";
 
 export async function POST(
   request: NextRequest,
@@ -290,6 +291,23 @@ export async function POST(
     // Recalculate parent training progress
     await recalculateTrainingProgress(user.id, miniTraining.training.id);
 
+    // Award XP if mini-training is completed (quiz passed)
+    // Use a portion of parent training's totalXP (e.g., 20% since mini-trainings are 20% of training weight)
+    let xpEarned = 0;
+    if (passed && miniTrainingProgress.isCompleted) {
+      // Calculate XP based on parent training's totalXP
+      // Mini-trainings typically represent 20% of training weight, so award 20% of training XP
+      const trainingTotalXP = miniTraining.training.totalXP || 0;
+      const miniTrainingBaseXP = Math.round(trainingTotalXP * 0.2); // 20% of training XP
+      
+      xpEarned = await awardTrainingXP(
+        user.id,
+        { totalXP: miniTrainingBaseXP },
+        score,
+        passed
+      );
+    }
+
     return NextResponse.json(
       {
         success: true,
@@ -300,6 +318,7 @@ export async function POST(
           passed,
           results,
           isCompleted: miniTrainingProgress.isCompleted,
+          xpEarned,
           startedAt: miniQuizAttempt?.startedAt || null,
           completedAt: miniQuizAttempt?.completedAt || null,
           timeSpent: miniQuizAttempt?.timeSpent || null,

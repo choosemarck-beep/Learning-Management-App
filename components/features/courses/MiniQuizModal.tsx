@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { X, CheckCircle2, XCircle, Award, Loader2 } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { X, CheckCircle2, XCircle, Award, Loader2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
 import toast from "react-hot-toast";
@@ -26,6 +26,7 @@ interface MiniQuiz {
   id: string;
   title: string;
   passingScore: number;
+  timeLimit?: number | null;
   questions: QuizQuestion[];
 }
 
@@ -62,6 +63,20 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
   const [score, setScore] = useState<number | null>(null);
   const [xpEarned, setXpEarned] = useState<number | null>(null);
   const [quizStartTime, setQuizStartTime] = useState<Date | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const [quizTiming, setQuizTiming] = useState<{
+    startedAt: string | null;
+    completedAt: string | null;
+    timeSpent: number | null;
+  } | null>(null);
+  
+  // Confirmation popup state (like QuizCard)
+  const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isAnswered, setIsAnswered] = useState<Record<string, boolean>>({});
+  
+  // Use ref to prevent accidental state resets
+  const previousQuestionIndexRef = useRef<number>(0);
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -73,9 +88,92 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
       setXpEarned(null);
       setIsSubmitting(false);
       setQuizStartTime(new Date());
+      setTimeRemaining(null);
+      setQuizTiming(null);
+      setSelectedAnswerIndex(null);
+      setShowConfirmation(false);
+      setIsAnswered({});
+      previousQuestionIndexRef.current = 0;
     }
   }, [isOpen]);
 
+  // Timer for quiz
+  useEffect(() => {
+    if (quiz.timeLimit && !results && !isSubmitting && isOpen) {
+      setTimeRemaining(quiz.timeLimit);
+      const interval = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev === null || prev <= 1) {
+            clearInterval(interval);
+            if (prev === 1) {
+              handleSubmit(); // Auto-submit when time runs out
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [quiz.timeLimit, results, isSubmitting, isOpen]);
+
+  // Handle option click with confirmation popup (like QuizCard)
+  const handleOptionClick = (questionId: string, optionId: string, optionIndex: number) => {
+    if (!optionId) {
+      console.warn("Attempted to select answer without ID");
+      return;
+    }
+    
+    // If already answered this question, don't allow re-selection
+    if (isAnswered[questionId] || showConfirmation) {
+      return;
+    }
+
+    // Show confirmation first
+    setSelectedAnswerIndex(optionIndex);
+    setShowConfirmation(true);
+    
+    // Scroll confirmation into view after a brief delay
+    setTimeout(() => {
+      const confirmationElement = document.querySelector(`.${styles.confirmationContainer}`);
+      if (confirmationElement) {
+        confirmationElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'nearest',
+          inline: 'nearest'
+        });
+      }
+    }, 100);
+  };
+
+  // Handle confirm answer
+  const handleConfirmAnswer = () => {
+    if (selectedAnswerIndex === null || !currentQuestion) return;
+
+    const optionId = typeof currentQuestion.options[selectedAnswerIndex] === 'string'
+      ? `opt-${currentQuestion.id}-${selectedAnswerIndex}`
+      : (currentQuestion.options[selectedAnswerIndex] as QuizOption).id || `opt-${currentQuestion.id}-${selectedAnswerIndex}`;
+
+    // Hide confirmation, mark as answered
+    setShowConfirmation(false);
+    setIsAnswered(prev => ({ ...prev, [currentQuestion.id]: true }));
+    setSelectedAnswerIndex(null);
+
+    // Store answer
+    setAnswers((prev) => ({
+      ...prev,
+      [currentQuestion.id]: optionId,
+    }));
+  };
+
+  // Handle cancel answer
+  const handleCancelAnswer = () => {
+    setSelectedAnswerIndex(null);
+    setShowConfirmation(false);
+  };
+
+  // Legacy handler for backward compatibility (not used with confirmation flow)
   const handleAnswerSelect = (questionId: string, answerId: string) => {
     if (!answerId) {
       console.warn("Attempted to select answer without ID");
@@ -90,12 +188,20 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
   const handleNext = () => {
     if (currentQuestionIndex < quiz.questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
+      // Reset confirmation state when moving to next question
+      setSelectedAnswerIndex(null);
+      setShowConfirmation(false);
+      previousQuestionIndexRef.current = currentQuestionIndex + 1;
     }
   };
 
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
+      // Reset confirmation state when moving to previous question
+      setSelectedAnswerIndex(null);
+      setShowConfirmation(false);
+      previousQuestionIndexRef.current = currentQuestionIndex - 1;
     }
   };
 
@@ -128,6 +234,12 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
       if (data.success) {
         setResults(data.data.results);
         setScore(data.data.score);
+        setXpEarned(data.data.xpEarned || null);
+        setQuizTiming({
+          startedAt: data.data.startedAt || null,
+          completedAt: data.data.completedAt || null,
+          timeSpent: data.data.timeSpent || null,
+        });
         
         if (data.data.passed) {
           toast.success(`Quiz passed! Score: ${data.data.score}%`);
@@ -155,6 +267,26 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
   const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
   const allAnswered = quiz.questions.every((q) => answers[q.id]);
   const progress = ((currentQuestionIndex + 1) / quiz.questions.length) * 100;
+  
+  // Format duration helper
+  const formatDuration = (seconds: number): string => {
+    if (seconds < 60) {
+      return `${seconds} second${seconds !== 1 ? 's' : ''}`;
+    }
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    if (remainingSeconds === 0) {
+      return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    }
+    return `${minutes} minute${minutes !== 1 ? 's' : ''} ${remainingSeconds} second${remainingSeconds !== 1 ? 's' : ''}`;
+  };
+
+  // Format time remaining for timer display
+  const formatTimeRemaining = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
 
   // Show results screen
   if (results && score !== null) {
@@ -184,6 +316,40 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
                   {correctCount} of {quiz.questions.length} correct
                 </span>
               </div>
+              {xpEarned !== null && xpEarned > 0 && (
+                <div className={styles.xpEarned}>
+                  <Award size={20} />
+                  <span>+{xpEarned} XP</span>
+                </div>
+              )}
+              {quizTiming && (
+                <div className={styles.quizTiming}>
+                  {quizTiming.startedAt && (
+                    <div className={styles.timingItem}>
+                      <span className={styles.timingLabel}>Started:</span>
+                      <span className={styles.timingValue}>
+                        {new Date(quizTiming.startedAt).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                  {quizTiming.completedAt && (
+                    <div className={styles.timingItem}>
+                      <span className={styles.timingLabel}>Completed:</span>
+                      <span className={styles.timingValue}>
+                        {new Date(quizTiming.completedAt).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+                  {quizTiming.timeSpent !== null && (
+                    <div className={styles.timingItem}>
+                      <span className={styles.timingLabel}>Duration:</span>
+                      <span className={styles.timingValue}>
+                        {formatDuration(quizTiming.timeSpent)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className={styles.resultsList}>
@@ -261,6 +427,13 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
 
         <div className={styles.header}>
           <h2 className={styles.quizTitle}>{quiz.title}</h2>
+          {/* Timer Display */}
+          {timeRemaining !== null && (
+            <div className={styles.timerContainer}>
+              <Clock size={18} className={styles.timerIcon} />
+              <span className={styles.timerText}>{formatTimeRemaining(timeRemaining)}</span>
+            </div>
+          )}
         </div>
 
         {/* Progress Bar */}
@@ -293,23 +466,52 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
                       ? `opt-${currentQuestion.id}-${optionIndex}` 
                       : (option.id || `opt-${currentQuestion.id}-${optionIndex}`);
                     const isSelected = answers[currentQuestion.id] === optionId;
+                    const isPending = showConfirmation && selectedAnswerIndex === optionIndex;
+                    const isQuestionAnswered = isAnswered[currentQuestion.id];
                     
                     return (
                       <button
                         key={optionId}
                         className={`${styles.option} ${
                           isSelected ? styles.optionSelected : ""
-                        }`}
+                        } ${isPending ? styles.optionPending : ""}`}
                         onClick={() =>
-                          handleAnswerSelect(currentQuestion.id, optionId)
+                          handleOptionClick(currentQuestion.id, optionId, optionIndex)
                         }
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isQuestionAnswered || showConfirmation}
                       >
                         <span className={styles.optionText}>{optionText}</span>
                       </button>
                     );
                   })}
                 </div>
+
+                {/* Confirmation Message (like QuizCard) */}
+                {showConfirmation && selectedAnswerIndex !== null && (
+                  <div className={styles.confirmationContainer}>
+                    <div className={styles.confirmationMessage}>
+                      Are you sure about this answer?
+                    </div>
+                    <div className={styles.confirmationActions}>
+                      <Button
+                        variant="outline"
+                        size="md"
+                        onClick={handleCancelAnswer}
+                        className={styles.cancelButton}
+                      >
+                        Change Answer
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="md"
+                        onClick={handleConfirmAnswer}
+                        className={styles.confirmButton}
+                      >
+                        Confirm
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </CardBody>
             </Card>
           )}
@@ -329,7 +531,7 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
               <Button
                 variant="primary"
                 onClick={handleSubmit}
-                disabled={!allAnswered || isSubmitting}
+                disabled={!allAnswered || isSubmitting || showConfirmation}
                 className={styles.submitButton}
               >
                 {isSubmitting ? (
@@ -345,7 +547,7 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
               <Button
                 variant="primary"
                 onClick={handleNext}
-                disabled={!answers[currentQuestion.id] || isSubmitting}
+                disabled={!answers[currentQuestion.id] || isSubmitting || showConfirmation}
                 className={styles.navButton}
               >
                 Next

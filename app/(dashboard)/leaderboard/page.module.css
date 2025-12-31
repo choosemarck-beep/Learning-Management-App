@@ -1,4 +1,4 @@
-/* Leaderboard Page - Mobile-First Design (320px-428px) */
+/* Leaderboard Page - Mobile-First Design (320px-428px) with Desktop Support */
 
 .container {
   width: 100%;
@@ -7,5 +7,13 @@
   min-height: 100vh;
   padding-bottom: 80px; /* Space for bottom navigation */
   position: relative;
+}
+
+/* Desktop layout - no max-width constraint, handled by AdminLayout/TrainerLayout */
+@media (min-width: 768px) {
+  .container {
+    max-width: none;
+    padding-bottom: 0;
+  }
 }
 
