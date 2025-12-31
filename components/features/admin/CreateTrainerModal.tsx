@@ -26,6 +26,7 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 2;
+  const [isNavigating, setIsNavigating] = useState(false); // Prevent submission during navigation
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -57,6 +58,7 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
       setErrors({});
       setCurrentStep(1);
       setGeneratedCredentials(null);
+      setIsNavigating(false); // Reset navigation flag
     }
   }, [isOpen]);
 
@@ -100,7 +102,12 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
 
   const handleNext = () => {
     if (validateStep(currentStep) && currentStep < totalSteps) {
+      setIsNavigating(true); // Set flag to prevent submission during navigation
       setCurrentStep(currentStep + 1);
+      // Clear navigation flag after a short delay to allow state to update
+      setTimeout(() => {
+        setIsNavigating(false);
+      }, 100);
     } else {
       // Show first error as toast
       const firstErrorKey = Object.keys(errors)[0];
@@ -121,17 +128,31 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Only submit if we're on the final step
-    // Prevent form submission on intermediate steps (e.g., when pressing Enter)
+    // CRITICAL: Prevent submission if we're currently navigating between steps
+    if (isNavigating) {
+      return;
+    }
+
+    // CRITICAL: Only allow form submission when on the final step
+    // If not on final step, prevent submission entirely (e.g., when pressing Enter)
     if (currentStep !== totalSteps) {
       // If not on final step, prevent submission and just advance to next step
       // But only if validation passes
       if (validateStep(currentStep)) {
         handleNext();
+      } else {
+        // Show validation errors
+        const firstErrorKey = Object.keys(errors)[0];
+        if (firstErrorKey && errors[firstErrorKey]) {
+          toast.error(errors[firstErrorKey]);
+        } else {
+          toast.error("Please fill in all required fields");
+        }
       }
-      return;
+      return; // CRITICAL: Return early to prevent any submission
     }
 
+    // We're on the final step - proceed with submission
     // Validate all steps before submission
     if (!validateStep(1)) {
       setCurrentStep(1);
@@ -435,7 +456,28 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
         closeOnBackdropClick={!isLoading}
         className={styles.modal}
       >
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <form 
+          onSubmit={handleSubmit} 
+          onKeyDown={(e) => {
+            // Prevent Enter key from submitting form when not on final step
+            if (e.key === "Enter" && currentStep !== totalSteps) {
+              e.preventDefault();
+              // If validation passes, advance to next step
+              if (validateStep(currentStep)) {
+                handleNext();
+              } else {
+                // Show validation errors
+                const firstErrorKey = Object.keys(errors)[0];
+                if (firstErrorKey && errors[firstErrorKey]) {
+                  toast.error(errors[firstErrorKey]);
+                } else {
+                  toast.error("Please fill in all required fields");
+                }
+              }
+            }
+          }}
+          className={styles.form}
+        >
           {/* Progress Indicator */}
           <div className={styles.progressSection}>
             <ProgressIndicator

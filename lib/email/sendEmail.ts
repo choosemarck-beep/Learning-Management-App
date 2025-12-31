@@ -3,6 +3,7 @@ import { sendEmail as sendEmailViaSendGrid } from "./client";
 import { OnboardingEmail } from "./templates/onboarding";
 import { TrainerOnboardingEmail } from "./templates/trainer-onboarding";
 import { ApprovalEmail } from "./templates/approval";
+import { PasswordResetEmail } from "./templates/password-reset";
 
 /**
  * Send onboarding email to new staff member (employees, branch managers, etc.)
@@ -106,6 +107,40 @@ export async function sendApprovalEmail(
     return { success: true };
   } catch (error) {
     console.error("Failed to send approval email:", error);
+    throw error;
+  }
+}
+
+/**
+ * Send password reset email to user
+ * @param email - User's email address
+ * @param userName - User's name
+ * @param resetUrl - Password reset URL with token
+ */
+export async function sendPasswordResetEmail(
+  email: string,
+  userName: string,
+  resetUrl: string
+) {
+  try {
+    // Render React Email component to HTML
+    const html = await render(
+      PasswordResetEmail({
+        userName,
+        resetUrl,
+      })
+    );
+
+    // Send email via SendGrid
+    await sendEmailViaSendGrid({
+      to: email,
+      subject: "Reset Your Password - Get Back to Learning!",
+      html,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to send password reset email:", error);
     throw error;
   }
 }

@@ -127,6 +127,7 @@ Galaxy-inspired color scheme:
    - **No Visual Glitches**: Prevent text clipping, icon distortion, layout breaks, or overflow issues
    - **Proper Containers**: Ensure text containers have adequate padding to prevent clipping
    - **Responsive Text**: Text should wrap properly and never overflow its container
+   - **No Redundant Titles/Descriptions**: Avoid displaying the same title or description multiple times on a page. If a layout component (AdminLayout, TrainerLayout) already sets a pageTitle and pageDescription, do not duplicate them in the page content. Remove redundant headers, titles, and subtitles that repeat information already shown in the page header or layout.
 6. **Touch Targets**: Minimum 44x44px for all interactive elements
 7. **Spacing**: Generous whitespace, 8px grid system - maintain consistency
    - **Viewport Optimization**: All content must fit within mobile viewport (320px-428px) without requiring scrolling
@@ -926,6 +927,20 @@ The application supports four distinct user roles with different access levels:
 - Maintain professional tone
 - Celebrate achievements (gamification mindset!)
 - **Terminology**: Refer to stakeholders as "Multipliers" throughout the project
+- **Email Design Standards (CRITICAL)**:
+  - **Professional Branding**: All emails must use the Pixel Galaxy theme (purple/blue gradients, dark backgrounds, space terminology)
+  - **Gamification Elements**: Incorporate XP, achievements, levels, leaderboards, and progress language in email content
+  - **Positive Framing**: Use positive, encouraging language that frames actions as opportunities and achievements
+  - **Behavioral Science**: Apply principles like:
+    - Loss aversion (emphasize what they'll gain, not lose)
+    - Social proof (mention team/leaderboard context)
+    - Progress visualization (mention XP, levels, achievements)
+    - Celebration of milestones (frame completions as wins)
+  - **URL Construction**: Always use `process.env.NEXTAUTH_URL` or construct from request headers (origin/host). NEVER use hardcoded localhost URLs. All email links must work in both development and production (Vercel).
+  - **Template Consistency**: Use React Email components for all emails to ensure consistent branding and responsive design
+  - **Call-to-Action**: Make CTAs clear, action-oriented, and gamified (e.g., "Start Learning Now" instead of "Login")
+  - **Subject Lines**: Use positive, gamified language (e.g., "Get Back to Learning!" instead of "Reset Password")
+  - **No Emojis**: Follow project rules - no emojis in email content (use text-based gamification instead)
 - **CRITICAL - User is Not a Developer**: 
   - Always explain what you're doing and why
   - Describe the problem before presenting the solution

@@ -36,9 +36,9 @@ export const TrainerOnboardingEmail: React.FC<TrainerOnboardingEmailProps> = ({
             <Text style={heading}>Welcome, Trainer {userName}!</Text>
 
             <Text style={paragraph}>
-              Your trainer account has been created and approved. You now have
-              access to the Learning Management platform to create and manage
-              training content.
+              Congratulations! Your trainer account is ready and you're all set to create amazing 
+              learning experiences. You have the power to inspire, educate, and help your team 
+              level up their skills!
             </Text>
 
             <Text style={paragraph}>
@@ -53,30 +53,37 @@ export const TrainerOnboardingEmail: React.FC<TrainerOnboardingEmailProps> = ({
               <Text style={credentialValue}>{password}</Text>
             </Section>
 
-            <Text style={warningText}>
-              ⚠️ Please save these credentials securely. You can change your
-              password after logging in.
+            <Text style={infoBox}>
+              <strong>Security tip:</strong> Please save these credentials securely. You can 
+              change your password after logging in to keep your account extra secure!
             </Text>
 
             <Text style={paragraph}>
-              <strong>As a Trainer, you can:</strong>
+              <strong>As a Trainer, you can empower learners by:</strong>
             </Text>
 
-            <Text style={listItem}>• Create and manage training courses</Text>
-            <Text style={listItem}>• Upload training videos and materials</Text>
-            <Text style={listItem}>• Create quizzes and assessments</Text>
-            <Text style={listItem}>• Track employee progress and completion</Text>
-            <Text style={listItem}>• Manage training content and updates</Text>
+            <Text style={listItem}>• Creating engaging training courses and modules</Text>
+            <Text style={listItem}>• Uploading videos and interactive materials</Text>
+            <Text style={listItem}>• Designing quizzes and assessments</Text>
+            <Text style={listItem}>• Tracking learner progress and celebrating their achievements</Text>
+            <Text style={listItem}>• Managing content and keeping it fresh and exciting</Text>
+            <Text style={listItem}>• Inspiring your team to reach new learning heights</Text>
 
             <Section style={buttonContainer}>
               <a href={loginUrl} style={button}>
-                Login to Your Account
+                Start Creating Content
               </a>
             </Section>
 
             <Text style={paragraph}>
-              If you have any questions or need assistance, please contact your
-              administrator or support team.
+              You're about to make a real difference in your team's learning journey. Every course 
+              you create, every quiz you design, and every achievement you help unlock brings your 
+              team closer to success. Let's create something amazing together!
+            </Text>
+
+            <Text style={paragraph}>
+              If you have any questions or need help getting started, we're here to support you 
+              every step of the way!
             </Text>
 
             <Hr style={divider} />

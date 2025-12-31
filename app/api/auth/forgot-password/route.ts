@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
-import { sendEmail } from "@/lib/email/client";
+import { sendPasswordResetEmail } from "@/lib/email/sendEmail";
 import crypto from "crypto";
 
 export async function POST(request: NextRequest) {
@@ -53,50 +53,13 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXTAUTH_URL || origin || (host ? `https://${host}` : "");
     const resetUrl = baseUrl ? `${baseUrl}/reset-password?token=${resetToken}` : `/reset-password?token=${resetToken}`;
 
-    // Send password reset email
+    // Send password reset email using professional template
     try {
-      await sendEmail({
-        to: user.email,
-        subject: "Reset Your Password - Learning Management",
-        html: `
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Reset Your Password</title>
-            </head>
-            <body style="font-family: Arial, sans-serif; background-color: #0F172A; color: #FFFFFF; padding: 20px; line-height: 1.6;">
-              <div style="max-width: 600px; margin: 0 auto; background-color: rgba(0, 0, 0, 0.3); border-radius: 12px; padding: 30px; border: 1px solid rgba(139, 92, 246, 0.2);">
-                <h1 style="color: #8B5CF6; font-size: 24px; margin-bottom: 20px;">Reset Your Password</h1>
-                <p style="color: #CBD5E1; font-size: 16px; margin-bottom: 20px;">
-                  Hello ${user.name || "there"},
-                </p>
-                <p style="color: #CBD5E1; font-size: 16px; margin-bottom: 20px;">
-                  We received a request to reset your password. Click the button below to create a new password:
-                </p>
-                <div style="text-align: center; margin: 30px 0;">
-                  <a href="${resetUrl}" style="display: inline-block; background-color: #8B5CF6; color: #FFFFFF; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                    Reset Password
-                  </a>
-                </div>
-                <p style="color: #CBD5E1; font-size: 14px; margin-bottom: 10px;">
-                  Or copy and paste this link into your browser:
-                </p>
-                <p style="color: #8B5CF6; font-size: 12px; word-break: break-all; margin-bottom: 20px;">
-                  ${resetUrl}
-                </p>
-                <p style="color: #94A3B8; font-size: 14px; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                  <strong>Important:</strong> This link will expire in 1 hour. If you didn't request this, you can safely ignore this email.
-                </p>
-                <p style="color: #94A3B8; font-size: 12px; margin-top: 20px;">
-                  If the button doesn't work, copy and paste the link above into your browser.
-                </p>
-              </div>
-            </body>
-          </html>
-        `,
-      });
+      await sendPasswordResetEmail(
+        user.email,
+        user.name || "Explorer",
+        resetUrl
+      );
     } catch (emailError) {
       console.error("Error sending password reset email:", emailError);
       // Don't fail the request if email fails (user might have typo, etc.)

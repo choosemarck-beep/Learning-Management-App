@@ -30,33 +30,40 @@ export const ApprovalEmail: React.FC<ApprovalEmailProps> = ({
           </Section>
 
           <Section style={content}>
-            <Text style={heading}>Great News, {userName}!</Text>
+            <Text style={heading}>You're Approved - Let's Start Learning!</Text>
 
             <Text style={paragraph}>
-              Your account has been approved! You now have full access to the
-              Learning Management platform.
+              Congratulations, {userName}! Your account has been approved and you're all set 
+              to begin your learning adventure. Get ready to earn XP, unlock achievements, and 
+              climb the leaderboard!
             </Text>
 
             <Text style={paragraph}>
-              <strong>What you can do now:</strong>
+              <strong>Your learning journey starts now:</strong>
             </Text>
 
-            <Text style={listItem}>• Access all learning courses and materials</Text>
-            <Text style={listItem}>• Track your progress and earn achievements</Text>
-            <Text style={listItem}>• Connect with your team and see leaderboards</Text>
-            <Text style={listItem}>• Complete training modules and earn XP</Text>
-            <Text style={listItem}>• View your profile and update your information</Text>
+            <Text style={listItem}>• Explore courses and start earning XP</Text>
+            <Text style={listItem}>• Unlock achievements and badges as you progress</Text>
+            <Text style={listItem}>• Compete on leaderboards and see how you rank</Text>
+            <Text style={listItem}>• Complete training modules and level up</Text>
+            <Text style={listItem}>• Track your progress and celebrate every milestone</Text>
+            <Text style={listItem}>• Connect with your team and share your success</Text>
 
             <Section style={buttonContainer}>
               <Link href={loginUrl} style={button}>
-                Login to Your Account
+                Start Learning Now
               </Link>
             </Section>
 
             <Text style={paragraph}>
-              We're excited to have you on board! If you have any questions or
-              need assistance, please don't hesitate to reach out to our support
-              team.
+              We're excited to see you succeed! Every course you complete, every quiz you ace, 
+              and every achievement you unlock brings you closer to becoming a learning champion. 
+              Let's make this journey amazing together!
+            </Text>
+
+            <Text style={paragraph}>
+              If you have any questions or need help getting started, our support team is here 
+              to help you succeed!
             </Text>
 
             <Hr style={divider} />

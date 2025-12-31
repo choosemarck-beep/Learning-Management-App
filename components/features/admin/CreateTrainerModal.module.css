@@ -1,22 +1,22 @@
 /* Create Trainer Modal - Professional Multi-Step Design */
 
 .modal {
-  max-width: 560px;
+  max-width: 500px;
   width: 100%;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
-  padding: var(--spacing-lg);
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
 }
 
 /* Progress Section */
 .progressSection {
-  padding: var(--spacing-sm) 0;
+  padding: var(--spacing-xs) 0;
   border-bottom: 1px solid rgba(139, 92, 246, 0.15);
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
 }
 
 .progressIndicator {
@@ -25,7 +25,7 @@
 
 /* Step Container */
 .stepContainer {
-  min-height: 280px;
+  min-height: 200px;
   position: relative;
   overflow: hidden;
   flex: 1;
@@ -40,7 +40,7 @@
 .stepContent {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   padding: 0;
   width: 100%;
 }
@@ -57,13 +57,13 @@
 .stepHeader {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
   width: 100%;
 }
 
 .stepTitle {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin: 0;
@@ -72,24 +72,24 @@
 }
 
 .stepDescription {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 /* Fields Group */
 .fieldsGroup {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   width: 100%;
 }
 
 .nameFieldsRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   width: 100%;
   align-items: flex-start;
 }
@@ -97,7 +97,7 @@
 .formField {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
   width: 100%;
 }
 
@@ -112,9 +112,9 @@
 /* Actions */
 .actions {
   display: flex;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-md);
-  padding: var(--spacing-md) var(--spacing-lg);
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
   border-top: 1px solid rgba(139, 92, 246, 0.15);
   align-items: center;
   justify-content: flex-end;
@@ -274,14 +274,14 @@
 /* Responsive adjustments for desktop */
 @media (min-width: 768px) {
   .modal {
-    max-width: 600px;
+    max-width: 520px;
   }
 
   .stepContainer {
-    min-height: 360px;
+    min-height: 240px;
   }
 
   .stepTitle {
-    font-size: var(--font-size-2xl);
+    font-size: var(--font-size-xl);
   }
 }

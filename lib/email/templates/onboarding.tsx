@@ -31,36 +31,35 @@ export const OnboardingEmail: React.FC<OnboardingEmailProps> = ({
           </Section>
 
           <Section style={content}>
-            <Text style={heading}>Welcome to Learning Management, {userName}!</Text>
+            <Text style={heading}>Welcome to Your Learning Journey, {userName}!</Text>
 
             <Text style={paragraph}>
-              Thank you for joining our learning platform. We're excited to have you
-              on board!
+              We're thrilled to have you join our learning community! You've taken the first step 
+              toward unlocking your potential and earning amazing achievements.
             </Text>
 
             <Text style={paragraph}>
-              Your enrollment is currently pending approval. Our team will review your
-              account and send you a confirmation email once your account has been
-              approved.
+              <strong>Great news:</strong> Your account is being reviewed and will be approved soon! 
+              Our team is working to get you started on your learning adventure as quickly as possible.
             </Text>
 
             <Text style={paragraph}>
-              Once approved, you'll be able to:
+              <strong>What's waiting for you once you're approved:</strong>
             </Text>
 
-            <Text style={listItem}>• Access all learning courses and materials</Text>
-            <Text style={listItem}>• Track your progress and earn achievements</Text>
-            <Text style={listItem}>• Connect with your team and see leaderboards</Text>
+            <Text style={listItem}>• Access exciting courses and training materials</Text>
+            <Text style={listItem}>• Earn XP and level up as you learn</Text>
+            <Text style={listItem}>• Unlock achievements and badges</Text>
+            <Text style={listItem}>• Compete on leaderboards and climb the ranks</Text>
+            <Text style={listItem}>• Track your progress and celebrate milestones</Text>
 
             <Text style={paragraph}>
-              We'll notify you via email as soon as your account is approved. In the
-              meantime, feel free to explore our platform and get ready for your
-              learning journey!
+              We'll send you an email the moment your account is approved - then you can start 
+              your learning journey right away! Get ready to level up!
             </Text>
 
             <Text style={paragraph}>
-              If you have any questions, please don't hesitate to reach out to our
-              support team.
+              If you have any questions, our support team is here to help you succeed!
             </Text>
 
             <Hr style={divider} />

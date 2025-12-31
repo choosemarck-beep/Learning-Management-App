@@ -77,11 +77,6 @@ export const LeaderboardPageClient: React.FC<LeaderboardPageClientProps> = ({
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Leaderboard</h1>
-        <p className={styles.subtitle}>Compete with your peers and climb the ranks!</p>
-      </div>
-
       <LeaderboardHeader
         view={view}
         period={period}
