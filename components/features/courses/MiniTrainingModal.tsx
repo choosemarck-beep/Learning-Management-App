@@ -797,17 +797,6 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
                     )}
                   </div>
                 )}
-                {/* Fullscreen Button */}
-                <button
-                  className={styles.fullscreenButton}
-                  onClick={handleFullscreen}
-                  aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-                >
-                  {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
-                </button>
-              </div>
-            )}
-
                 {/* Progress Timer Overlay - Same as main training */}
                 {videoDuration > 0 && (
                   <div className={styles.progressTimerOverlay}>
@@ -834,6 +823,15 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
                     </div>
                   </div>
                 )}
+
+                {/* Fullscreen Button */}
+                <button
+                  className={styles.fullscreenButton}
+                  onClick={handleFullscreen}
+                  aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                >
+                  {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+                </button>
               </div>
             )}
 

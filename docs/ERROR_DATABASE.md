@@ -11,17 +11,23 @@ This document tracks common errors encountered during development and their solu
 - Build fails with syntax errors
 - Missing try-catch block structure
 - Unmatched braces or parentheses
+- JSX parsing errors: "Unexpected token `div`. Expected jsx identifier"
 
 **Common Causes:**
 - Missing `try` block before `catch` block
 - Incorrect function structure
 - Missing closing braces
+- JSX elements placed outside their parent container (e.g., after closing conditional render)
+- Missing closing parentheses or braces in conditional rendering
 
 **Solution:**
 - Ensure every `catch` block has a matching `try` block
 - Wrap the entire function body that needs error handling in a try-catch
 - Check for proper indentation and brace matching
 - Use TypeScript compiler to identify exact syntax issues
+- **For JSX errors**: Verify all JSX elements are properly nested within their parent containers
+- **For conditional rendering**: Ensure closing `)}` or `}` matches opening `{condition && (`
+- Check that JSX elements are not placed after a closing tag of a conditional render
 
 **Example Fix:**
 ```typescript
@@ -46,8 +52,30 @@ export default async function Page() {
 }
 ```
 
+**JSX Structure Error Example:**
+```tsx
+// ❌ WRONG - JSX element outside conditional render
+{videoUrl && embedUrl && (
+  <div className={styles.videoContainer}>
+    {/* Video content */}
+  </div>
+)}
+{/* This element is OUTSIDE the conditional - causes parsing error */}
+<div className={styles.progressOverlay}>...</div>
+
+// ✅ CORRECT - JSX element inside conditional render
+{videoUrl && embedUrl && (
+  <div className={styles.videoContainer}>
+    {/* Video content */}
+    {/* This element is INSIDE the conditional */}
+    <div className={styles.progressOverlay}>...</div>
+  </div>
+)}
+```
+
 **Files Fixed:**
 - `app/(dashboard)/employee/trainer/dashboard/page.tsx` - Added try-catch wrapper around main function body
+- `components/features/courses/MiniTrainingModal.tsx` - Moved progress timer overlay inside video container conditional render
 
 ---
 
