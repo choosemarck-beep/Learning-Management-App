@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { Navigation } from "@/components/layout/Navigation";
 import { ConditionalGalaxyBackground } from "@/components/ui/ConditionalGalaxyBackground";
 import { ConditionalContainer } from "@/components/layout/ConditionalContainer";
+import { ConditionalMain } from "@/components/layout/ConditionalMain";
 import { getCurrentUser } from "@/lib/auth/utils";
 import styles from "./layout.module.css";
 
@@ -29,7 +30,8 @@ export default async function DashboardLayout({
       {/* ConditionalContainer will not render container div for admin routes */}
       <ConditionalContainer className={styles.container}>
         {/* Header removed */}
-        <main className={styles.main}>{children}</main>
+        {/* ConditionalMain will not render main wrapper for admin/trainer routes */}
+        <ConditionalMain className={styles.main}>{children}</ConditionalMain>
         <div className={styles.regularNavigation}>
           <Navigation />
         </div>
