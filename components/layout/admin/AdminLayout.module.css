@@ -37,8 +37,11 @@
 .content {
   flex: 1;
   padding: 0; /* Remove ALL padding to magnetize containers */
-  overflow: hidden; /* No scrolling in desktop view */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  overflow-y: auto; /* Allow vertical scrolling */
   position: relative;
   z-index: 1;
-  height: 100vh; /* Full height since header is no longer fixed */
+  height: calc(100vh - 64px); /* Full height minus header (64px) */
+  width: 100%; /* Full width of mainContent */
+  max-width: 100%; /* Prevent overflow */
 }

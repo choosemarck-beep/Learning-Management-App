@@ -10,6 +10,7 @@
   gap: var(--spacing-md);
   height: 100%;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 /* Content wrapper for desktop spacing control */
@@ -24,32 +25,47 @@
 @media (min-width: 768px) {
   .container {
     max-width: none;
+    width: calc(100vw - 89px); /* Full width minus sidebar (89px) */
     margin: 0;
     margin-left: 0 !important; /* Ensure no left margin */
-    padding: 0 !important; /* Remove ALL padding to bring content directly next to sidebar */
+    padding: 0 !important; /* Remove ALL padding */
     gap: 0;
     height: calc(100vh - 64px); /* Full height minus header */
     overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    position: relative;
+    left: 0;
   }
   
   .contentWrapper {
+    width: 100%;
+    max-width: 100%;
     padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 8px; /* Minimal left padding (8px) for visual balance */
-    margin-left: 0; /* Ensure no left margin */
+    margin: 0; /* Ensure no margin */
     gap: var(--spacing-md);
+    box-sizing: border-box; /* Include padding in width calculation */
   }
 }
 
 @media (min-width: 1024px) {
   .container {
+    width: calc(100vw - 89px); /* Full width minus sidebar (89px) */
+    margin: 0;
     margin-left: 0 !important; /* Ensure no left margin */
-    padding: 0 !important; /* Remove ALL padding to bring content directly next to sidebar */
+    padding: 0 !important; /* Remove ALL padding */
     gap: 0;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    position: relative;
+    left: 0;
   }
   
   .contentWrapper {
+    width: 100%;
+    max-width: 100%;
     padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 8px; /* Minimal left padding (8px) for visual balance */
-    margin-left: 0; /* Ensure no left margin */
+    margin: 0; /* Ensure no margin */
     gap: var(--spacing-md);
+    box-sizing: border-box; /* Include padding in width calculation */
   }
 }
 
