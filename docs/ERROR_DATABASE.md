@@ -3126,3 +3126,62 @@ const trainingTotalXP = miniTraining.training.totalXP || 0; // ✅ Works
 - **2025-01-01**: Added Prisma relation select field error - always include all fields that will be accessed in select statements
 
 ---
+
+#### Error: Property does not exist on type (Missing Field in Interface)
+**Symptoms:**
+- Build fails with TypeScript error: `Property 'fieldName' does not exist on type 'InterfaceName'`
+- Error occurs when trying to access or set a property that's not defined in the TypeScript interface
+- Code was updated to use a new field but the interface wasn't updated
+
+**Common Causes:**
+- Interface definition missing a field that's being used in the code
+- Field was added to state/object but not to the TypeScript interface
+- Code was refactored to use a new field but interface wasn't updated
+
+**Solution:**
+- Add the missing field to the TypeScript interface
+- Ensure the field type matches how it's being used in the code
+- Update all places where the interface is initialized to include the new field
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - interface missing videoWatchedSeconds
+interface ProgressData {
+  videoProgress: number;
+  quizCompleted: boolean;
+  isCompleted: boolean;
+}
+
+// Later in code:
+setProgress((prev) => ({
+  ...prev,
+  videoWatchedSeconds: result.data.watchedSeconds, // ERROR: field doesn't exist
+}));
+
+// ✅ CORRECT - add missing field to interface
+interface ProgressData {
+  videoProgress: number;
+  videoWatchedSeconds: number; // Add missing field
+  quizCompleted: boolean;
+  isCompleted: boolean;
+}
+
+// Also update initialization to include the field
+setProgress(result.data.progress ? {
+  ...result.data.progress,
+  videoWatchedSeconds: initialWatchedSeconds, // Calculate from videoProgress
+} : null);
+```
+
+**Files Fixed:**
+- `components/features/courses/MiniTrainingModal.tsx` - Added `videoWatchedSeconds` to `ProgressData` interface and updated initialization
+
+**Prevention:**
+- Always update TypeScript interfaces when adding new fields to state/objects
+- Use TypeScript errors to catch missing fields during development
+- Review interface definitions when refactoring code that uses those interfaces
+- Ensure all fields used in code are defined in the interface
+- **Pattern**: When adding a new field to state, update both the interface and all initialization/update code
+- **2025-01-01**: Added missing interface field error - always update TypeScript interfaces when adding new fields to state/objects
+
+---

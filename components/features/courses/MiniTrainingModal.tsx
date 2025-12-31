@@ -37,6 +37,7 @@ interface MiniTrainingData {
 
 interface ProgressData {
   videoProgress: number;
+  videoWatchedSeconds: number;
   quizCompleted: boolean;
   isCompleted: boolean;
 }
@@ -156,12 +157,16 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
         }
       }
       setMiniTraining(miniTrainingData);
-      setProgress(result.data.progress);
       // Initialize watched seconds from progress if available
       // Note: We track watched seconds locally, but progress is only saved if quiz passed
       const initialWatchedSeconds = result.data.progress?.videoProgress 
         ? Math.floor((result.data.progress.videoProgress / 100) * (miniTrainingData.videoDuration || 0))
         : 0;
+      // Set progress with videoWatchedSeconds calculated from videoProgress
+      setProgress(result.data.progress ? {
+        ...result.data.progress,
+        videoWatchedSeconds: initialWatchedSeconds,
+      } : null);
       setWatchedSeconds(initialWatchedSeconds);
       lastSavedSecondsRef.current = initialWatchedSeconds;
       setHasResumed(false); // Reset resume flag when fetching new data
@@ -457,22 +462,23 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
         setCanTakeQuiz(result.data.canTakeQuiz || false);
         // Only update overall progress if quiz is completed (for progress calculation)
         // But always save watch position for resume functionality
-        if (result.data.progress !== undefined && progress?.quizCompleted) {
-          const newProgress = result.data.progress || (progress?.videoProgress || 0);
+        if (result.data.videoProgress !== undefined && progress?.quizCompleted) {
+          const newProgress = result.data.videoProgress || (progress?.videoProgress || 0);
           const wasCompleted = progress?.isCompleted || false;
           setProgress((prev) => (prev ? { 
             ...prev, 
             videoProgress: result.data.videoProgress || prev.videoProgress,
             videoWatchedSeconds: result.data.watchedSeconds || prev.videoWatchedSeconds,
-            isCompleted: newProgress >= 100,
+            isCompleted: result.data.isCompleted !== undefined ? result.data.isCompleted : (newProgress >= 100),
           } : null));
           // Refresh router if mini-training was just completed
-          if (!wasCompleted && newProgress >= 100) {
+          if (!wasCompleted && (result.data.isCompleted || newProgress >= 100)) {
             router.refresh();
           }
         } else {
           // Still update videoWatchedSeconds even if quiz not completed
           // This is stored in progress for resume functionality
+          // Note: We don't update progress state here to avoid affecting progress calculation
         }
       }
     } catch (error) {
