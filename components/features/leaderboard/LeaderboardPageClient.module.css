@@ -12,21 +12,41 @@
   overflow-y: auto;
 }
 
+/* Content wrapper for desktop spacing control */
+.contentWrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
 /* Desktop responsive styles */
 @media (min-width: 768px) {
   .container {
     max-width: none;
     margin: 0;
-    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 10px; /* 10px left padding to bring content closer to sidebar */
-    gap: var(--spacing-md);
+    margin-left: 0 !important; /* Ensure no left margin */
+    padding: 0 !important; /* Remove ALL padding to bring content directly next to sidebar */
+    gap: 0;
     height: calc(100vh - 64px); /* Full height minus header */
     overflow-y: auto;
+  }
+  
+  .contentWrapper {
+    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 10px; /* Small left padding (10px) to create minimal gap from sidebar */
+    gap: var(--spacing-md);
   }
 }
 
 @media (min-width: 1024px) {
   .container {
-    padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 10px; /* 10px left padding to bring content closer to sidebar */
+    margin-left: 0 !important; /* Ensure no left margin */
+    padding: 0 !important; /* Remove ALL padding to bring content directly next to sidebar */
+    gap: 0;
+  }
+  
+  .contentWrapper {
+    padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 10px; /* Small left padding (10px) to create minimal gap from sidebar */
     gap: var(--spacing-md);
   }
 }

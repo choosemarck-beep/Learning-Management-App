@@ -77,33 +77,35 @@ export const LeaderboardPageClient: React.FC<LeaderboardPageClientProps> = ({
 
   return (
     <div className={styles.container}>
-      <LeaderboardHeader
-        view={view}
-        period={period}
-        onViewChange={handleViewChange}
-        onPeriodChange={handlePeriodChange}
-      />
+      <div className={styles.contentWrapper}>
+        <LeaderboardHeader
+          view={view}
+          period={period}
+          onViewChange={handleViewChange}
+          onPeriodChange={handlePeriodChange}
+        />
 
-      <LeaderboardSearch
-        search={search}
-        onSearchChange={handleSearchChange}
-        onSearchSubmit={() => fetchLeaderboard()}
-      />
+        <LeaderboardSearch
+          search={search}
+          onSearchChange={handleSearchChange}
+          onSearchSubmit={() => fetchLeaderboard()}
+        />
 
-      <LeaderboardList
-        topUsers={leaderboardData?.topUsers || []}
-        currentUserEntry={leaderboardData?.currentUserEntry || null}
-        currentUserRank={leaderboardData?.currentUserRank || 0}
-        isLoading={isLoading}
-      />
-
-      {leaderboardData && leaderboardData.pagination.totalPages > 1 && (
-        <LeaderboardPagination
-          pagination={leaderboardData.pagination}
-          onPageChange={handlePageChange}
+        <LeaderboardList
+          topUsers={leaderboardData?.topUsers || []}
+          currentUserEntry={leaderboardData?.currentUserEntry || null}
+          currentUserRank={leaderboardData?.currentUserRank || 0}
           isLoading={isLoading}
         />
-      )}
+
+        {leaderboardData && leaderboardData.pagination.totalPages > 1 && (
+          <LeaderboardPagination
+            pagination={leaderboardData.pagination}
+            onPageChange={handlePageChange}
+            isLoading={isLoading}
+          />
+        )}
+      </div>
     </div>
   );
 };
