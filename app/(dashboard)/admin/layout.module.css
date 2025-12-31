@@ -7,6 +7,7 @@
   margin: 0;
   padding: 0;
   position: relative;
+  left: 0; /* Ensure no left offset */
   /* Break out of parent container using viewport width and negative margins */
   margin-left: calc(-50vw + 50%);
   margin-right: calc(-50vw + 50%);

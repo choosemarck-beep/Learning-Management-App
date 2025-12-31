@@ -119,6 +119,8 @@
   max-width: none !important;
   margin: 0 !important;
   padding: 0 !important;
+  position: relative;
+  left: 0 !important;
 }
 
 .main {
@@ -126,6 +128,16 @@
   width: 100%;
   padding: var(--spacing-md);
   padding-bottom: calc(var(--spacing-2xl) + var(--spacing-lg));
+}
+
+/* Remove all padding and margin for admin pages in main */
+.main:has(.adminWrapper) {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100vw !important;
+  max-width: none !important;
+  position: relative;
+  left: 0 !important;
 }
 
 /* Reels page: Remove all padding for full screen */
