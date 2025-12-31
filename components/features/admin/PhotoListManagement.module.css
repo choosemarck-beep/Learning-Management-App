@@ -1,28 +1,28 @@
-/* Photo List Management - Desktop-Optimized */
+/* Photo List Management - Desktop-Optimized Compact */
 
 .modal {
-  max-width: 700px;
+  max-width: 900px;
   width: 90vw;
 }
 
 .modalContent {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-sm);
   padding: var(--spacing-md);
 }
 
 .photoList {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
 .photoItem {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
   background: rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(139, 92, 246, 0.2);
   border-radius: var(--radius-md);
@@ -32,14 +32,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: 0;
 }
 
 .photoNumber {
   font-weight: var(--font-weight-semibold); /* 600 */
   color: var(--color-text-primary);
-  font-size: var(--font-size-base); /* Facebook Body: 16px */
-  line-height: 1.6; /* Facebook Body: 1.6x */
+  font-size: var(--font-size-sm); /* 14px */
+  line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
 .photoActions {
@@ -74,53 +74,60 @@
 .photoContent {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.imageContainer {
-  width: 100%;
-  max-width: 300px; /* Match carousel preview size */
-  aspect-ratio: 16 / 9;
-  max-height: 169px; /* 300px * 9/16 = 168.75px, rounded to 169px */
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  background: rgba(0, 0, 0, 0.2);
-  margin: 0 auto; /* Center the preview */
-}
-
-.photoImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  gap: var(--spacing-xs);
 }
 
 .editForm {
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: 0;
+  background: transparent;
+}
+
+.inputRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--spacing-sm);
-  padding: var(--spacing-sm);
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: var(--radius-md);
+  align-items: flex-end;
+}
+
+.inputRowWithActions {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--spacing-sm);
+  align-items: flex-end;
 }
 
 .formActions {
   display: flex;
   gap: var(--spacing-xs);
-  margin-top: var(--spacing-xs);
+  align-items: flex-end;
+  height: 100%;
+  padding-bottom: 0;
+}
+
+.formActions button {
+  flex: 1;
+  min-height: 40px;
 }
 
 .photoInfo {
-  padding: var(--spacing-sm);
+  padding: 0;
   font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
   line-height: 1.4; /* Facebook Labels: 1.4x */
+}
+
+.infoRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  align-items: center;
 }
 
 .photoTitle {
   font-weight: var(--font-weight-semibold); /* 600 */
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-xs);
   line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
@@ -129,15 +136,40 @@
   line-height: 1.4; /* Facebook Labels: 1.4x */
 }
 
+.photoUrl {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--color-primary-purple);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.urlIcon {
+  flex-shrink: 0;
+  color: var(--color-primary-purple);
+}
+
 .emptySlot {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
   border: 2px dashed rgba(139, 92, 246, 0.3);
   border-radius: var(--radius-md);
   background: rgba(0, 0, 0, 0.05);
+}
+
+.emptySlot .inputRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--spacing-sm);
+  align-items: flex-end;
 }
 
 .fileInput {
@@ -147,6 +179,7 @@
 .uploadButton {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-xs);
   padding: var(--spacing-sm) var(--spacing-md);
   background: rgba(139, 92, 246, 0.1);
@@ -158,7 +191,8 @@
   font-size: var(--font-size-sm); /* Facebook Buttons: 14px */
   font-weight: var(--font-weight-semibold); /* 600 */
   line-height: 1.4; /* Facebook Buttons: 1.4x */
-  min-height: 44px; /* Better touch target */
+  min-height: 40px; /* Compact height for desktop */
+  white-space: nowrap;
 }
 
 .uploadButton:hover:not(:disabled) {
@@ -176,8 +210,9 @@
 .modalActions {
   display: flex;
   justify-content: flex-end;
-  gap: var(--spacing-md);
-  padding-top: var(--spacing-md);
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
   border-top: 1px solid rgba(139, 92, 246, 0.2);
 }
 

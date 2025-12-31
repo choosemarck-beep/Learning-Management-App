@@ -12,6 +12,7 @@ import {
   ArrowUp,
   ArrowDown,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import styles from "./PhotoListManagement.module.css";
@@ -255,115 +256,116 @@ export const PhotoListManagement: React.FC<PhotoListManagementProps> = ({
 
               {slot.image ? (
                 <div className={styles.photoContent}>
-                  <div className={styles.imageContainer}>
-                    <img
-                      src={slot.image.imageUrl}
-                      alt={slot.image.title || `Photo ${slot.index + 1}`}
-                      className={styles.photoImage}
-                    />
-                  </div>
-
                   {editingId === slot.image.id ? (
                     <div className={styles.editForm}>
-                      <Input
-                        label="Title"
-                        value={editForm.title}
-                        onChange={(e) =>
-                          setEditForm({ ...editForm, title: e.target.value })
-                        }
-                        placeholder="Optional title"
-                      />
-                      <Input
-                        label="Description"
-                        value={editForm.description}
-                        onChange={(e) =>
-                          setEditForm({ ...editForm, description: e.target.value })
-                        }
-                        placeholder="Optional description"
-                      />
-                      <Input
-                        label="Redirect URL"
-                        type="url"
-                        value={editForm.redirectUrl}
-                        onChange={(e) =>
-                          setEditForm({ ...editForm, redirectUrl: e.target.value })
-                        }
-                        placeholder="https://example.com (optional)"
-                      />
-                      <div className={styles.formActions}>
-                        <Button
-                          onClick={() => handleSaveEdit(slot.image!.id)}
-                          variant="primary"
-                          size="sm"
-                        >
-                          Save
-                        </Button>
-                        <Button
-                          onClick={() => setEditingId(null)}
-                          variant="outline"
-                          size="sm"
-                        >
-                          Cancel
-                        </Button>
+                      <div className={styles.inputRow}>
+                        <Input
+                          label="Title"
+                          value={editForm.title}
+                          onChange={(e) =>
+                            setEditForm({ ...editForm, title: e.target.value })
+                          }
+                          placeholder="Optional title"
+                        />
+                        <Input
+                          label="Description"
+                          value={editForm.description}
+                          onChange={(e) =>
+                            setEditForm({ ...editForm, description: e.target.value })
+                          }
+                          placeholder="Optional description"
+                        />
+                      </div>
+                      <div className={styles.inputRowWithActions}>
+                        <Input
+                          label="Redirect URL"
+                          type="url"
+                          value={editForm.redirectUrl}
+                          onChange={(e) =>
+                            setEditForm({ ...editForm, redirectUrl: e.target.value })
+                          }
+                          placeholder="https://example.com (optional)"
+                        />
+                        <div className={styles.formActions}>
+                          <Button
+                            onClick={() => handleSaveEdit(slot.image!.id)}
+                            variant="primary"
+                            size="sm"
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            onClick={() => setEditingId(null)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ) : (
                     <div className={styles.photoInfo}>
-                      {slot.image.title && (
-                        <p className={styles.photoTitle}>{slot.image.title}</p>
-                      )}
-                      {slot.image.description && (
-                        <p className={styles.photoDescription}>{slot.image.description}</p>
-                      )}
-                      {slot.image.redirectUrl && (
-                        <p className={styles.photoUrl} title={slot.image.redirectUrl}>
-                          🔗 {slot.image.redirectUrl}
-                        </p>
-                      )}
+                      <div className={styles.infoRow}>
+                        {slot.image.title && (
+                          <span className={styles.photoTitle}>{slot.image.title}</span>
+                        )}
+                        {slot.image.description && (
+                          <span className={styles.photoDescription}>{slot.image.description}</span>
+                        )}
+                        {slot.image.redirectUrl && (
+                          <span className={styles.photoUrl} title={slot.image.redirectUrl}>
+                            <ExternalLink size={12} className={styles.urlIcon} />
+                            {slot.image.redirectUrl}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
               ) : (
                 <div className={styles.emptySlot}>
-                  <Input
-                    label="Redirect URL (Optional)"
-                    type="url"
-                    value={uploadRedirectUrls[slot.index] || ""}
-                    onChange={(e) =>
-                      setUploadRedirectUrls((prev) => ({
-                        ...prev,
-                        [slot.index]: e.target.value,
-                      }))
-                    }
-                    placeholder="https://example.com"
-                    disabled={isUploading}
-                  />
-                  <input
-                    ref={(el) => { fileInputRefs.current[idx] = el; }}
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileChange(e, idx)}
-                    className={styles.fileInput}
-                    disabled={isUploading}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRefs.current[idx]?.click()}
-                    disabled={isUploading}
-                    className={styles.uploadButton}
-                  >
-                    {isUploading ? (
-                      <>
-                        <Loader2 size={16} className={styles.spinner} />
-                        <span>Uploading...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Upload size={16} />
-                        <span>Upload Photo</span>
-                      </>
-                    )}
-                  </button>
+                  <div className={styles.inputRow}>
+                    <Input
+                      label="Redirect URL (Optional)"
+                      type="url"
+                      value={uploadRedirectUrls[slot.index] || ""}
+                      onChange={(e) =>
+                        setUploadRedirectUrls((prev) => ({
+                          ...prev,
+                          [slot.index]: e.target.value,
+                        }))
+                      }
+                      placeholder="https://example.com"
+                      disabled={isUploading}
+                    />
+                    <input
+                      ref={(el) => { fileInputRefs.current[idx] = el; }}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileChange(e, idx)}
+                      className={styles.fileInput}
+                      disabled={isUploading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRefs.current[idx]?.click()}
+                      disabled={isUploading}
+                      className={styles.uploadButton}
+                    >
+                      {isUploading ? (
+                        <>
+                          <Loader2 size={16} className={styles.spinner} />
+                          <span>Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={16} />
+                          <span>Upload Photo</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
