@@ -65,24 +65,14 @@ export const AdminDashboardClient: React.FC<AdminDashboardClientProps> = ({
 
   return (
     <div className={styles.container}>
-      {/* Quick Stats Grid */}
-      <div className={styles.statsGrid}>
-        <StatsCard
-          label="Total Users"
-          value={stats.totalUsers}
-        />
-        <StatsCard
-          label="Pending"
-          value={stats.pendingUsers}
-        />
-        <StatsCard
-          label="Rejected"
-          value={stats.rejectedUsers}
-        />
-      </div>
-
       {/* Comprehensive Analytics Dashboard */}
-      <AnalyticsDashboard />
+      <AnalyticsDashboard 
+        initialStats={{
+          totalUsers: stats.totalUsers,
+          pendingUsers: stats.pendingUsers,
+          rejectedUsers: stats.rejectedUsers,
+        }}
+      />
     </div>
   );
 };

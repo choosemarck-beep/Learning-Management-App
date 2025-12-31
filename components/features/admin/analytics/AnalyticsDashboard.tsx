@@ -29,7 +29,17 @@ interface OverviewData {
   pendingApprovals: number;
 }
 
-export const AnalyticsDashboard: React.FC = () => {
+interface AnalyticsDashboardProps {
+  initialStats?: {
+    totalUsers: number;
+    pendingUsers: number;
+    rejectedUsers: number;
+  };
+}
+
+export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
+  initialStats,
+}) => {
   const [overviewData, setOverviewData] = useState<OverviewData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -62,29 +72,43 @@ export const AnalyticsDashboard: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {/* Overview Stats */}
+      {/* Overview Stats - Combined Stats Grid */}
       <div className={styles.overviewSection}>
         <h2 className={styles.sectionTitle}>Overview</h2>
         <div className={styles.overviewGrid}>
           <StatsCard
             label="Total Users"
             value={overviewData.totalUsers}
-            icon={<Users size={18} />}
+            icon={<Users size={16} />}
           />
+          {initialStats && (
+            <>
+              <StatsCard
+                label="Pending"
+                value={initialStats.pendingUsers}
+                icon={<Users size={16} />}
+              />
+              <StatsCard
+                label="Rejected"
+                value={initialStats.rejectedUsers}
+                icon={<Users size={16} />}
+              />
+            </>
+          )}
           <StatsCard
             label="Active Learners"
             value={overviewData.activeLearners}
-            icon={<CheckCircle size={18} />}
+            icon={<CheckCircle size={16} />}
           />
           <StatsCard
             label="Total Courses"
             value={overviewData.totalCourses}
-            icon={<BookOpen size={18} />}
+            icon={<BookOpen size={16} />}
           />
           <StatsCard
             label="Completion Rate"
             value={`${overviewData.completionRate}%`}
-            icon={<Trophy size={18} />}
+            icon={<Trophy size={16} />}
           />
         </div>
       </div>
