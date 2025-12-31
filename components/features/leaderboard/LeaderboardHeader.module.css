@@ -78,22 +78,49 @@
 /* Desktop responsive styles */
 @media (min-width: 768px) {
   .container {
-    padding: var(--spacing-lg);
-    gap: var(--spacing-lg);
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .viewSelector,
+  .periodSelector {
+    flex: 1;
+    min-width: 0;
   }
 
   .tab {
-    padding: var(--spacing-md);
-    min-height: 48px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    min-height: 40px;
+    aspect-ratio: auto;
+    flex: 0 1 auto;
   }
 
   .tab .icon {
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
   }
 
   .tabs {
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding: var(--spacing-sm) var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+
+  .tab {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    min-height: 36px;
+  }
+
+  .tab .icon {
+    width: 16px;
+    height: 16px;
   }
 }
 

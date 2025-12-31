@@ -16,11 +16,11 @@
 /* Desktop responsive styles */
 @media (min-width: 768px) {
   .container {
-    gap: var(--spacing-lg);
+    gap: var(--spacing-md);
   }
 
   .topUsers {
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
   }
 }
 
