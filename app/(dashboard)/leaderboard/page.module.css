@@ -1,0 +1,11 @@
+/* Leaderboard Page - Mobile-First Design (320px-428px) */
+
+.container {
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding-bottom: 80px; /* Space for bottom navigation */
+  position: relative;
+}
+

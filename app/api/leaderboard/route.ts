@@ -67,9 +67,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Build where clause based on view
+    // Exclude ADMIN, SUPER_ADMIN, and TRAINER from leaderboards
     const whereClause: any = {
       role: {
-        notIn: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
+        notIn: [UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.TRAINER],
       },
       status: UserStatus.APPROVED,
     };
