@@ -455,8 +455,9 @@ export async function POST(
       );
     }
 
-    // Recalculate course progress
-    if (overallProgress.isCompleted) {
+    // Update course progress whenever training completion status changes
+    // This ensures course progress bar reflects current completion rate
+    if (overallProgress.isCompleted !== trainingProgress.isCompleted) {
       await updateCourseProgress(user.id, training.course.id);
     }
 

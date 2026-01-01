@@ -67,6 +67,8 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [hasResumed, setHasResumed] = useState(false);
   const [actualVideoDuration, setActualVideoDuration] = useState<number | null>(null);
+  const [showControls, setShowControls] = useState(false);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const saveProgressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedSecondsRef = useRef<number>(0);
 
@@ -286,13 +288,17 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
       youtubePlayerRef.current = new window.YT.Player("mini-training-youtube-player", {
         videoId: videoId,
         playerVars: {
-          controls: 0,
-          modestbranding: 1,
-          showinfo: 0,
-          iv_load_policy: 3,
-          cc_load_policy: 0,
-          fs: 0,
-          playsinline: 1,
+          autoplay: 0,
+          controls: 0, // Hide YouTube controls for cleaner look
+          disablekb: 1, // Disable keyboard controls
+          enablejsapi: 1, // Enable JavaScript API
+          rel: 0, // Don't show related videos
+          modestbranding: 1, // Minimal YouTube branding
+          showinfo: 0, // Hide video info
+          iv_load_policy: 3, // Hide annotations
+          cc_load_policy: 0, // Hide captions by default
+          fs: 0, // Hide fullscreen button
+          playsinline: 1, // Play inline on mobile
         },
         events: {
           onReady: (event: any) => {
@@ -533,6 +539,39 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
     setCanTakeQuiz(watchedSeconds >= minimumWatchTime);
   }, [watchedSeconds, miniTraining?.videoDuration]);
 
+  // Handle page visibility change - pause video when user leaves page
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Page is hidden - pause video and stop tracking
+        if (isYouTube && youtubePlayerRef.current) {
+          try {
+            if (typeof youtubePlayerRef.current.pauseVideo === 'function') {
+              youtubePlayerRef.current.pauseVideo();
+              setIsPlaying(false);
+              setIsVideoPlaying(false);
+              stopYouTubeTracking();
+            }
+          } catch (error) {
+            console.error("[Mini Training YouTube] Error pausing on visibility change:", error);
+          }
+        } else if (videoRef.current) {
+          videoRef.current.pause();
+          setIsPlaying(false);
+          setIsVideoPlaying(false);
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    };
+  }, [isYouTube]);
+
   // Handle fullscreen changes
   useEffect(() => {
     const { setupFullscreenListeners } = require("@/lib/utils/fullscreen");
@@ -542,6 +581,76 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
 
     return cleanup;
   }, []);
+
+  // Auto-save progress on page visibility change (tab switch, minimize, etc.)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        // User switched tabs or minimized window - save progress (force=true)
+        let currentSeconds = watchedSeconds;
+        try {
+          if (isYouTube && youtubePlayerRef.current && typeof youtubePlayerRef.current.getCurrentTime === 'function') {
+            currentSeconds = youtubePlayerRef.current.getCurrentTime() || watchedSeconds;
+          } else if (videoRef.current) {
+            currentSeconds = videoRef.current.currentTime || watchedSeconds;
+          }
+        } catch (error) {
+          console.warn("[Mini Training] Error getting current time for visibility save:", error);
+          // Use watchedSeconds as fallback
+        }
+        if (currentSeconds > 0) {
+          saveProgressImmediately(Math.floor(currentSeconds), false, true);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isYouTube, watchedSeconds]);
+
+  // Auto-save progress on page unload (navigation away, tab close)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Save progress immediately before page unloads using fetch with keepalive
+      let currentSeconds = watchedSeconds;
+      try {
+        if (isYouTube && youtubePlayerRef.current && typeof youtubePlayerRef.current.getCurrentTime === 'function') {
+          currentSeconds = youtubePlayerRef.current.getCurrentTime() || watchedSeconds;
+        } else if (videoRef.current) {
+          currentSeconds = videoRef.current.currentTime || watchedSeconds;
+        }
+      } catch (error) {
+        console.warn("[Mini Training] Error getting current time for unload save:", error);
+        // Use watchedSeconds as fallback
+      }
+      
+      // Use fetch with keepalive for reliable save on page unload
+      // This is more reliable than sendBeacon for Next.js API routes
+      if (miniTrainingId) {
+        fetch(`/api/mini-trainings/${miniTrainingId}/watch-progress`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            watchedSeconds: Math.floor(currentSeconds),
+            isPlaying: false,
+          }),
+          keepalive: true, // Ensures request completes even if page unloads
+        }).catch((error) => {
+          // Silently fail - we can't do anything about it during unload
+          console.error("[Mini Training] Failed to save progress on unload:", error);
+        });
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [miniTrainingId, isYouTube, watchedSeconds]);
 
   // Toggle fullscreen
   const handleFullscreen = async () => {

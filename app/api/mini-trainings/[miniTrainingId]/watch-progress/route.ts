@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
+import { updateCourseProgress } from "@/lib/utils/trainingProgress";
 
 export async function GET(
   request: NextRequest,
@@ -285,64 +286,18 @@ async function recalculateTrainingProgress(userId: string, trainingId: string) {
     },
   });
 
-  // Recalculate course progress if training is completed
-  if (isCompleted) {
+  // Update course progress whenever training completion status changes
+  // This ensures course progress bar reflects current completion rate
+  const wasCompleted = trainingProgress.isCompleted;
+  if (isCompleted !== wasCompleted) {
     const course = await prisma.course.findUnique({
       where: { id: training.courseId },
       select: { id: true },
     });
 
     if (course) {
-      await recalculateCourseProgress(userId, course.id);
+      await updateCourseProgress(userId, course.id);
     }
   }
-}
-
-// Helper function to recalculate course progress
-async function recalculateCourseProgress(userId: string, courseId: string) {
-  const trainings = await prisma.training.findMany({
-    where: {
-      courseId: courseId,
-      isPublished: true,
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  const trainingProgresses = await prisma.trainingProgressNew.findMany({
-    where: {
-      userId: userId,
-      trainingId: {
-        in: trainings.map((t) => t.id),
-      },
-    },
-  });
-
-  const completedTrainings = trainingProgresses.filter((tp) => tp.isCompleted).length;
-  const totalTrainings = trainings.length;
-  const courseProgress = totalTrainings > 0
-    ? (completedTrainings / totalTrainings) * 100
-    : 0;
-  const isCompleted = courseProgress >= 100;
-
-  await prisma.courseProgress.upsert({
-    where: {
-      userId_courseId: {
-        userId: userId,
-        courseId: courseId,
-      },
-    },
-    create: {
-      userId: userId,
-      courseId: courseId,
-      progress: courseProgress,
-      isCompleted: isCompleted,
-    },
-    update: {
-      progress: courseProgress,
-      isCompleted: isCompleted,
-    },
-  });
 }
 

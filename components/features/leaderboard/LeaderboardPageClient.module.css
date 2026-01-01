@@ -43,7 +43,7 @@
   .contentWrapper {
     width: 100%;
     max-width: 100%;
-    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 89px; /* Add left padding to account for extended width */
+    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 99px; /* 89px sidebar + 10px gap */
     margin: 0;
     gap: var(--spacing-md);
     box-sizing: border-box;
@@ -70,7 +70,7 @@
   .contentWrapper {
     width: 100%;
     max-width: 100%;
-    padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 89px; /* Add left padding to account for extended width */
+    padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 99px; /* 89px sidebar + 10px gap */
     margin: 0;
     gap: var(--spacing-md);
     box-sizing: border-box;

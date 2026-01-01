@@ -82,14 +82,7 @@ export const NetflixTrainingCard: React.FC<NetflixTrainingCardProps> = ({
           </div>
         )}
 
-        {/* Hover overlay with play button */}
-        {isHovered && (
-          <div className={styles.hoverOverlay}>
-            <div className={styles.playButton}>
-              <Play size={24} fill="currentColor" />
-            </div>
-          </div>
-        )}
+        {/* No play button - trainings are not videos, they contain mini-trainings */}
       </div>
 
       {/* Training info */}

@@ -13,9 +13,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding-top: var(--spacing-xl);
-  padding-left: var(--spacing-md);
-  padding-right: var(--spacing-md);
+  padding: 0;
   overflow: hidden;
   z-index: 9999;
   background: var(--color-bg-dark);
@@ -60,8 +58,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: var(--spacing-lg);
-  padding-bottom: var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-md) var(--spacing-md);
 }
 
 .logo {
