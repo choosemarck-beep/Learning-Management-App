@@ -17,7 +17,8 @@
     "verify-questions": "ts-node --project tsconfig.seed.json scripts/verify-quiz-questions.ts",
     "generate-icons": "node scripts/generate-icons.js",
     "check-user": "ts-node --project tsconfig.seed.json scripts/check-user.ts",
-    "reset-password": "ts-node --project tsconfig.seed.json scripts/reset-user-password.ts"
+    "reset-password": "ts-node --project tsconfig.seed.json scripts/reset-user-password.ts",
+    "cleanup-logs": "ts-node --project tsconfig.seed.json scripts/cleanup-activity-logs.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",

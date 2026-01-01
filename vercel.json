@@ -1,0 +1,9 @@
+{
+  "crons": [
+    {
+      "path": "/api/admin/activity-logs/cleanup",
+      "schedule": "0 2 * * *"
+    }
+  ]
+}
+
