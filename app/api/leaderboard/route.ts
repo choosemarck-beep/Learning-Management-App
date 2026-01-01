@@ -5,6 +5,8 @@ import { UserRole, UserStatus } from "@prisma/client";
 import { getRankName } from "@/lib/utils/gamification";
 import { LeaderboardView, LeaderboardPeriod } from "@/types/leaderboard";
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/leaderboard
  * 

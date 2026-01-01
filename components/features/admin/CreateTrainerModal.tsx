@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Copy, ChevronLeft, Check } from "lucide-react";
+import { Copy, Check } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -182,6 +182,32 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
       });
 
       const data = await response.json();
+
+      if (!response.ok) {
+        // Handle HTTP errors (4xx, 5xx)
+        const errorMessage = data.error || data.message || `Server error (${response.status})`;
+        toast.error(errorMessage);
+        
+        if (data.details) {
+          const validationErrors: Record<string, string> = {};
+          data.details.forEach((err: any) => {
+            if (err.path && err.path.length > 0) {
+              validationErrors[err.path[0]] = err.message;
+            }
+          });
+          setErrors(validationErrors);
+          // Go back to step 1 if there are errors in required fields
+          if (validationErrors.firstName || validationErrors.lastName || validationErrors.email) {
+            setCurrentStep(1);
+          }
+        }
+        console.error("Trainer creation failed:", {
+          status: response.status,
+          error: data.error,
+          details: data.details,
+        });
+        return;
+      }
 
       if (data.success) {
         setGeneratedCredentials({
@@ -514,7 +540,6 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
                 disabled={isLoading}
                 className={styles.backButton}
               >
-                <ChevronLeft size={18} />
                 Back
               </Button>
             ) : (
@@ -549,7 +574,6 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
                 isLoading={isLoading}
                 className={styles.submitButton}
               >
-                <Check size={18} />
                 Create Trainer
               </Button>
             )}
