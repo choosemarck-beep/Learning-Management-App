@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Activity, Calendar, User, FileText, Search, Filter } from "lucide-react";
 import toast from "react-hot-toast";
 import styles from "./ViewLogsClient.module.css";
@@ -36,7 +36,7 @@ export const ViewLogsClient: React.FC = () => {
 
   const limit = 50;
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     try {
       setIsLoading(true);
       const params = new URLSearchParams({
@@ -61,12 +61,11 @@ export const ViewLogsClient: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [roleFilter, typeFilter, currentPage, limit]);
 
   useEffect(() => {
     fetchLogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roleFilter, typeFilter, currentPage]);
+  }, [fetchLogs]);
 
   // Group logs by role
   const groupedLogs = useMemo(() => {
