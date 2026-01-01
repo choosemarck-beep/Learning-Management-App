@@ -3426,6 +3426,7 @@ useEffect(() => {
 - Test components with React Strict Mode enabled (causes double renders)
 - **Pattern**: When using async operations in `useEffect` or `useCallback`, always check mount status before setting state
 - **2025-01-01**: Added React error #310 pattern - use `useRef` mount guards to prevent state updates after component unmount
+- **2025-01-02**: Added conditional hook call pattern - hooks called after early return violate Rules of Hooks, must move hooks before early returns
 
 ---
 
@@ -3476,5 +3477,84 @@ useEffect(() => {
 - Document ESLint rule decisions in project documentation
 - **Pattern**: After updating ESLint packages, check build for new rule violations and configure rules accordingly
 - **2025-01-02**: Added ESLint build errors after package updates - configure ESLint rules to disable/relax strict rules that have many violations
+
+---
+
+#### Error: React Hook Called After Early Return (Conditional Hook Call)
+**Symptoms:**
+- Runtime error: "Minified React error #310"
+- ESLint warning: "React Hook 'useEffect' is called conditionally"
+- Error occurs when component has an early return before a hook call
+- Component works on first render but crashes on subsequent renders
+- Hook count mismatch between renders
+
+**Common Causes:**
+- `useEffect` or other hooks called AFTER an early return statement
+- Early return based on state (e.g., `if (!isClient) return null;`) before hooks
+- First render: early return executes, hook not called
+- Second render: early return doesn't execute, hook IS called
+- This violates Rules of Hooks: hooks must be called in same order every render
+
+**Solution:**
+- **Move all hooks BEFORE any early returns**: Hooks must be called at the top level, before any conditional returns
+- Add guard inside the hook if needed: `if (!condition) return;` inside the hook, not before it
+- Ensure hooks are always called in the same order regardless of component state
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - Hook called after early return (conditional hook call)
+export const Component: React.FC<Props> = ({ prop }) => {
+  const [state, setState] = useState(false);
+  
+  useEffect(() => {
+    // First effect
+  }, []);
+  
+  // Early return BEFORE second hook
+  if (!prop) {
+    return null; // ERROR: Second hook below won't be called on first render
+  }
+  
+  useEffect(() => {
+    // Second effect - called conditionally!
+  }, [prop]);
+  
+  return <div>Content</div>;
+};
+
+// ✅ CORRECT - All hooks called before early return
+export const Component: React.FC<Props> = ({ prop }) => {
+  const [state, setState] = useState(false);
+  
+  useEffect(() => {
+    // First effect
+  }, []);
+  
+  // Second hook called BEFORE early return
+  useEffect(() => {
+    // Guard inside hook if needed
+    if (!prop) return;
+    // Hook logic here
+  }, [prop]);
+  
+  // Early return AFTER all hooks
+  if (!prop) {
+    return null; // Safe: all hooks already called
+  }
+  
+  return <div>Content</div>;
+};
+```
+
+**Files Fixed:**
+- `components/layout/SplashScreenWrapper.tsx` - Moved `useEffect` before early return, added `isClient` guard inside effect
+
+**Prevention:**
+- **CRITICAL**: Always call all hooks at the top level, before any early returns
+- If you need conditional logic, put it INSIDE the hook, not before it
+- Review components with early returns to ensure all hooks are called first
+- Use ESLint rule `react-hooks/rules-of-hooks` to catch these issues
+- **Pattern**: All hooks → Early returns → Render logic
+- **2025-01-02**: Added conditional hook call error - hooks must be called before any early returns to maintain consistent hook order
 
 ---

@@ -44,13 +44,12 @@ export const SplashScreenWrapper: React.FC<SplashScreenWrapperProps> = ({
     }
   };
 
-  // Don't render anything until client-side hydration is complete
-  if (!isClient) {
-    return <>{children}</>;
-  }
-
   // Hide body/html background when splash is showing
+  // CRITICAL: This useEffect must be called BEFORE any early returns to follow Rules of Hooks
   useEffect(() => {
+    // Only run when client is ready
+    if (!isClient) return;
+
     if (showSplash) {
       // Hide body and html backgrounds to prevent showing through
       document.body.style.overflow = "hidden";
@@ -73,7 +72,12 @@ export const SplashScreenWrapper: React.FC<SplashScreenWrapperProps> = ({
       document.body.style.backgroundColor = "";
       document.documentElement.style.backgroundColor = "";
     };
-  }, [showSplash]);
+  }, [showSplash, isClient]);
+
+  // Don't render anything until client-side hydration is complete
+  if (!isClient) {
+    return <>{children}</>;
+  }
 
   return (
     <>
