@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Activity, Calendar, User, FileText, Search, Filter } from "lucide-react";
 import toast from "react-hot-toast";
 import styles from "./ViewLogsClient.module.css";
@@ -33,10 +33,13 @@ export const ViewLogsClient: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalLogs, setTotalLogs] = useState(0);
   const [activeTab, setActiveTab] = useState<"all" | "employees" | "trainers" | "admins">("all");
+  const isMountedRef = useRef(false);
 
   const limit = 50;
 
   const fetchLogs = useCallback(async () => {
+    if (!isMountedRef.current) return;
+    
     try {
       setIsLoading(true);
       const params = new URLSearchParams({
@@ -49,6 +52,8 @@ export const ViewLogsClient: React.FC = () => {
       const response = await fetch(`/api/trainer/activity-logs?${params}`);
       const data = await response.json();
 
+      if (!isMountedRef.current) return;
+
       if (data.success) {
         setLogs(data.data.logs);
         setTotalLogs(data.data.total);
@@ -56,15 +61,23 @@ export const ViewLogsClient: React.FC = () => {
         toast.error(data.error || "Failed to load activity logs");
       }
     } catch (error) {
+      if (!isMountedRef.current) return;
       console.error("Error fetching activity logs:", error);
       toast.error("Failed to load activity logs");
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
     }
   }, [roleFilter, typeFilter, currentPage, limit]);
 
   useEffect(() => {
+    isMountedRef.current = true;
     fetchLogs();
+    
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [fetchLogs]);
 
   // Group logs by role

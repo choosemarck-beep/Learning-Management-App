@@ -3343,3 +3343,88 @@ const infoBox = {
 - **2025-01-01**: Added missing style definition error - ensure all style objects used in JSX are defined in the styles section
 
 ---
+
+#### Error: "Minified React error #310" - Rendered more hooks than during the previous render
+**Symptoms:**
+- Runtime error: "Minified React error #310; visit https://react.dev/errors/310 for the full message"
+- Error occurs when accessing certain pages (e.g., View Logs page)
+- Stack trace shows `Object.r4 [as useEffect]` in the error
+- Component crashes or shows error overlay
+- Error persists even after using `useCallback` for functions
+
+**Common Causes:**
+- Hooks being called conditionally or in different orders between renders
+- Component being unmounted/remounted between renders causing hook count mismatch
+- `useEffect` dependencies causing infinite re-render loops
+- Async operations completing after component unmount, causing state updates on unmounted component
+- Server-side rendering hydration mismatch with client-side rendering
+- `useCallback` dependencies changing frequently, causing `useEffect` to run repeatedly
+
+**Solution:**
+1. **Use `useRef` to track component mount status**: Prevent state updates after component unmounts
+2. **Add mount guards in async operations**: Check if component is still mounted before setting state
+3. **Ensure consistent hook order**: All hooks must be called at the top level, in the same order every render
+4. **Use cleanup functions in `useEffect`**: Set mount ref to false in cleanup to prevent state updates
+5. **Stabilize `useCallback` dependencies**: Ensure dependencies don't change unnecessarily
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - No mount guard, can cause hooks error if component unmounts during async operation
+const fetchLogs = useCallback(async () => {
+  setIsLoading(true);
+  const response = await fetch(`/api/endpoint`);
+  const data = await response.json();
+  setLogs(data.logs); // ERROR: Component might be unmounted
+}, [dependencies]);
+
+useEffect(() => {
+  fetchLogs();
+}, [fetchLogs]);
+
+// ✅ CORRECT - Use ref to track mount status and prevent state updates after unmount
+const isMountedRef = useRef(false);
+
+const fetchLogs = useCallback(async () => {
+  if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
+  
+  try {
+    setIsLoading(true);
+    const response = await fetch(`/api/endpoint`);
+    const data = await response.json();
+    
+    if (!isMountedRef.current) return; // Guard: Check again before setting state
+    
+    setLogs(data.logs);
+  } catch (error) {
+    if (!isMountedRef.current) return; // Guard: Check before error handling
+    console.error(error);
+  } finally {
+    if (isMountedRef.current) { // Guard: Only set loading if still mounted
+      setIsLoading(false);
+    }
+  }
+}, [dependencies]);
+
+useEffect(() => {
+  isMountedRef.current = true; // Mark as mounted
+  fetchLogs();
+  
+  return () => {
+    isMountedRef.current = false; // Mark as unmounted in cleanup
+  };
+}, [fetchLogs]);
+```
+
+**Files Fixed:**
+- `components/features/trainer/ViewLogsClient.tsx` - Added `useRef` mount guard to prevent state updates after unmount
+
+**Prevention:**
+- Always use `useRef` to track component mount status when performing async operations
+- Add mount guards before all state updates in async functions
+- Use cleanup functions in `useEffect` to set mount ref to false
+- Ensure all hooks are called at the top level in consistent order
+- Test components with React Strict Mode enabled (causes double renders)
+- **Pattern**: When using async operations in `useEffect` or `useCallback`, always check mount status before setting state
+- **2025-01-01**: Added React error #310 pattern - use `useRef` mount guards to prevent state updates after component unmount
+
+---
