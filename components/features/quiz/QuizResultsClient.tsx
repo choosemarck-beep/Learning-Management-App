@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { ProfileBottomNav } from "@/components/layout/ProfileBottomNav";
 import toast from "react-hot-toast";
+import { getQuizMessage, getHighestScore } from "@/lib/utils/quizMessages";
 import styles from "./QuizResultsClient.module.css";
 
 interface QuizResult {
@@ -41,9 +42,30 @@ export const QuizResultsClient: React.FC<QuizResultsClientProps> = ({
   const [score, setScore] = useState<number | null>(initialScore);
   const [xpEarned, setXpEarned] = useState<number | null>(initialXpEarned);
   const [isLoading, setIsLoading] = useState(true);
+  const [highestScore, setHighestScore] = useState<number | null>(null);
 
   useEffect(() => {
     fetchQuizResults();
+  }, [taskId]);
+
+  // Fetch highest score
+  useEffect(() => {
+    const fetchHighest = async () => {
+      try {
+        // Extract quizId from taskId if possible, or fetch from API
+        const response = await fetch(`/api/tasks/${taskId}`);
+        const data = await response.json();
+        if (data.success && data.data.quizId) {
+          const highest = await getHighestScore(data.data.userId, data.data.quizId);
+          setHighestScore(highest);
+        }
+      } catch (error) {
+        console.error("[QuizResultsClient] Error fetching highest score:", error);
+      }
+    };
+    if (taskId) {
+      fetchHighest();
+    }
   }, [taskId]);
 
   const fetchQuizResults = async () => {
@@ -99,13 +121,6 @@ export const QuizResultsClient: React.FC<QuizResultsClientProps> = ({
     }
   };
 
-  const getScoreMessage = (score: number) => {
-    if (score >= 90) return "Excellent! Outstanding performance!";
-    if (score >= 75) return "Great job! Well done!";
-    if (score >= 60) return "Good effort! Keep learning!";
-    return "Keep practicing! You'll improve!";
-  };
-
   const getScoreColor = (score: number) => {
     if (score >= 90) return "var(--color-status-success)";
     if (score >= 75) return "var(--color-primary-purple)";
@@ -125,6 +140,7 @@ export const QuizResultsClient: React.FC<QuizResultsClientProps> = ({
   const finalXpEarned = xpEarned || 0;
   const correctCount = results.filter((r) => r.isCorrect).length;
   const totalQuestions = results.length || 1;
+  const quizMessage = getQuizMessage(finalScore, totalQuestions, correctCount);
 
   return (
     <>
@@ -133,26 +149,39 @@ export const QuizResultsClient: React.FC<QuizResultsClientProps> = ({
         <div className={styles.scoreHeader}>
           <div
             className={styles.scoreCircle}
-            style={{ borderColor: getScoreColor(finalScore) }}
+            style={{ borderColor: quizMessage.color }}
           >
             <Trophy
               size={48}
               className={styles.trophyIcon}
-              style={{ color: getScoreColor(finalScore) }}
+              style={{ color: quizMessage.color }}
             />
             <div
               className={styles.scoreValue}
-              style={{ color: getScoreColor(finalScore) }}
+              style={{ color: quizMessage.color }}
             >
               {finalScore}%
             </div>
           </div>
-          <h1 className={styles.scoreTitle}>Quiz Complete!</h1>
-          <p className={styles.scoreMessage}>{getScoreMessage(finalScore)}</p>
+          <h1 className={styles.scoreTitle} style={{ color: quizMessage.color }}>
+            {quizMessage.title}
+          </h1>
+          <p className={styles.scoreMessage}>{quizMessage.message}</p>
+          <p className={styles.encouragementMessage}>{quizMessage.encouragement}</p>
           <div className={styles.xpBadge}>
             <Star size={20} />
             <span>+{finalXpEarned} XP Earned</span>
           </div>
+          {/* Highest Score Display */}
+          {highestScore !== null && highestScore > 0 && (
+            <div className={styles.highestScoreBadge}>
+              <Trophy size={16} />
+              <span>Highest Score: {highestScore}%</span>
+              {finalScore < highestScore && (
+                <span className={styles.scoreNote}>Your best is {highestScore}%</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Summary Stats */}

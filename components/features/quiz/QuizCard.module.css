@@ -410,6 +410,66 @@
   animation: fadeIn 0.5s ease-out;
 }
 
+.messageContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  align-items: center;
+  text-align: center;
+  margin: var(--spacing-md) 0;
+  padding: var(--spacing-md);
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: var(--radius-md);
+  animation: fadeIn 0.5s ease-out 0.1s both;
+}
+
+.messageText {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.encouragementText {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  font-style: italic;
+}
+
+.highestScoreContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(251, 191, 36, 0.1);
+  border-radius: var(--radius-md);
+  animation: fadeIn 0.5s ease-out 0.5s both;
+}
+
+.highestScoreLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.highestScoreValue {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-star-gold, #FBBF24);
+}
+
+.scoreNote {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-left: var(--spacing-xs);
+  font-style: italic;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

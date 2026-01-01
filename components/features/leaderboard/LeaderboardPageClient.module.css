@@ -25,7 +25,7 @@
 @media (min-width: 768px) {
   .container {
     max-width: none;
-    width: calc(100vw - 89px); /* Full width minus sidebar (89px) */
+    width: 100%; /* Full width of parent .content container */
     margin: 0;
     margin-left: 0 !important; /* Ensure no left margin */
     padding: 0 !important; /* Remove ALL padding */
@@ -34,42 +34,46 @@
     overflow-y: auto;
     overflow-x: hidden; /* Prevent horizontal scrolling */
     position: absolute; /* Position absolutely to control exact placement */
-    left: 0; /* Start at the left edge of the content container (right after sidebar) */
+    left: 0; /* Start at the exact left edge of .content container */
     top: 0;
-    background: transparent; /* Ensure background doesn't create visual gap */
+    background: var(--color-bg-dark); /* Dark background to cover starry gap */
+    z-index: 2; /* Ensure it's above the starry background (z-index: 0) */
   }
   
   .contentWrapper {
     width: 100%;
     max-width: 100%;
-    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 0; /* Remove left padding to eliminate gap */
+    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 0; /* No left padding - start immediately */
     margin: 0; /* Ensure no margin */
     gap: var(--spacing-md);
     box-sizing: border-box; /* Include padding in width calculation */
+    background: var(--color-bg-dark); /* Ensure wrapper also has dark background */
   }
 }
 
 @media (min-width: 1024px) {
   .container {
-    width: calc(100vw - 89px); /* Full width minus sidebar (89px) */
+    width: 100%; /* Full width of parent .content container */
     margin: 0;
     margin-left: 0 !important; /* Ensure no left margin */
     padding: 0 !important; /* Remove ALL padding */
     gap: 0;
     overflow-x: hidden; /* Prevent horizontal scrolling */
     position: absolute; /* Position absolutely to control exact placement */
-    left: 0; /* Start at the left edge of the content container (right after sidebar) */
+    left: 0; /* Start at the exact left edge of .content container */
     top: 0;
-    background: transparent; /* Ensure background doesn't create visual gap */
+    background: var(--color-bg-dark); /* Dark background to cover starry gap */
+    z-index: 2; /* Ensure it's above the starry background (z-index: 0) */
   }
   
   .contentWrapper {
     width: 100%;
     max-width: 100%;
-    padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 0; /* Remove left padding to eliminate gap */
+    padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 0; /* No left padding - start immediately */
     margin: 0; /* Ensure no margin */
     gap: var(--spacing-md);
     box-sizing: border-box; /* Include padding in width calculation */
+    background: var(--color-bg-dark); /* Ensure wrapper also has dark background */
   }
 }
 

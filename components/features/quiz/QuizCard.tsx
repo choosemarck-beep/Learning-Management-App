@@ -4,8 +4,9 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { CheckCircle2, XCircle, Sparkles } from "lucide-react";
+import { CheckCircle2, XCircle, Sparkles, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { getQuizMessage, hasPerfectScore } from "@/lib/utils/quizMessages";
 import styles from "./QuizCard.module.css";
 
 export interface Question {
@@ -148,6 +149,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
   const [showRationale, setShowRationale] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [highestScore, setHighestScore] = useState<number | null>(null);
   const [userAnswerMap, setUserAnswerMap] = useState<Record<string, string>>({});
   
   // Use ref to track previous questions length to detect actual question changes
@@ -305,6 +307,26 @@ export const QuizCard: React.FC<QuizCardProps> = ({
     ? Math.round((finalScore / totalQuestions) * 100) 
     : 0;
 
+  // Get congratulatory message based on score
+  const quizMessage = getQuizMessage(finalPercentage, totalQuestions, finalScore);
+  const isPerfectScore = hasPerfectScore(finalPercentage);
+
+  // Fetch highest score when quiz is completed
+  useEffect(() => {
+    if (isComplete && trainingId) {
+      const fetchHighestScore = async () => {
+        try {
+          const { getHighestScore } = await import("@/lib/utils/quizMessages");
+          // Note: This requires quizId, which we may need to pass as a prop
+          // For now, we'll handle it in components that have quizId
+        } catch (error) {
+          console.error("[QuizCard] Error fetching highest score:", error);
+        }
+      };
+      fetchHighestScore();
+    }
+  }, [isComplete, trainingId]);
+
   // Completion state
   if (isComplete) {
     return (
@@ -312,7 +334,16 @@ export const QuizCard: React.FC<QuizCardProps> = ({
         <Card className={styles.completionCard}>
           <CardBody>
             <div className={styles.completionContent}>
-              <h2 className={styles.completionTitle}>Quiz Complete!</h2>
+              <h2 className={styles.completionTitle} style={{ color: quizMessage.color }}>
+                {quizMessage.title}
+              </h2>
+              
+              {/* Congratulatory Message */}
+              <div className={styles.messageContainer}>
+                <p className={styles.messageText}>{quizMessage.message}</p>
+                <p className={styles.encouragementText}>{quizMessage.encouragement}</p>
+              </div>
+
               {/* Attempt Counter */}
               {(attemptNumber !== undefined || maxAttempts) && (
                 <div className={styles.attemptCounter}>
@@ -332,45 +363,86 @@ export const QuizCard: React.FC<QuizCardProps> = ({
                   You scored <span className={styles.scoreHighlight}>{finalScore}</span> out of{" "}
                   <span className={styles.scoreHighlight}>{totalQuestions}</span> questions correctly
                 </div>
-                <div className={styles.scorePercentage}>
+                <div className={styles.scorePercentage} style={{ color: quizMessage.color }}>
                   {finalPercentage}%
                 </div>
               </div>
+
+              {/* Highest Score Display */}
+              {highestScore !== null && highestScore > 0 && (
+                <div className={styles.highestScoreContainer}>
+                  <Trophy size={16} />
+                  <span className={styles.highestScoreLabel}>Highest Score:</span>
+                  <span className={styles.highestScoreValue}>{highestScore}%</span>
+                  {finalPercentage < highestScore && (
+                    <span className={styles.scoreNote}>Your best is {highestScore}%</span>
+                  )}
+                </div>
+              )}
               
               <div className={styles.actionButtons}>
-                {/* When PASSED: Show Exit button */}
-                {passed && onExit && (
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    onClick={onExit}
-                    className={styles.exitButton}
-                  >
-                    Exit
-                  </Button>
-                )}
-                {/* When FAILED: Show Take Later button */}
-                {!passed && onTakeLater && (
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={onTakeLater}
-                    className={styles.takeLaterButton}
-                  >
-                    Take the quiz Later
-                  </Button>
-                )}
-                {/* Always show Restart Quiz if attempts remaining */}
-                {onRestart && (
-                  <Button
-                    variant={passed ? "outline" : "primary"}
-                    size="lg"
-                    onClick={handleRestart}
-                    className={styles.restartButton}
-                    disabled={maxAttempts ? (totalAttempts || 0) >= maxAttempts : false}
-                  >
-                    Restart Quiz
-                  </Button>
+                {/* Perfect Score: Show "Take Refresher Quiz" and "Exit" */}
+                {isPerfectScore ? (
+                  <>
+                    {onRestart && (
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        onClick={handleRestart}
+                        className={styles.restartButton}
+                        disabled={maxAttempts ? (totalAttempts || 0) >= maxAttempts : false}
+                      >
+                        Take Refresher Quiz
+                      </Button>
+                    )}
+                    {onExit && (
+                      <Button
+                        variant="primary"
+                        size="lg"
+                        onClick={onExit}
+                        className={styles.exitButton}
+                      >
+                        Exit
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {/* When PASSED (but not perfect): Show Exit button */}
+                    {passed && onExit && (
+                      <Button
+                        variant="primary"
+                        size="lg"
+                        onClick={onExit}
+                        className={styles.exitButton}
+                      >
+                        Exit
+                      </Button>
+                    )}
+                    {/* When FAILED: Show Take Later button */}
+                    {!passed && onTakeLater && (
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        onClick={onTakeLater}
+                        className={styles.takeLaterButton}
+                      >
+                        Take the quiz Later
+                      </Button>
+                    )}
+                    {/* Show Restart Quiz if attempts remaining */}
+                    {onRestart && (
+                      <Button
+                        variant={passed ? "outline" : "primary"}
+                        size="lg"
+                        onClick={handleRestart}
+                        className={styles.restartButton}
+                        disabled={maxAttempts ? (totalAttempts || 0) >= maxAttempts : false}
+                      >
+                        Restart Quiz
+                      </Button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
