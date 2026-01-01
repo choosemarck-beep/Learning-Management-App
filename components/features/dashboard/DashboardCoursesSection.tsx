@@ -4,7 +4,7 @@ import React from "react";
 import { Card, CardHeader, CardBody } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Button } from "@/components/ui/Button";
-import { BookOpen } from "lucide-react";
+import { BookOpen, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import styles from "./DashboardCoursesSection.module.css";
 
@@ -79,10 +79,27 @@ export const DashboardCoursesSection: React.FC<DashboardCoursesSectionProps> = (
               </div>
 
               <div className={styles.progressSection}>
+                <div className={styles.progressHeader}>
+                  <span className={styles.progressLabel}>
+                    {course.isCompleted ? (
+                      <span className={styles.completedLabel}>
+                        <CheckCircle2 size={14} />
+                        Completed
+                      </span>
+                    ) : (
+                      `${Math.round(course.progress)}% Complete`
+                    )}
+                  </span>
+                  {!course.isCompleted && course.progress > 0 && (
+                    <span className={styles.progressPercentage}>
+                      {Math.round(course.progress)}%
+                    </span>
+                  )}
+                </div>
                 <ProgressBar
                   value={course.progress}
-                  showPercentage
-                  label={`${course.progress}% Complete`}
+                  showPercentage={false}
+                  className={course.isCompleted ? styles.completedProgress : ""}
                 />
               </div>
 
@@ -91,7 +108,7 @@ export const DashboardCoursesSection: React.FC<DashboardCoursesSectionProps> = (
                   {course.totalXP} XP available
                 </span>
                 <Button
-                  variant={course.progress > 0 ? "secondary" : "primary"}
+                  variant={course.isCompleted ? "secondary" : course.progress > 0 ? "secondary" : "primary"}
                   size="sm"
                   onClick={() => handleCourseClick(course.id)}
                 >

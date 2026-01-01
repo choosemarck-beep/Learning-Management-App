@@ -8,8 +8,9 @@
   padding-bottom: 100px; /* Space for bottom navigation */
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm); /* Reduced from md to fit more content */
   min-height: 100vh;
   min-height: 100dvh;
+  box-sizing: border-box;
 }
 

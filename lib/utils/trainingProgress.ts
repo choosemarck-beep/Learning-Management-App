@@ -33,12 +33,29 @@ export async function calculateTrainingProgress(
     }> | Array<{ id: string }>; // Flexible to handle existing call sites
   }
 ): Promise<{ progress: number; isCompleted: boolean }> {
+  // Input validation and sanitization
+  const videoProgress = Math.max(0, Math.min(100, progress.videoProgress || 0));
+  const quizCompleted = Boolean(progress.quizCompleted);
+  const miniTrainingsCompleted = Math.max(0, Math.floor(progress.miniTrainingsCompleted || 0));
+  const totalMiniTrainings = Math.max(0, Math.floor(progress.totalMiniTrainings || 0));
+  
+  // Validate mini-trainings count consistency
+  if (miniTrainingsCompleted > totalMiniTrainings) {
+    console.warn(
+      `[calculateTrainingProgress] Invalid mini-trainings count: completed (${miniTrainingsCompleted}) > total (${totalMiniTrainings}). Clamping to total.`
+    );
+  }
+  const validMiniTrainingsCompleted = Math.min(miniTrainingsCompleted, totalMiniTrainings);
+
   const hasVideo = !!training.videoDuration && training.videoDuration > 0;
   const hasQuiz = !!training.quiz;
   const hasMiniTrainings = training.miniTrainings.length > 0;
 
   // If no components, default to 0
   if (!hasVideo && !hasQuiz && !hasMiniTrainings) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[calculateTrainingProgress] No training components found, returning 0% progress');
+    }
     return { progress: 0, isCompleted: false };
   }
 
@@ -81,38 +98,53 @@ export async function calculateTrainingProgress(
 
   // Video progress
   if (hasVideo && videoWeight > 0) {
-    weightedProgress += progress.videoProgress * videoWeight;
+    weightedProgress += videoProgress * videoWeight;
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[calculateTrainingProgress] Video progress: ${videoProgress}% × ${(videoWeight * 100).toFixed(0)}% = ${(videoProgress * videoWeight).toFixed(2)}%`);
+    }
   }
 
   // Quiz completion
   if (hasQuiz && quizWeight > 0) {
-    if (progress.quizCompleted) {
+    if (quizCompleted) {
       weightedProgress += 100 * quizWeight;
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[calculateTrainingProgress] Quiz completed: 100% × ${(quizWeight * 100).toFixed(0)}% = ${(100 * quizWeight).toFixed(2)}%`);
+      }
+    } else {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[calculateTrainingProgress] Quiz not completed: 0% × ${(quizWeight * 100).toFixed(0)}% = 0%`);
+      }
     }
   }
 
   // Mini-trainings completion with internal 70/30 video/quiz split
-  if (hasMiniTrainings && miniTrainingsWeight > 0 && progress.totalMiniTrainings > 0) {
+  if (hasMiniTrainings && miniTrainingsWeight > 0 && totalMiniTrainings > 0) {
     let miniTrainingProgress = 0;
 
     if (progress.miniTrainingProgresses && progress.miniTrainingProgresses.length > 0) {
       // Calculate detailed progress using 70/30 split per mini-training
       const miniTrainingProgresses = progress.miniTrainingProgresses;
       let totalMiniProgress = 0;
+      let validMiniTrainings = 0;
 
       for (const mtProgress of miniTrainingProgresses) {
+        // Validate and sanitize mini-training progress
+        const mtVideoProgress = Math.max(0, Math.min(100, mtProgress.videoProgress || 0));
+        const mtQuizCompleted = Boolean(mtProgress.quizCompleted);
+        
         let mtWeightedProgress = 0;
         let mtTotalWeight = 0;
 
         // Video portion (70% of mini-training weight)
         if (mtProgress.hasVideo) {
-          mtWeightedProgress += mtProgress.videoProgress * 0.7;
+          mtWeightedProgress += mtVideoProgress * 0.7;
           mtTotalWeight += 0.7;
         }
 
         // Quiz portion (30% of mini-training weight)
         if (mtProgress.hasQuiz) {
-          if (mtProgress.quizCompleted) {
+          if (mtQuizCompleted) {
             mtWeightedProgress += 100 * 0.3;
           }
           mtTotalWeight += 0.3;
@@ -123,22 +155,38 @@ export async function calculateTrainingProgress(
           ? mtWeightedProgress / mtTotalWeight 
           : 0;
         totalMiniProgress += mtProgressNormalized;
+        validMiniTrainings++;
       }
 
-      // Average all mini-trainings
-      miniTrainingProgress = totalMiniProgress / progress.totalMiniTrainings;
+      // Average all mini-trainings (use valid count to avoid division by zero)
+      miniTrainingProgress = validMiniTrainings > 0
+        ? totalMiniProgress / validMiniTrainings
+        : 0;
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[calculateTrainingProgress] Mini-trainings detailed progress: ${miniTrainingProgress.toFixed(2)}% (${validMiniTrainings}/${totalMiniTrainings} valid)`);
+      }
     } else {
       // Fallback to simple count-based if detailed progress not provided
-      miniTrainingProgress =
-        (progress.miniTrainingsCompleted / progress.totalMiniTrainings) * 100;
+      miniTrainingProgress = (validMiniTrainingsCompleted / totalMiniTrainings) * 100;
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[calculateTrainingProgress] Mini-trainings count-based progress: ${validMiniTrainingsCompleted}/${totalMiniTrainings} = ${miniTrainingProgress.toFixed(2)}%`);
+      }
     }
 
     weightedProgress += miniTrainingProgress * miniTrainingsWeight;
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[calculateTrainingProgress] Mini-trainings weighted: ${miniTrainingProgress.toFixed(2)}% × ${(miniTrainingsWeight * 100).toFixed(0)}% = ${(miniTrainingProgress * miniTrainingsWeight).toFixed(2)}%`);
+    }
   }
 
-  // Progress is already normalized (weights sum to 1.0)
-  const finalProgress = Math.round(weightedProgress * 100) / 100;
+  // Ensure progress never exceeds 100% (weights should sum to 1.0, but add safety check)
+  const finalProgress = Math.max(0, Math.min(100, Math.round(weightedProgress * 100) / 100));
   const isCompleted = finalProgress >= 100;
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[calculateTrainingProgress] Final progress: ${finalProgress.toFixed(2)}% (completed: ${isCompleted})`);
+  }
 
   return {
     progress: finalProgress,
@@ -153,41 +201,71 @@ export async function calculateCourseProgress(
   userId: string,
   courseId: string
 ): Promise<{ progress: number; isCompleted: boolean; completedTrainings: number; totalTrainings: number }> {
-  // Get all published trainings in course
-  const trainings = await prisma.training.findMany({
-    where: {
-      courseId: courseId,
-      isPublished: true,
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  // Get user's progress for all trainings
-  const trainingProgresses = await prisma.trainingProgressNew.findMany({
-    where: {
-      userId: userId,
-      trainingId: {
-        in: trainings.map((t) => t.id),
+  try {
+    // Get all published trainings in course
+    const trainings = await prisma.training.findMany({
+      where: {
+        courseId: courseId,
+        isPublished: true,
       },
-    },
-  });
+      select: {
+        id: true,
+      },
+    });
 
-  // Calculate course progress
-  const completedTrainings = trainingProgresses.filter((tp) => tp.isCompleted).length;
-  const totalTrainings = trainings.length;
-  const courseProgress = totalTrainings > 0
-    ? (completedTrainings / totalTrainings) * 100
-    : 0;
-  const isCompleted = courseProgress >= 100;
+    if (trainings.length === 0) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[calculateCourseProgress] No published trainings found for course ${courseId}`);
+      }
+      return {
+        progress: 0,
+        isCompleted: false,
+        completedTrainings: 0,
+        totalTrainings: 0,
+      };
+    }
 
-  return {
-    progress: Math.round(courseProgress * 100) / 100,
-    isCompleted,
-    completedTrainings,
-    totalTrainings,
-  };
+    // Get user's progress for all trainings
+    const trainingProgresses = await prisma.trainingProgressNew.findMany({
+      where: {
+        userId: userId,
+        trainingId: {
+          in: trainings.map((t) => t.id),
+        },
+      },
+    });
+
+    // Calculate course progress
+    const completedTrainings = trainingProgresses.filter((tp) => tp.isCompleted).length;
+    const totalTrainings = trainings.length;
+    const courseProgress = totalTrainings > 0
+      ? (completedTrainings / totalTrainings) * 100
+      : 0;
+    
+    // Ensure progress is between 0 and 100
+    const validatedProgress = Math.max(0, Math.min(100, Math.round(courseProgress * 100) / 100));
+    const isCompleted = validatedProgress >= 100;
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[calculateCourseProgress] Course ${courseId}: ${completedTrainings}/${totalTrainings} trainings completed = ${validatedProgress.toFixed(2)}%`);
+    }
+
+    return {
+      progress: validatedProgress,
+      isCompleted,
+      completedTrainings,
+      totalTrainings,
+    };
+  } catch (error) {
+    console.error(`[calculateCourseProgress] Error calculating course progress for course ${courseId}:`, error);
+    // Return safe defaults on error
+    return {
+      progress: 0,
+      isCompleted: false,
+      completedTrainings: 0,
+      totalTrainings: 0,
+    };
+  }
 }
 
 /**
@@ -234,27 +312,49 @@ export async function updateCourseProgress(
   userId: string,
   courseId: string
 ): Promise<void> {
-  const calculated = await calculateCourseProgress(userId, courseId);
+  try {
+    const calculated = await calculateCourseProgress(userId, courseId);
 
-  // Update or create course progress (auto-enrollment)
-  await prisma.courseProgress.upsert({
-    where: {
-      userId_courseId: {
+    // Validate calculated progress before saving
+    if (calculated.progress < 0 || calculated.progress > 100) {
+      console.error(
+        `[updateCourseProgress] Invalid progress value: ${calculated.progress}. Clamping to valid range.`
+      );
+      calculated.progress = Math.max(0, Math.min(100, calculated.progress));
+    }
+
+    // Update or create course progress (auto-enrollment)
+    await prisma.courseProgress.upsert({
+      where: {
+        userId_courseId: {
+          userId: userId,
+          courseId: courseId,
+        },
+      },
+      create: {
         userId: userId,
         courseId: courseId,
+        progress: calculated.progress,
+        isCompleted: calculated.isCompleted,
       },
-    },
-    create: {
-      userId: userId,
-      courseId: courseId,
-      progress: calculated.progress,
-      isCompleted: calculated.isCompleted,
-    },
-    update: {
-      progress: calculated.progress,
-      isCompleted: calculated.isCompleted,
-    },
-  });
+      update: {
+        progress: calculated.progress,
+        isCompleted: calculated.isCompleted,
+      },
+    });
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log(
+        `[updateCourseProgress] Updated course progress for user ${userId}, course ${courseId}: ${calculated.progress.toFixed(2)}% (completed: ${calculated.isCompleted})`
+      );
+    }
+  } catch (error) {
+    console.error(
+      `[updateCourseProgress] Error updating course progress for user ${userId}, course ${courseId}:`,
+      error
+    );
+    throw error; // Re-throw to allow callers to handle
+  }
 }
 
 /**

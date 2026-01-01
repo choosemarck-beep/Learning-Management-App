@@ -93,10 +93,15 @@ export const NetflixCourseCard: React.FC<NetflixCourseCardProps> = ({
         <h3 className={styles.title}>{course.title}</h3>
         <div className={styles.meta}>
           <span className={styles.xp}>{course.totalXP} XP</span>
-          {course.isEnrolled && (
-            <span className={styles.progressText}>
-              {Math.round(course.progress)}% Complete
-            </span>
+          {course.isEnrolled && course.progress > 0 && (
+            <div className={styles.progressInfo}>
+              <span className={styles.progressText}>
+                {Math.round(course.progress)}% Complete
+              </span>
+              {course.isCompleted && (
+                <CheckCircle2 size={14} className={styles.completedIcon} />
+              )}
+            </div>
           )}
         </div>
       </div>

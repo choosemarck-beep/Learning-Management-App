@@ -4,16 +4,17 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
-  padding-bottom: var(--spacing-xl);
+  gap: var(--spacing-md); /* Reduced from lg to optimize viewport */
+  padding-bottom: var(--spacing-lg); /* Reduced from xl */
+  box-sizing: border-box;
 }
 
 .courseRow {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs); /* Reduced from sm */
   width: 100%;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-sm); /* Reduced from md */
 }
 
 .courseRowHeader {

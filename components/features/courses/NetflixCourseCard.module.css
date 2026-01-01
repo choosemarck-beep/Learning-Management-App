@@ -59,14 +59,20 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  background: rgba(0, 0, 0, 0.3);
+  height: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 2;
 }
 
 .progressBar {
   height: 100%;
-  background: var(--color-primary-purple);
+  background: linear-gradient(
+    90deg,
+    var(--color-primary-purple) 0%,
+    var(--color-primary-indigo) 100%
+  );
   transition: width var(--transition-normal) ease;
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
 }
 
 .hoverOverlay {
@@ -172,5 +178,16 @@
 .progressText {
   color: var(--color-text-secondary);
   font-size: 0.6875rem; /* 11px */
+}
+
+.progressInfo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.completedIcon {
+  color: var(--color-status-success);
+  flex-shrink: 0;
 }
 

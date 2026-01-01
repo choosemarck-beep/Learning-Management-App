@@ -90,6 +90,42 @@
 
 .progressSection {
   margin: var(--spacing-xxs) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progressLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-semibold);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.completedLabel {
+  color: var(--color-status-success);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.progressPercentage {
+  font-size: var(--font-size-xs);
+  color: var(--color-primary-purple);
+  font-weight: var(--font-weight-bold);
+}
+
+.completedProgress {
+  opacity: 0.8;
 }
 
 .courseFooter {
