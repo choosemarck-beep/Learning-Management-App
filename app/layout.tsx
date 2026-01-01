@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Providers } from "./providers";
 import "./globals.css";
 
@@ -6,8 +6,6 @@ export const metadata: Metadata = {
   title: "Learning Management - Gamified Learning Platform",
   description: "A mobile-first, gamified learning management web app",
   manifest: "/manifest.json",
-  themeColor: "#0F172A",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -25,6 +23,14 @@ export const metadata: Metadata = {
       },
     ],
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0F172A",
 };
 
 export default function RootLayout({
