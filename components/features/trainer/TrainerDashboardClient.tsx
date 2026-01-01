@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronUp, ChevronDown, BookOpen, Users, CheckCircle, Trophy, Settings } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
@@ -84,8 +84,19 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
   const [modalType, setModalType] = useState<"training" | "course">("training");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Mount guard to prevent state updates after unmount
+  const isMountedRef = useRef(false);
 
   // Log component initialization for debugging
+  useEffect(() => {
+    isMountedRef.current = true; // Mark as mounted
+    
+    return () => {
+      isMountedRef.current = false; // Mark as unmounted in cleanup
+    };
+  }, []);
+
   useEffect(() => {
     console.log("[TrainerDashboardClient] Component mounted and initialized:", {
       statsCount: initialStats?.trainingStats?.length || 0,
@@ -101,19 +112,27 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
     });
     
     // Check for any undefined or null critical props
+    if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
+    
     if (!initialStats) {
       console.error("[TrainerDashboardClient] CRITICAL: initialStats is missing!");
-      setError("Dashboard stats are missing. Please refresh the page.");
+      if (isMountedRef.current) {
+        setError("Dashboard stats are missing. Please refresh the page.");
+      }
     }
     if (!Array.isArray(allTrainings)) {
       console.error("[TrainerDashboardClient] CRITICAL: allTrainings is not an array!", typeof allTrainings);
-      setError("Trainings data is invalid. Please refresh the page.");
+      if (isMountedRef.current) {
+        setError("Trainings data is invalid. Please refresh the page.");
+      }
     }
     if (!Array.isArray(allCourses)) {
       console.error("[TrainerDashboardClient] CRITICAL: allCourses is not an array!", typeof allCourses);
-      setError("Courses data is invalid. Please refresh the page.");
+      if (isMountedRef.current) {
+        setError("Courses data is invalid. Please refresh the page.");
+      }
     }
-  }, []);
+  }, [initialStats, allTrainings, allCourses]);
 
   // Get trainings currently on dashboard
   const displayedTrainings = trainingPreferences
@@ -153,43 +172,61 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
   );
 
   const fetchStats = useCallback(async () => {
+    if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
+    
     try {
       console.log("[TrainerDashboardClient] Fetching stats...");
       const response = await fetch("/api/trainer/dashboard/stats");
+      
+      if (!isMountedRef.current) return; // Guard: Check again before setting state
       
       if (!response.ok) {
         console.error("[TrainerDashboardClient] Stats API error:", {
           status: response.status,
           statusText: response.statusText,
         });
-        setError(`Failed to fetch stats: ${response.status}`);
+        if (isMountedRef.current) {
+          setError(`Failed to fetch stats: ${response.status}`);
+        }
         return;
       }
 
       const data = await response.json();
+      
+      if (!isMountedRef.current) return; // Guard: Check again before setting state
+      
       console.log("[TrainerDashboardClient] Stats fetched:", {
         success: data.success,
         statsCount: data.data?.trainingStats?.length || 0,
       });
 
       if (data.success) {
-        setStats(data.data);
-        setError(null);
+        if (isMountedRef.current) {
+          setStats(data.data);
+          setError(null);
+        }
       } else {
         console.error("[TrainerDashboardClient] Stats API returned error:", data.error);
-        setError(data.error || "Failed to fetch stats");
+        if (isMountedRef.current) {
+          setError(data.error || "Failed to fetch stats");
+        }
       }
     } catch (error) {
+      if (!isMountedRef.current) return; // Guard: Check before error handling
       console.error("[TrainerDashboardClient] Error fetching stats:", {
         error,
         message: error instanceof Error ? error.message : String(error),
       });
-      setError("Failed to fetch stats. Please refresh the page.");
+      if (isMountedRef.current) {
+        setError("Failed to fetch stats. Please refresh the page.");
+      }
     }
   }, []);
 
   const savePreferences = useCallback(
     async (newTrainingPreferences: string[], newCoursePreferences: string[]) => {
+      if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
+      
       setIsLoading(true);
       try {
         const response = await fetch("/api/trainer/dashboard/preferences", {
@@ -203,24 +240,35 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
           }),
         });
 
+        if (!isMountedRef.current) return; // Guard: Check again before setting state
+
         const data = await response.json();
         if (data.success) {
           // Update preferences with the sanitized list from server
-          setTrainingPreferences(data.data.trainingIds);
-          setCoursePreferences(data.data.courseIds);
-          if (data.warning) {
-            toast.success(data.warning, { duration: 4000 });
-          } else {
-            toast.success("Dashboard updated");
+          if (isMountedRef.current) {
+            setTrainingPreferences(data.data.trainingIds);
+            setCoursePreferences(data.data.courseIds);
+            if (data.warning) {
+              toast.success(data.warning, { duration: 4000 });
+            } else {
+              toast.success("Dashboard updated");
+            }
           }
         } else {
-          toast.error(data.error || "Failed to save preferences");
+          if (isMountedRef.current) {
+            toast.error(data.error || "Failed to save preferences");
+          }
         }
       } catch (error) {
+        if (!isMountedRef.current) return; // Guard: Check before error handling
         console.error("Error saving preferences:", error);
-        toast.error("Failed to save preferences");
+        if (isMountedRef.current) {
+          toast.error("Failed to save preferences");
+        }
       } finally {
-        setIsLoading(false);
+        if (isMountedRef.current) {
+          setIsLoading(false);
+        }
       }
     },
     []
@@ -289,22 +337,34 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
 
   // Sync allTrainingsList and allCoursesList with props when they change
   useEffect(() => {
+    if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
+    
     console.log("[TrainerDashboardClient] Updating trainings list:", allTrainings?.length || 0);
     if (Array.isArray(allTrainings)) {
-      setAllTrainingsList(allTrainings);
+      if (isMountedRef.current) {
+        setAllTrainingsList(allTrainings);
+      }
     } else {
       console.error("[TrainerDashboardClient] Invalid allTrainings prop:", typeof allTrainings);
-      setError("Invalid trainings data received");
+      if (isMountedRef.current) {
+        setError("Invalid trainings data received");
+      }
     }
   }, [allTrainings]);
 
   useEffect(() => {
+    if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
+    
     console.log("[TrainerDashboardClient] Updating courses list:", allCourses?.length || 0);
     if (Array.isArray(allCourses)) {
-      setAllCoursesList(allCourses);
+      if (isMountedRef.current) {
+        setAllCoursesList(allCourses);
+      }
     } else {
       console.error("[TrainerDashboardClient] Invalid allCourses prop:", typeof allCourses);
-      setError("Invalid courses data received");
+      if (isMountedRef.current) {
+        setError("Invalid courses data received");
+      }
     }
   }, [allCourses]);
 
