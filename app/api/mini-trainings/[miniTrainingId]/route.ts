@@ -109,7 +109,7 @@ export async function GET(
         // Apply randomization if questionsToShow is set
         // ALWAYS apply randomization to prevent cheating and memorization
         if (parsedQuestions.length > 0) {
-          const questionsToShow = miniTraining.miniQuiz?.questionsToShow;
+          const questionsToShow = miniTraining.miniQuiz?.questionsToShow ?? null;
           const randomized = randomizeQuizQuestions(
             parsedQuestions,
             questionsToShow, // Can be null (show all) - still randomizes order

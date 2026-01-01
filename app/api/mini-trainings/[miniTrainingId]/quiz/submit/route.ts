@@ -117,7 +117,7 @@ export async function POST(
     if (questions.length > 0) {
       const randomized = randomizeQuizQuestions(
         questions,
-        miniTraining.miniQuiz.questionsToShow, // Can be null (show all) - still randomizes order
+        miniTraining.miniQuiz.questionsToShow ?? null, // Can be null (show all) - still randomizes order
         user.id,
         attemptNumber
       );

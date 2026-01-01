@@ -173,7 +173,7 @@ export default async function TrainingQuizPage({ params, searchParams }: PagePro
     if (parsedQuestions.length > 0) {
       const randomized = randomizeQuizQuestions(
         parsedQuestions,
-        training.quiz.questionsToShow, // Can be null (show all) - still randomizes order
+        training.quiz.questionsToShow ?? null, // Can be null (show all) - still randomizes order
         currentUser.id,
         attemptNumber
       );
