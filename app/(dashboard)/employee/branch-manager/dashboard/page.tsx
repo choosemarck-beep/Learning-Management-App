@@ -242,7 +242,7 @@ export default async function BranchManagerDashboardPage() {
     const courses = await Promise.all(
       courseProgresses.map(async (cp) => {
         // Recalculate progress to ensure it's current
-        const calculated = await calculateCourseProgress(user.id, cp.courseId);
+        const calculated = await calculateCourseProgress(user.id, cp.course.id);
         
         return {
           id: String(cp.course.id),
