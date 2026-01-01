@@ -25,55 +25,56 @@
 @media (min-width: 768px) {
   .container {
     max-width: none;
-    width: 100%; /* Full width of parent .content container */
+    width: calc(100% + 89px); /* Extend width to cover gap area */
     margin: 0;
-    margin-left: 0 !important; /* Ensure no left margin */
-    padding: 0 !important; /* Remove ALL padding */
+    margin-left: -89px !important; /* Pull back to sidebar edge */
+    padding: 0 !important;
     gap: 0;
-    height: calc(100vh - 64px); /* Full height minus header */
+    height: calc(100vh - 64px);
     overflow-y: auto;
-    overflow-x: hidden; /* Prevent horizontal scrolling */
-    position: absolute; /* Position absolutely to control exact placement */
-    left: 0; /* Start at the exact left edge of .content container */
+    overflow-x: hidden;
+    position: relative;
+    left: 0;
     top: 0;
-    background: var(--color-bg-dark); /* Dark background to cover starry gap */
-    z-index: 2; /* Ensure it's above the starry background (z-index: 0) */
+    background: var(--color-bg-dark);
+    z-index: 2;
   }
   
   .contentWrapper {
     width: 100%;
     max-width: 100%;
-    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 0; /* No left padding - start immediately */
-    margin: 0; /* Ensure no margin */
+    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 89px; /* Add left padding to account for extended width */
+    margin: 0;
     gap: var(--spacing-md);
-    box-sizing: border-box; /* Include padding in width calculation */
-    background: var(--color-bg-dark); /* Ensure wrapper also has dark background */
+    box-sizing: border-box;
+    background: var(--color-bg-dark);
   }
 }
 
 @media (min-width: 1024px) {
   .container {
-    width: 100%; /* Full width of parent .content container */
+    max-width: none;
+    width: calc(100% + 89px); /* Extend width to cover gap area */
     margin: 0;
-    margin-left: 0 !important; /* Ensure no left margin */
-    padding: 0 !important; /* Remove ALL padding */
+    margin-left: -89px !important; /* Pull back to sidebar edge */
+    padding: 0 !important;
     gap: 0;
-    overflow-x: hidden; /* Prevent horizontal scrolling */
-    position: absolute; /* Position absolutely to control exact placement */
-    left: 0; /* Start at the exact left edge of .content container */
+    overflow-x: hidden;
+    position: relative;
+    left: 0;
     top: 0;
-    background: var(--color-bg-dark); /* Dark background to cover starry gap */
-    z-index: 2; /* Ensure it's above the starry background (z-index: 0) */
+    background: var(--color-bg-dark);
+    z-index: 2;
   }
   
   .contentWrapper {
     width: 100%;
     max-width: 100%;
-    padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 0; /* No left padding - start immediately */
-    margin: 0; /* Ensure no margin */
+    padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 89px; /* Add left padding to account for extended width */
+    margin: 0;
     gap: var(--spacing-md);
-    box-sizing: border-box; /* Include padding in width calculation */
-    background: var(--color-bg-dark); /* Ensure wrapper also has dark background */
+    box-sizing: border-box;
+    background: var(--color-bg-dark);
   }
 }
 
