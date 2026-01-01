@@ -66,11 +66,23 @@ export async function GET(request: NextRequest) {
         prisma.activityLog.count({ where }),
       ]);
 
+      // Serialize Date objects to ISO strings
+      const serializedLogs = logs.map((log) => ({
+        id: log.id,
+        type: log.type,
+        description: log.description,
+        metadata: log.metadata,
+        targetId: log.targetId,
+        targetType: log.targetType,
+        createdAt: log.createdAt.toISOString(),
+        user: log.user,
+      }));
+
       return NextResponse.json(
         {
           success: true,
           data: {
-            logs,
+            logs: serializedLogs,
             total,
             limit,
             offset,

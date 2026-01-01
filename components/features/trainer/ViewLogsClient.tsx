@@ -36,10 +36,6 @@ export const ViewLogsClient: React.FC = () => {
 
   const limit = 50;
 
-  useEffect(() => {
-    fetchLogs();
-  }, [roleFilter, typeFilter, currentPage]);
-
   const fetchLogs = async () => {
     try {
       setIsLoading(true);
@@ -66,6 +62,11 @@ export const ViewLogsClient: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roleFilter, typeFilter, currentPage]);
 
   // Group logs by role
   const groupedLogs = useMemo(() => {
