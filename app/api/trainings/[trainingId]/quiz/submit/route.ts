@@ -68,7 +68,25 @@ export async function POST(
       );
     }
 
-    // Check if quiz allows retake
+    // Check if this is a refresher quiz (user already has perfect score)
+    const searchParams = request.nextUrl.searchParams;
+    const isRefresherFromQuery = searchParams.get("refresher") === "true";
+    
+    // Get highest score to check if this is a refresher
+    const highestAttempt = await prisma.quizAttempt.findFirst({
+      where: {
+        userId: user.id,
+        quizId: training.quiz.id,
+      },
+      orderBy: {
+        score: "desc",
+      },
+    });
+    
+    const isRefresher = (highestAttempt?.score === 100) || isRefresherFromQuery;
+    const shouldRecordScore = !isRefresher;
+
+    // Check if quiz allows retake (skip for refresher quizzes)
     const existingAttempts = await prisma.quizAttempt.findMany({
       where: {
         userId: user.id,
@@ -79,15 +97,15 @@ export async function POST(
       },
     });
 
-    if (!training.quiz.allowRetake && existingAttempts.length > 0) {
+    if (!isRefresher && !training.quiz.allowRetake && existingAttempts.length > 0) {
       return NextResponse.json(
         { success: false, error: "Quiz does not allow retakes" },
         { status: 400 }
       );
     }
 
-    // Check max attempts
-    if (training.quiz.maxAttempts && existingAttempts.length >= training.quiz.maxAttempts) {
+    // Check max attempts (skip for refresher quizzes - they don't count)
+    if (!isRefresher && training.quiz.maxAttempts && existingAttempts.length >= training.quiz.maxAttempts) {
       return NextResponse.json(
         { success: false, error: "Maximum attempts reached" },
         { status: 400 }
@@ -139,11 +157,11 @@ export async function POST(
       return question;
     });
 
-    // Apply same randomization as display (if questionsToShow is set)
-    if (training.quiz.questionsToShow && questions.length > 0) {
+    // ALWAYS apply randomization to prevent cheating and memorization
+    if (questions.length > 0) {
       const randomized = randomizeQuizQuestions(
         questions,
-        training.quiz.questionsToShow,
+        training.quiz.questionsToShow, // Can be null (show all) - still randomizes order
         user.id,
         attemptNumber
       );
@@ -281,19 +299,40 @@ export async function POST(
     // Use calculated time if available, otherwise use provided timeSpent
     const finalTimeSpent = calculatedTimeSpent !== null ? calculatedTimeSpent : (timeSpent || null);
 
-    // Create quiz attempt
-    const quizAttempt = await prisma.quizAttempt.create({
-      data: {
-        userId: user.id,
-        quizId: training.quiz.id,
-        score: score,
-        answers: JSON.stringify(answers),
-        timeSpent: finalTimeSpent,
-        startedAt: startedAtDate,
-        completedAt: completedAt,
-        passed: passed,
-      },
-    });
+    // Only create quiz attempt if this is not a refresher quiz
+    let quizAttempt = null;
+    if (shouldRecordScore) {
+      quizAttempt = await prisma.quizAttempt.create({
+        data: {
+          userId: user.id,
+          quizId: training.quiz.id,
+          score: score,
+          answers: JSON.stringify(answers),
+          timeSpent: finalTimeSpent,
+          startedAt: startedAtDate,
+          completedAt: completedAt,
+          passed: passed,
+        },
+      });
+    } else {
+      // For refresher quizzes, return results without recording
+      return NextResponse.json(
+        {
+          success: true,
+          data: {
+            score,
+            correctAnswers,
+            totalQuestions,
+            results,
+            xpEarned: 0, // No XP for refresher quizzes
+            passed,
+            isRefresher: true,
+            message: "This was a refresher quiz. Your score was not recorded since you already have a perfect score.",
+          },
+        },
+        { status: 200 }
+      );
+    }
 
     // Get or create training progress
     const trainingProgress = await prisma.trainingProgressNew.upsert({

@@ -113,11 +113,11 @@ export async function POST(
       return question;
     });
 
-    // Apply same randomization as display (if questionsToShow is set)
-    if (miniTraining.miniQuiz.questionsToShow && questions.length > 0) {
+    // ALWAYS apply randomization to prevent cheating and memorization
+    if (questions.length > 0) {
       const randomized = randomizeQuizQuestions(
         questions,
-        miniTraining.miniQuiz.questionsToShow,
+        miniTraining.miniQuiz.questionsToShow, // Can be null (show all) - still randomizes order
         user.id,
         attemptNumber
       );

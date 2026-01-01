@@ -10,6 +10,8 @@ import { Modal } from "@/components/ui/Modal";
 import toast from "react-hot-toast";
 import { getVideoEmbedUrl, getVideoType, isYouTubeUrl } from "@/lib/utils/videoUtils";
 import { MiniTrainingModal } from "./MiniTrainingModal";
+import { PerfectScoreModal } from "@/components/features/quiz/PerfectScoreModal";
+import { getHighestScore, hasPerfectScore } from "@/lib/utils/quizMessages";
 import styles from "./TrainingVideoPageClient.module.css";
 
 // YouTube Player API types
@@ -107,6 +109,10 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
   
   // Quiz Warning Modal state
   const [isQuizWarningModalOpen, setIsQuizWarningModalOpen] = useState(false);
+  
+  // Perfect Score Modal state
+  const [isPerfectScoreModalOpen, setIsPerfectScoreModalOpen] = useState(false);
+  const [highestScore, setHighestScore] = useState<number | null>(null);
   
   // YouTube Player API refs
   const youtubePlayerRef = useRef<any>(null);
@@ -639,7 +645,7 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
     setCanTakeQuiz(watchedSeconds >= minimumWatchTime);
   }, [watchedSeconds, initialData.training.minimumWatchTime]);
 
-  const handleQuizClick = () => {
+  const handleQuizClick = async () => {
     if (!canTakeQuiz) {
       toast.error(`Please watch at least ${Math.ceil((initialData.training.minimumWatchTime || 0) / 60)} minutes of the video first.`);
       return;
@@ -650,12 +656,32 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
       return;
     }
 
+    // Check for perfect score before showing warning modal
+    try {
+      const response = await fetch(`/api/quizzes/${initialData.quiz.id}/highest-score`);
+      const data = await response.json();
+      
+      if (data.success && data.data.highestScore !== null) {
+        const highest = data.data.highestScore;
+        
+        if (hasPerfectScore(highest)) {
+          setHighestScore(highest);
+          setIsPerfectScoreModalOpen(true);
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("[TrainingVideoPageClient] Error checking highest score:", error);
+      // Continue to show warning modal if check fails
+    }
+
     // Show warning modal instead of navigating directly
     setIsQuizWarningModalOpen(true);
   };
 
-  const handleStartQuiz = async () => {
+  const handleStartQuiz = async (isRefresher: boolean = false) => {
     setIsQuizWarningModalOpen(false);
+    setIsPerfectScoreModalOpen(false);
     // Clear any "Take it later" choice when starting quiz
     try {
       await fetch(`/api/trainings/${trainingId}/quiz/postpone`, {
@@ -668,7 +694,11 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
     } catch (error) {
       console.error("Error clearing postpone status:", error);
     }
-    router.push(`/training/${trainingId}/quiz`);
+    // Pass refresher flag as query parameter
+    const url = isRefresher 
+      ? `/training/${trainingId}/quiz?refresher=true`
+      : `/training/${trainingId}/quiz`;
+    router.push(url);
   };
 
   const handleTakeLater = async () => {
@@ -1315,6 +1345,16 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
           miniTrainingId={selectedMiniTrainingId}
           trainingId={trainingId}
           onComplete={handleMiniTrainingComplete}
+        />
+      )}
+
+      {/* Perfect Score Modal */}
+      {highestScore !== null && (
+        <PerfectScoreModal
+          isOpen={isPerfectScoreModalOpen}
+          onClose={() => setIsPerfectScoreModalOpen(false)}
+          onConfirm={() => handleStartQuiz(true)}
+          highestScore={highestScore}
         />
       )}
 

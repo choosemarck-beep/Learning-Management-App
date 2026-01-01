@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, XCircle, Award, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Award, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
 import { QuizCard, LegacyQuizQuestion } from "@/components/features/quiz/QuizCard";
@@ -62,6 +62,7 @@ interface TrainingQuizPageClientProps {
   course: Course;
   attemptNumber: number;
   totalAttempts: number;
+  isRefresher?: boolean;
 }
 
 export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
@@ -71,6 +72,7 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
   course,
   attemptNumber,
   totalAttempts,
+  isRefresher = false,
 }) => {
   const router = useRouter();
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -136,15 +138,24 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (submittedAnswers?: Record<string, string>) => {
     // Don't submit if already showing results
     if (results !== null) {
       return;
     }
 
-    // Check if all displayed questions are answered (quiz.questions already contains only displayed questions)
-    const unansweredQuestions = quiz.questions.filter(
-      (q) => !answers[q.id]
+    // Use submitted answers if provided (from QuizCard), otherwise use state answers
+    const answersToValidate = submittedAnswers || answers;
+    
+    // Validate only against questions that were actually displayed
+    // QuizCard only displays questions from legacyQuestions, so we validate against those
+    // legacyQuestions is created from quiz.questions and should only contain displayed questions
+    const displayedQuestionIds = legacyQuestions.map(q => q.id);
+    const displayedQuestions = quiz.questions.filter(q => displayedQuestionIds.includes(q.id));
+    
+    // Check if all displayed questions are answered
+    const unansweredQuestions = displayedQuestions.filter(
+      (q) => !answersToValidate[q.id]
     );
     if (unansweredQuestions.length > 0) {
       toast.error(`Please answer all questions. ${unansweredQuestions.length} question(s) remaining.`);
@@ -154,13 +165,18 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/trainings/${trainingId}/quiz/submit`, {
+      const url = new URL(`/api/trainings/${trainingId}/quiz/submit`, window.location.origin);
+      if (isRefresher) {
+        url.searchParams.set("refresher", "true");
+      }
+      
+      const response = await fetch(url.toString(), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          answers,
+          answers: answersToValidate,
           startedAt: quizStartTime?.toISOString() || new Date().toISOString(),
         }),
       });
@@ -239,8 +255,9 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
       return;
     }
     // Set answers and submit
+    // Note: userAnswers only contains answers for displayed questions from QuizCard
     setAnswers(userAnswers);
-    await handleSubmit();
+    await handleSubmit(userAnswers);
   };
 
   // Handle quiz restart - fetch new randomized questions
@@ -274,10 +291,16 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
                 {correctCount} of {quiz.questions.length} correct
               </span>
             </div>
-            {xpEarned !== null && xpEarned > 0 && (
+            {xpEarned !== null && xpEarned > 0 && !isRefresher && (
               <div className={styles.xpEarned}>
                 <Award size={20} />
                 <span>+{xpEarned} XP</span>
+              </div>
+            )}
+            {isRefresher && (
+              <div className={styles.refresherMessage}>
+                <AlertTriangle size={20} />
+                <span>This was a refresher quiz. Your score was not recorded since you already have a perfect score.</span>
               </div>
             )}
             {quizTiming && (
@@ -389,6 +412,15 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
   return (
     <div className={styles.container}>
       <div className={styles.content}>
+        {isRefresher && (
+          <div className={styles.refresherBanner}>
+            <AlertTriangle size={20} />
+            <div className={styles.refresherBannerContent}>
+              <strong>Refresher Quiz</strong>
+              <p>You already have a perfect score. This attempt will not be recorded, but you can use it to practice and reinforce your learning.</p>
+            </div>
+          </div>
+        )}
         <QuizCard
           legacyQuestions={legacyQuestions}
           trainingId={trainingId}

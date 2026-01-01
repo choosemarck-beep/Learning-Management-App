@@ -11,9 +11,12 @@ export const dynamic = 'force-dynamic';
 
 interface PageProps {
   params: Promise<{ trainingId: string }>;
+  searchParams: Promise<{ refresher?: string }>;
 }
 
-export default async function TrainingQuizPage({ params }: PageProps) {
+export default async function TrainingQuizPage({ params, searchParams }: PageProps) {
+  const { refresher } = await searchParams;
+  const isRefresher = refresher === "true";
   const currentUser = await getCurrentUser();
 
   if (!currentUser) {
@@ -165,12 +168,12 @@ export default async function TrainingQuizPage({ params }: PageProps) {
       parsedQuestions = [];
     }
 
-    // Apply randomization if questionsToShow is set
+    // ALWAYS apply randomization to prevent cheating and memorization
     let finalQuestions = parsedQuestions;
-    if (training.quiz.questionsToShow && parsedQuestions.length > 0) {
+    if (parsedQuestions.length > 0) {
       const randomized = randomizeQuizQuestions(
         parsedQuestions,
-        training.quiz.questionsToShow,
+        training.quiz.questionsToShow, // Can be null (show all) - still randomizes order
         currentUser.id,
         attemptNumber
       );
@@ -219,6 +222,7 @@ export default async function TrainingQuizPage({ params }: PageProps) {
             course={courseData}
             attemptNumber={attemptNumber}
             totalAttempts={existingAttempts.length}
+            isRefresher={isRefresher}
           />
         </div>
         <ProfileBottomNav
