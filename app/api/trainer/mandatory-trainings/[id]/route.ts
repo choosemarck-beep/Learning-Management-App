@@ -29,7 +29,7 @@ export async function PATCH(
     const body = await request.json();
     const { title, description, badgeIcon, badgeColor, isActive } = body;
 
-    // Verify training exists and belongs to this trainer
+    // Verify training exists
     const existingTraining = await prisma.mandatoryTraining.findUnique({
       where: { id },
     });
@@ -38,13 +38,6 @@ export async function PATCH(
       return NextResponse.json(
         { success: false, error: "Training not found" },
         { status: 404 }
-      );
-    }
-
-    if (existingTraining.createdBy !== currentUser.id) {
-      return NextResponse.json(
-        { success: false, error: "Forbidden - You can only edit your own trainings" },
-        { status: 403 }
       );
     }
 
@@ -120,7 +113,7 @@ export async function DELETE(
     // Await params in Next.js 14+ App Router
     const { id } = await params;
 
-    // Verify training exists and belongs to this trainer
+    // Verify training exists
     const existingTraining = await prisma.mandatoryTraining.findUnique({
       where: { id },
     });
@@ -129,13 +122,6 @@ export async function DELETE(
       return NextResponse.json(
         { success: false, error: "Training not found" },
         { status: 404 }
-      );
-    }
-
-    if (existingTraining.createdBy !== currentUser.id) {
-      return NextResponse.json(
-        { success: false, error: "Forbidden - You can only delete your own trainings" },
-        { status: 403 }
       );
     }
 

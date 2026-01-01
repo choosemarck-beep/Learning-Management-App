@@ -27,9 +27,7 @@ export async function GET(request: NextRequest) {
     const publishedOnly = searchParams.get("published") === "true";
     const search = searchParams.get("search") || "";
 
-    const where: any = {
-      createdBy: user.id,
-    };
+    const where: any = {};
 
     if (publishedOnly) {
       where.isPublished = true;

@@ -27,7 +27,9 @@ export const StatsCard: React.FC<StatsCardProps> = ({
           {icon && <div className={styles.icon}>{icon}</div>}
           <div className={styles.stats}>
             <span className={styles.label}>{label}</span>
-            <span className={styles.value}>{value.toLocaleString()}</span>
+            <span className={styles.value}>
+              {typeof value === "number" ? value.toLocaleString() : value}
+            </span>
             {trend && (
               <span
                 className={`${styles.trend} ${

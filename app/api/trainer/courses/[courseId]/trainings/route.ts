@@ -24,11 +24,10 @@ export async function GET(
       );
     }
 
-    // Verify course ownership
-    const course = await prisma.course.findFirst({
+    // Verify course exists
+    const course = await prisma.course.findUnique({
       where: {
         id: params.courseId,
-        createdBy: user.id,
       },
     });
 
@@ -121,11 +120,10 @@ export async function POST(
       );
     }
 
-    // Verify course ownership
-    const course = await prisma.course.findFirst({
+    // Verify course exists
+    const course = await prisma.course.findUnique({
       where: {
         id: params.courseId,
-        createdBy: user.id,
       },
     });
 

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "A mobile-first, gamified learning management web app",
   manifest: "/manifest.json",
   themeColor: "#0F172A",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

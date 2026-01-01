@@ -22,11 +22,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch all trainings created by this trainer (from courses)
+    // Fetch all trainings (shared across all trainers)
     const trainings = await prisma.training.findMany({
-      where: {
-        createdBy: user.id,
-      },
+      where: {},
       select: {
         id: true,
         title: true,
@@ -39,11 +37,9 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Fetch all courses created by this trainer
+    // Fetch all courses (shared across all trainers)
     const courses = await prisma.course.findMany({
-      where: {
-        createdBy: user.id,
-      },
+      where: {},
       select: {
         id: true,
         title: true,

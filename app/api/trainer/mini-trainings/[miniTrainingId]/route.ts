@@ -54,13 +54,6 @@ export async function GET(
       );
     }
 
-    // Verify ownership through parent training
-    if (miniTraining.training.createdBy !== user.id) {
-      return NextResponse.json(
-        { success: false, error: "Forbidden - You don't own this mini training" },
-        { status: 403 }
-      );
-    }
 
     return NextResponse.json(
       {
@@ -199,17 +192,10 @@ export async function DELETE(
       );
     }
 
-    // Verify ownership
+    // Verify mini training exists
     const existingMiniTraining = await prisma.miniTraining.findUnique({
       where: {
         id: params.miniTrainingId,
-      },
-      include: {
-        training: {
-          select: {
-            createdBy: true,
-          },
-        },
       },
     });
 
@@ -217,13 +203,6 @@ export async function DELETE(
       return NextResponse.json(
         { success: false, error: "Mini training not found" },
         { status: 404 }
-      );
-    }
-
-    if (existingMiniTraining.training.createdBy !== user.id) {
-      return NextResponse.json(
-        { success: false, error: "Forbidden - You don't own this mini training" },
-        { status: 403 }
       );
     }
 

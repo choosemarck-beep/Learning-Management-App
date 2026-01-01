@@ -47,11 +47,9 @@ export default async function TrainerWorkshopPage() {
     redirect("/login");
   }
 
-  // Fetch courses created by this trainer
+  // Fetch all courses (shared across all trainers) - including published courses that employees see
   const courses = await prisma.course.findMany({
-    where: {
-      createdBy: user.id,
-    },
+    where: {},
     include: {
       trainings: {
         select: {
@@ -71,15 +69,14 @@ export default async function TrainerWorkshopPage() {
         },
       },
     },
-    orderBy: {
-      createdAt: "desc",
-    },
+    orderBy: [
+      { isPublished: "desc" }, // Published courses first
+      { createdAt: "desc" },
+    ],
   });
 
   const trainings = await prisma.mandatoryTraining.findMany({
-    where: {
-      createdBy: user.id,
-    },
+    where: {},
     orderBy: {
       createdAt: "desc",
     },

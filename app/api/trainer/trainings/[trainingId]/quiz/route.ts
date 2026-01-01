@@ -27,11 +27,10 @@ export async function GET(
       );
     }
 
-    // Verify training ownership
-    const training = await prisma.training.findFirst({
+    // Verify training exists
+    const training = await prisma.training.findUnique({
       where: {
         id: params.trainingId,
-        createdBy: user.id,
       },
     });
 
@@ -96,11 +95,10 @@ export async function POST(
       );
     }
 
-    // Verify training ownership
-    const training = await prisma.training.findFirst({
+    // Verify training exists
+    const training = await prisma.training.findUnique({
       where: {
         id: params.trainingId,
-        createdBy: user.id,
       },
     });
 
@@ -309,11 +307,10 @@ export async function DELETE(
       );
     }
 
-    // Verify training ownership
-    const training = await prisma.training.findFirst({
+    // Verify training exists
+    const training = await prisma.training.findUnique({
       where: {
         id: params.trainingId,
-        createdBy: user.id,
       },
     });
 

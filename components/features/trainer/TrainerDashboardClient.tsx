@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, BookOpen, Users, CheckCircle, Trophy, Settings } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Card, CardBody } from "@/components/ui/Card";
-import { CompletionRateCard } from "./CompletionRateCard";
+import { Accordion } from "@/components/ui/Accordion";
+import { StatsCard } from "../admin/StatsCard";
 import { TrainingCompletionCard } from "./TrainingCompletionCard";
 import { CourseCompletionCard } from "./CourseCompletionCard";
 import { TrainerAnalyticsDashboard } from "./analytics/TrainerAnalyticsDashboard";
@@ -75,7 +75,6 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
   allTrainings,
   allCourses,
 }) => {
-  const router = useRouter();
   const [stats, setStats] = useState<DashboardStats>(initialStats);
   const [trainingPreferences, setTrainingPreferences] = useState<string[]>(initialTrainingPreferences);
   const [coursePreferences, setCoursePreferences] = useState<string[]>(initialCoursePreferences);
@@ -340,148 +339,249 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
     );
   }
 
+  // Calculate overview stats
+  const totalTrainings = stats.trainingStats.length;
+  const totalCourses = stats.courseStats?.length || 0;
+  const pendingCompletions = stats.totalAssigned - stats.totalCompleted;
+
   return (
     <div className={styles.container}>
-      {/* Overall Completion Rate Card */}
-      <div className={styles.completionRateSection}>
-        <CompletionRateCard
-          overallCompletionRate={stats?.overallCompletionRate ?? 0}
-          totalAssigned={stats?.totalAssigned ?? 0}
-          totalCompleted={stats?.totalCompleted ?? 0}
-        />
-      </div>
-
-      {/* Training Cards Section */}
-      <div className={styles.trainingsSection}>
-        <div className={styles.sectionHeader}>
-          <div>
-            <h2 className={styles.sectionTitle}>Training Completion</h2>
-            <p className={styles.sectionDescription}>
-              Trainings are created within courses. Go to <strong>Workshop</strong> → <strong>Courses</strong> to create courses and add trainings with videos, quizzes, and mini trainings.
-            </p>
-          </div>
+      {/* Overview Stats - Matching Admin Dashboard */}
+      <div className={styles.overviewSection}>
+        <h2 className={styles.sectionTitle}>Overview</h2>
+        <div className={styles.overviewGrid}>
+          <StatsCard
+            label="Total Trainings"
+            value={totalTrainings}
+            icon={<BookOpen size={16} />}
+          />
+          <StatsCard
+            label="Total Courses"
+            value={totalCourses}
+            icon={<BookOpen size={16} />}
+          />
+          <StatsCard
+            label="Total Assigned"
+            value={stats.totalAssigned}
+            icon={<Users size={16} />}
+          />
+          <StatsCard
+            label="Total Completed"
+            value={stats.totalCompleted}
+            icon={<CheckCircle size={16} />}
+          />
+          <StatsCard
+            label="Completion Rate"
+            value={`${Math.round(stats.overallCompletionRate)}%`}
+            icon={<Trophy size={16} />}
+          />
+          <StatsCard
+            label="Pending"
+            value={pendingCompletions}
+            icon={<CheckCircle size={16} />}
+          />
         </div>
-
-        {displayedTrainings.length === 0 ? (
-          <Card>
-            <CardBody>
-              <p className={styles.emptyMessage}>
-                No trainings added to dashboard. Click "Add Training" to get started!
-              </p>
-            </CardBody>
-          </Card>
-        ) : (
-          <div className={styles.grid}>
-            {displayedTrainings.map((training, index) => {
-              const stat = stats.trainingStats.find(
-                (s) => s.trainingId === training.id
-              );
-              return (
-                <div key={training.id} className={styles.cardWrapper}>
-                  <div className={styles.reorderControls}>
-                    <button
-                      className={styles.reorderButton}
-                      onClick={() => handleMoveUp(index, "training")}
-                      disabled={index === 0}
-                      aria-label="Move up"
-                      title="Move up"
-                    >
-                      <ChevronUp size={16} />
-                    </button>
-                    <button
-                      className={styles.reorderButton}
-                      onClick={() => handleMoveDown(index, "training")}
-                      disabled={index === displayedTrainings.length - 1}
-                      aria-label="Move down"
-                      title="Move down"
-                    >
-                      <ChevronDown size={16} />
-                    </button>
-                  </div>
-                  <TrainingCompletionCard
-                    trainingId={training.id}
-                    title={training.title}
-                    completionRate={
-                      stat?.completionRate ?? 0
-                    }
-                    totalAssigned={stat?.totalAssigned ?? 0}
-                    totalCompleted={stat?.totalCompleted ?? 0}
-                    courseId={training.course?.id}
-                    courseTitle={training.course?.title}
-                    onRemove={handleRemoveTraining}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
 
-      {/* Course Cards Section */}
-      <div className={styles.trainingsSection}>
-        <div className={styles.sectionHeader}>
-          <div>
-            <h2 className={styles.sectionTitle}>Course Completion</h2>
-            <p className={styles.sectionDescription}>
-              View completion rates for entire courses, aggregating all trainings within each course.
-            </p>
-          </div>
-        </div>
-
-        {displayedCourses.length === 0 ? (
-          <Card>
-            <CardBody>
-              <p className={styles.emptyMessage}>
-                No courses added to dashboard. Click "Add Course" to get started!
-              </p>
-            </CardBody>
-          </Card>
-        ) : (
-          <div className={styles.grid}>
-            {displayedCourses.map((course, index) => {
-              const stat = stats.courseStats?.find(
-                (s) => s.courseId === course.id
-              );
-              return (
-                <div key={course.id} className={styles.cardWrapper}>
-                  <div className={styles.reorderControls}>
-                    <button
-                      className={styles.reorderButton}
-                      onClick={() => handleMoveUp(index, "course")}
-                      disabled={index === 0}
-                      aria-label="Move up"
-                      title="Move up"
-                    >
-                      <ChevronUp size={16} />
-                    </button>
-                    <button
-                      className={styles.reorderButton}
-                      onClick={() => handleMoveDown(index, "course")}
-                      disabled={index === displayedCourses.length - 1}
-                      aria-label="Move down"
-                      title="Move down"
-                    >
-                      <ChevronDown size={16} />
-                    </button>
-                  </div>
-                  <CourseCompletionCard
-                    courseId={course.id}
-                    title={course.title}
-                    completionRate={stat?.completionRate ?? 0}
-                    totalAssigned={stat?.totalAssigned ?? 0}
-                    totalCompleted={stat?.totalCompleted ?? 0}
-                    trainingCount={course._count.trainings}
-                    onRemove={handleRemoveCourse}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Analytics Dashboard Section */}
+      {/* Analytics Widgets - Accordion Format (Matching Admin) */}
       <div className={styles.analyticsSection}>
+        {/* Training Completion Tracking */}
+        <Accordion
+          title="Training Completion Tracking"
+          icon={<BookOpen size={18} />}
+          defaultOpen={false}
+        >
+          <div className={styles.completionContent}>
+            {displayedTrainings.length === 0 ? (
+              <Card>
+                <CardBody>
+                  <p className={styles.emptyMessage}>
+                    No trainings added to dashboard. Use "Customize Dashboard" to add trainings.
+                  </p>
+                </CardBody>
+              </Card>
+            ) : (
+              <div className={styles.grid}>
+                {displayedTrainings.map((training) => {
+                  const stat = stats.trainingStats.find(
+                    (s) => s.trainingId === training.id
+                  );
+                  return (
+                    <TrainingCompletionCard
+                      key={training.id}
+                      trainingId={training.id}
+                      title={training.title}
+                      completionRate={stat?.completionRate ?? 0}
+                      totalAssigned={stat?.totalAssigned ?? 0}
+                      totalCompleted={stat?.totalCompleted ?? 0}
+                      courseId={training.course?.id}
+                      courseTitle={training.course?.title}
+                      onRemove={handleRemoveTraining}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </Accordion>
+
+        {/* Course Completion Tracking */}
+        <Accordion
+          title="Course Completion Tracking"
+          icon={<BookOpen size={18} />}
+          defaultOpen={false}
+        >
+          <div className={styles.completionContent}>
+            {displayedCourses.length === 0 ? (
+              <Card>
+                <CardBody>
+                  <p className={styles.emptyMessage}>
+                    No courses added to dashboard. Use "Customize Dashboard" to add courses.
+                  </p>
+                </CardBody>
+              </Card>
+            ) : (
+              <div className={styles.grid}>
+                {displayedCourses.map((course) => {
+                  const stat = stats.courseStats?.find(
+                    (s) => s.courseId === course.id
+                  );
+                  return (
+                    <CourseCompletionCard
+                      key={course.id}
+                      courseId={course.id}
+                      title={course.title}
+                      completionRate={stat?.completionRate ?? 0}
+                      totalAssigned={stat?.totalAssigned ?? 0}
+                      totalCompleted={stat?.totalCompleted ?? 0}
+                      trainingCount={course._count.trainings}
+                      onRemove={handleRemoveCourse}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </Accordion>
+
+        {/* Customize Dashboard */}
+        <Accordion
+          title="Customize Dashboard"
+          icon={<Settings size={18} />}
+          defaultOpen={false}
+        >
+          <div className={styles.customizeContent}>
+            <div className={styles.customizeSection}>
+              <h3 className={styles.customizeTitle}>Manage Trainings</h3>
+              <p className={styles.customizeDescription}>
+                Add, remove, or reorder trainings on your dashboard.
+              </p>
+              <div className={styles.customizeActions}>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    setModalType("training");
+                    setIsAddModalOpen(true);
+                  }}
+                >
+                  Add Training
+                </Button>
+              </div>
+              {displayedTrainings.length > 0 && (
+                <div className={styles.reorderList}>
+                  {displayedTrainings.map((training, index) => (
+                    <div key={training.id} className={styles.reorderItem}>
+                      <span className={styles.reorderItemText}>{training.title}</span>
+                      <div className={styles.reorderButtons}>
+                        <button
+                          className={styles.reorderButton}
+                          onClick={() => handleMoveUp(index, "training")}
+                          disabled={index === 0}
+                          aria-label="Move up"
+                          title="Move up"
+                        >
+                          <ChevronUp size={16} />
+                        </button>
+                        <button
+                          className={styles.reorderButton}
+                          onClick={() => handleMoveDown(index, "training")}
+                          disabled={index === displayedTrainings.length - 1}
+                          aria-label="Move down"
+                          title="Move down"
+                        >
+                          <ChevronDown size={16} />
+                        </button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveTraining(training.id)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className={styles.customizeSection}>
+              <h3 className={styles.customizeTitle}>Manage Courses</h3>
+              <p className={styles.customizeDescription}>
+                Add, remove, or reorder courses on your dashboard.
+              </p>
+              <div className={styles.customizeActions}>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    setModalType("course");
+                    setIsAddModalOpen(true);
+                  }}
+                >
+                  Add Course
+                </Button>
+              </div>
+              {displayedCourses.length > 0 && (
+                <div className={styles.reorderList}>
+                  {displayedCourses.map((course, index) => (
+                    <div key={course.id} className={styles.reorderItem}>
+                      <span className={styles.reorderItemText}>{course.title}</span>
+                      <div className={styles.reorderButtons}>
+                        <button
+                          className={styles.reorderButton}
+                          onClick={() => handleMoveUp(index, "course")}
+                          disabled={index === 0}
+                          aria-label="Move up"
+                          title="Move up"
+                        >
+                          <ChevronUp size={16} />
+                        </button>
+                        <button
+                          className={styles.reorderButton}
+                          onClick={() => handleMoveDown(index, "course")}
+                          disabled={index === displayedCourses.length - 1}
+                          aria-label="Move down"
+                          title="Move down"
+                        >
+                          <ChevronDown size={16} />
+                        </button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveCourse(course.id)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </Accordion>
+
+        {/* Analytics Dashboard */}
         <TrainerAnalyticsDashboard />
       </div>
 

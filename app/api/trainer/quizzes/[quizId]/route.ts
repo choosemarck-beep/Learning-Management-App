@@ -26,17 +26,10 @@ export async function PUT(
       );
     }
 
-    // Verify quiz ownership through training
+    // Verify quiz exists
     const quiz = await prisma.quiz.findUnique({
       where: {
         id: params.quizId,
-      },
-      include: {
-        training: {
-          select: {
-            createdBy: true,
-          },
-        },
       },
     });
 
@@ -44,13 +37,6 @@ export async function PUT(
       return NextResponse.json(
         { success: false, error: "Quiz not found" },
         { status: 404 }
-      );
-    }
-
-    if (quiz.training.createdBy !== user.id) {
-      return NextResponse.json(
-        { success: false, error: "Forbidden - You don't own this quiz" },
-        { status: 403 }
       );
     }
 
@@ -139,17 +125,10 @@ export async function DELETE(
       );
     }
 
-    // Verify quiz ownership through training
+    // Verify quiz exists
     const quiz = await prisma.quiz.findUnique({
       where: {
         id: params.quizId,
-      },
-      include: {
-        training: {
-          select: {
-            createdBy: true,
-          },
-        },
       },
     });
 
@@ -157,13 +136,6 @@ export async function DELETE(
       return NextResponse.json(
         { success: false, error: "Quiz not found" },
         { status: 404 }
-      );
-    }
-
-    if (quiz.training.createdBy !== user.id) {
-      return NextResponse.json(
-        { success: false, error: "Forbidden - You don't own this quiz" },
-        { status: 403 }
       );
     }
 

@@ -16,22 +16,30 @@
   padding: 0;
   overflow: hidden;
   z-index: 9999;
-  background: var(--color-bg-dark);
+  /* Remove background color - let background image show through */
+  background: transparent;
+  /* Extend to cover safe area at top */
+  top: calc(-1 * env(safe-area-inset-top, 0));
+  height: calc(100vh + env(safe-area-inset-top, 0));
+  height: calc(100dvh + env(safe-area-inset-top, 0));
+  padding-top: env(safe-area-inset-top, 0);
 }
 
 .backgroundImage {
   position: absolute;
-  top: 0;
+  top: calc(-1 * env(safe-area-inset-top, 0));
   left: 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% + env(safe-area-inset-top, 0));
   z-index: 0;
   /* background-image is set via inline style when imageUrl is available */
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
-  /* Ensure image covers the entire screen and is properly cropped for mobile */
+  /* Ensure image covers the entire screen including safe area */
   object-fit: cover;
+  /* Fallback background if no image */
+  background-color: var(--color-bg-dark);
 }
 
 /* Fallback gradient - only show if no image is set */

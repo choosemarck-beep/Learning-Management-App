@@ -176,11 +176,9 @@ export default async function TrainerDashboardPage() {
     try {
       console.log("[TrainerDashboardPage] Fetching trainings and courses for trainer:", user.id);
       const [rawTrainings, rawCourses, rawPreferences] = await Promise.all([
-        // Fetch all trainings created by this trainer (from courses)
+        // Fetch all trainings (shared across all trainers)
         prisma.training.findMany({
-          where: {
-            createdBy: user.id,
-          },
+          where: {},
           select: {
             id: true,
             title: true,
@@ -195,25 +193,25 @@ export default async function TrainerDashboardPage() {
             createdAt: "desc",
           },
         }),
-        // Fetch all courses created by this trainer
+        // Fetch all courses (shared across all trainers) - including published courses that employees see
         prisma.course.findMany({
-          where: {
-            createdBy: user.id,
-          },
+          where: {},
           select: {
             id: true,
             title: true,
             description: true,
             thumbnail: true,
+            isPublished: true, // Include isPublished to show which courses employees can see
             _count: {
               select: {
                 trainings: true,
               },
             },
           },
-          orderBy: {
-            createdAt: "desc",
-          },
+          orderBy: [
+            { isPublished: "desc" }, // Published courses first
+            { createdAt: "desc" },
+          ],
         }),
         // Fetch dashboard preferences
         prisma.trainerDashboardPreferences.findUnique({

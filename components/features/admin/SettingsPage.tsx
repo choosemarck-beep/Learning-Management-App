@@ -84,18 +84,45 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ user }) => {
       return;
     }
 
+    if (!passwordData.currentPassword) {
+      toast.error("Current password is required");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // TODO: Implement API call to change password
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API call
+      const response = await fetch("/api/user/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+          confirmPassword: passwordData.confirmPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Failed to change password");
+      }
+
       toast.success("Password changed successfully");
       setPasswordData({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
+      setShowPasswords({
+        current: false,
+        new: false,
+        confirm: false,
+      });
     } catch (error) {
-      toast.error("Failed to change password");
+      const errorMessage = error instanceof Error ? error.message : "Failed to change password";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

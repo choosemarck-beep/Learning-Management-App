@@ -26,17 +26,10 @@ export async function GET(
       );
     }
 
-    // Verify mini training ownership through parent training
+    // Verify mini training exists
     const miniTraining = await prisma.miniTraining.findUnique({
       where: {
         id: params.miniTrainingId,
-      },
-      include: {
-        training: {
-          select: {
-            createdBy: true,
-          },
-        },
       },
     });
 
@@ -44,13 +37,6 @@ export async function GET(
       return NextResponse.json(
         { success: false, error: "Mini training not found" },
         { status: 404 }
-      );
-    }
-
-    if (miniTraining.training.createdBy !== user.id) {
-      return NextResponse.json(
-        { success: false, error: "Forbidden - You don't own this mini training" },
-        { status: 403 }
       );
     }
 

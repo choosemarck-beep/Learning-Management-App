@@ -36,11 +36,10 @@ export default async function CourseEditorPage({
     redirect("/login");
   }
 
-  // Fetch course with all related data
-  const course = await prisma.course.findFirst({
+  // Fetch course with all related data (shared across all trainers)
+  const course = await prisma.course.findUnique({
     where: {
       id: params.courseId,
-      createdBy: user.id, // Ensure trainer owns this course
     },
     include: {
       trainings: {

@@ -644,6 +644,17 @@ BLOB_READ_WRITE_TOKEN="..."
 - **CRITICAL**: Never use inline styles (`style={{}}`). Always use CSS Modules with CSS variables from the design system
 - **NO EMOJIS**: Never use emojis in buttons, assets, or any UI elements. Use Lucide React or Heroicons instead.
 - **MOBILE-ONLY**: All user-facing components must be designed for mobile viewports (320px-428px) only. No desktop breakpoints except for admin/super admin pages (`/admin/**`, `/super-admin/**`)
+- **Dashboard Design Consistency**:
+  - **CRITICAL**: Trainer dashboard MUST match admin dashboard's clean, professional design
+  - **Layout Structure**: Overview stats grid at top + Analytics accordions below (same as admin)
+  - **Customization**: Move dashboard customization (add/remove/reorder) to separate accordion section, not inline on main dashboard
+  - **Visual Consistency**: Use same card styling, spacing, and typography as admin dashboard
+  - **Professional Polish**: Remove cluttered UI elements, use accordions for collapsible sections
+- **Course Visibility for Trainers**:
+  - **CRITICAL**: Trainers MUST be able to see all published courses that employees can view
+  - Trainers should see published courses prominently in workshop and dashboard views
+  - Published courses should be ordered first (before unpublished) in trainer views
+  - Trainers need access to view what employees see to ensure proper content management
 - **TYPOGRAPHY QUALITY**: 
   - Use maximum 2-3 font sizes consistently
   - Maintain consistent spacing between text elements
@@ -1020,6 +1031,15 @@ The application supports four distinct user roles with different access levels:
 - **MUST** validate user status (APPROVED) before allowing login
 - **MUST** never expose password hashes in API responses
 - **MUST** enforce password complexity requirements (uppercase, lowercase, number, special character)
+- **Password Change Security (Admins & Trainers)**:
+  - **MUST** verify current password before allowing password change
+  - **MUST** enforce minimum password length (8 characters)
+  - **MUST** prevent reusing the same password (new password must be different from current)
+  - **MUST** implement rate limiting on password change endpoints (5 attempts per hour per IP)
+  - **MUST** provide clear error messages for validation failures (current password incorrect, passwords don't match, etc.)
+  - **MUST** use secure password hashing (bcryptjs with 10 rounds minimum)
+  - **MUST** clear password fields after successful change
+  - **MUST** provide accessible Settings page for Admins and Trainers to change passwords
 
 ### API Security
 - **MUST** validate all request bodies with Zod schemas

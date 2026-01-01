@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { User, Settings, LogOut } from "lucide-react";
 import styles from "./UserProfileDropdown.module.css";
 
@@ -19,9 +20,20 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   userAvatar: propAvatar,
 }) => {
   const { data: session } = useSession();
+  const router = useRouter();
   
   // Use session avatar if available (real-time updates), fallback to prop (SSR)
   const userAvatar = session?.user?.avatar || propAvatar || null;
+
+  const handleSettingsClick = () => {
+    if (userRole === "TRAINER") {
+      router.push("/employee/trainer/settings");
+    } else if (userRole === "ADMIN") {
+      router.push("/admin/settings");
+    } else if (userRole === "SUPER_ADMIN") {
+      router.push("/super-admin/settings");
+    }
+  };
 
   const handleLogout = async () => {
     // Clear remembered user from localStorage
@@ -99,10 +111,9 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
           <span>Profile</span>
           <span className={styles.comingSoon}>Coming soon</span>
         </button>
-        <button className={styles.menuItem} disabled>
+        <button className={styles.menuItem} onClick={handleSettingsClick}>
           <Settings size={18} />
           <span>Settings</span>
-          <span className={styles.comingSoon}>Coming soon</span>
         </button>
         <div className={styles.divider} />
         <button className={`${styles.menuItem} ${styles.logoutItem}`} onClick={handleLogout}>

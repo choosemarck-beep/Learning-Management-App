@@ -30,7 +30,6 @@ export async function GET(
     const course = await prisma.course.findFirst({
       where: {
         id: params.courseId,
-        createdBy: user.id, // Ensure trainer owns this course
       },
       include: {
         trainings: {
@@ -278,11 +277,10 @@ export async function DELETE(
       );
     }
 
-    // Verify course ownership
-    const existingCourse = await prisma.course.findFirst({
+    // Verify course exists
+    const existingCourse = await prisma.course.findUnique({
       where: {
         id: params.courseId,
-        createdBy: user.id,
       },
     });
 

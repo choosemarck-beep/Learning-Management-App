@@ -95,33 +95,31 @@ export async function PUT(request: NextRequest) {
     const finalTrainingIds = trainingIds || [];
     const finalCourseIds = courseIds || [];
 
-    // Verify all training IDs belong to this trainer (from courses)
+    // Verify all training IDs exist
     const trainings = await prisma.training.findMany({
       where: {
         id: { in: finalTrainingIds },
-        createdBy: user.id,
       },
       select: {
         id: true,
       },
     });
 
-    // Verify all course IDs belong to this trainer
+    // Verify all course IDs exist
     const courses = await prisma.course.findMany({
       where: {
         id: { in: finalCourseIds },
-        createdBy: user.id,
       },
       select: {
         id: true,
       },
     });
 
-    // Filter to only valid training IDs that belong to this trainer
+    // Filter to only valid training IDs
     const validTrainingIds = trainings.map((t) => t.id);
     const invalidTrainingIds = finalTrainingIds.filter((id: string) => !validTrainingIds.includes(id));
 
-    // Filter to only valid course IDs that belong to this trainer
+    // Filter to only valid course IDs
     const validCourseIds = courses.map((c) => c.id);
     const invalidCourseIds = finalCourseIds.filter((id: string) => !validCourseIds.includes(id));
 

@@ -49,6 +49,32 @@ export const SplashScreenWrapper: React.FC<SplashScreenWrapperProps> = ({
     return <>{children}</>;
   }
 
+  // Hide body/html background when splash is showing
+  useEffect(() => {
+    if (showSplash) {
+      // Hide body and html backgrounds to prevent showing through
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+      // Set background to transparent so splash screen background shows
+      document.body.style.backgroundColor = "transparent";
+      document.documentElement.style.backgroundColor = "transparent";
+    } else {
+      // Restore defaults when splash is hidden
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      document.body.style.backgroundColor = "";
+      document.documentElement.style.backgroundColor = "";
+    }
+
+    return () => {
+      // Cleanup on unmount
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      document.body.style.backgroundColor = "";
+      document.documentElement.style.backgroundColor = "";
+    };
+  }, [showSplash]);
+
   return (
     <>
       {showSplash && (
