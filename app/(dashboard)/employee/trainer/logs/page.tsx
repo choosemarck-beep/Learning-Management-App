@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/utils";
 import { prisma } from "@/lib/prisma/client";
@@ -7,6 +7,8 @@ import { ViewLogsClient } from "@/components/features/trainer/ViewLogsClient";
 import styles from "./page.module.css";
 
 // Trainer Logs Page - View all system activity logs
+
+export const dynamic = 'force-dynamic';
 
 export default async function TrainerLogsPage() {
   try {
@@ -73,7 +75,13 @@ export default async function TrainerLogsPage() {
         pageDescription="View all system activity logs organized by role"
       >
         <div className={styles.container}>
-          <ViewLogsClient />
+          <Suspense fallback={
+            <div className={styles.loading}>
+              <p>Loading activity logs...</p>
+            </div>
+          }>
+            <ViewLogsClient />
+          </Suspense>
         </div>
       </TrainerLayout>
     );

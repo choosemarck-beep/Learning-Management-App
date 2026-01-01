@@ -69,7 +69,7 @@ export const ViewLogsClient: React.FC = () => {
         setIsLoading(false);
       }
     }
-  }, [roleFilter, typeFilter, currentPage, limit]);
+  }, [roleFilter, typeFilter, currentPage]); // Removed limit - it's a constant
 
   useEffect(() => {
     isMountedRef.current = true;
