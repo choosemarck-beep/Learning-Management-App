@@ -172,8 +172,8 @@ export default function SignupPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        // Show detailed error message from API
-        let errorMessage = result.error || "An error occurred. Please try again.";
+        // Handle HTTP errors (4xx, 5xx)
+        let errorMessage = result.error || result.message || `Server error (${response.status})`;
         
         // If there are validation details, show the first error
         if (result.details && Array.isArray(result.details) && result.details.length > 0) {
@@ -181,15 +181,63 @@ export default function SignupPage() {
           errorMessage = firstError.message || errorMessage;
         }
         
+        // Handle field-specific errors - navigate to the appropriate step
+        if (result.field) {
+          const fieldToStep: Record<string, number> = {
+            firstName: 1,
+            lastName: 1,
+            email: 1,
+            phone: 1,
+            employeeNumber: 2,
+            hireType: 2,
+            companyId: 2,
+            positionId: 3,
+            department: 3,
+            branch: 3,
+            hireDate: 3,
+            password: 4,
+            confirmPassword: 4,
+          };
+          const targetStep = fieldToStep[result.field];
+          if (targetStep) {
+            setCurrentStep(targetStep);
+          }
+        } else if (result.details && Array.isArray(result.details) && result.details.length > 0) {
+          // Navigate to step based on first error field
+          const firstError = result.details[0];
+          if (firstError.path && firstError.path.length > 0) {
+            const fieldToStep: Record<string, number> = {
+              firstName: 1,
+              lastName: 1,
+              email: 1,
+              phone: 1,
+              employeeNumber: 2,
+              hireType: 2,
+              companyId: 2,
+              positionId: 3,
+              department: 3,
+              branch: 3,
+              hireDate: 3,
+              password: 4,
+              confirmPassword: 4,
+            };
+            const targetStep = fieldToStep[firstError.path[0]];
+            if (targetStep) {
+              setCurrentStep(targetStep);
+            }
+          }
+        }
+        
         // Log full error for debugging
         console.error("Signup error:", {
           status: response.status,
           error: result.error,
+          field: result.field,
+          code: result.code,
           details: result.details,
-          fullResult: result,
         });
         
-        toast.error(errorMessage);
+        toast.error(errorMessage, { duration: 6000 });
         setIsLoading(false);
         return;
       }

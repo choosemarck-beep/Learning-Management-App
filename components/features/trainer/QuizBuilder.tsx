@@ -260,13 +260,53 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
       const result = await response.json();
 
       if (!response.ok) {
-        const errorMessage = result.error || "Failed to save quiz";
-        toast.error(errorMessage);
+        // Handle HTTP errors (4xx, 5xx)
+        const errorMessage = result.error || result.message || `Server error (${response.status})`;
+        toast.error(errorMessage, { duration: 6000 });
+        
+        // Handle field-specific errors
+        if (result.field) {
+          // Navigate to the appropriate step based on the field
+          if (result.field === "title" || result.field === "passingScore" || result.field === "timeLimit") {
+            setCurrentStep(1);
+          } else if (result.field === "questions") {
+            setCurrentStep(2);
+          }
+        }
+        
+        if (result.details) {
+          const validationErrors: Record<string, string> = {};
+          result.details.forEach((err: any) => {
+            if (err.path && err.path.length > 0) {
+              validationErrors[err.path[0]] = err.message;
+            }
+          });
+          // Navigate to step 1 if there are validation errors in required fields
+          if (validationErrors.title || validationErrors.passingScore) {
+            setCurrentStep(1);
+          } else if (validationErrors.questions) {
+            setCurrentStep(2);
+          }
+        }
+        
+        console.error("Quiz save failed:", {
+          status: response.status,
+          error: result.error,
+          field: result.field,
+          code: result.code,
+          details: result.details,
+        });
         setIsLoading(false);
         return;
       }
 
-      toast.success(hasExistingQuiz ? "Quiz updated successfully!" : "Quiz created successfully!");
+      if (result.success) {
+        toast.success(hasExistingQuiz ? "Quiz updated successfully!" : "Quiz created successfully!");
+      } else {
+        toast.error(result.error || "Failed to save quiz", { duration: 6000 });
+        setIsLoading(false);
+        return;
+      }
       
       if (onSuccess) {
         onSuccess();

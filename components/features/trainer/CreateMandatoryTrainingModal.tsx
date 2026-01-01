@@ -109,13 +109,51 @@ export const CreateMandatoryTrainingModal: React.FC<CreateMandatoryTrainingModal
       const result = await response.json();
 
       if (!response.ok) {
-        const errorMessage = result.error || "Failed to create training";
-        toast.error(errorMessage);
+        // Handle HTTP errors (4xx, 5xx)
+        const errorMessage = result.error || result.message || `Server error (${response.status})`;
+        toast.error(errorMessage, { duration: 6000 });
+        
+        // Handle field-specific errors
+        if (result.field) {
+          // Navigate to the appropriate step based on the field
+          if (result.field === "title" || result.field === "description") {
+            setCurrentStep(1);
+          } else if (result.field === "badgeIcon" || result.field === "badgeColor") {
+            setCurrentStep(2);
+          }
+        }
+        
+        if (result.details) {
+          const validationErrors: Record<string, string> = {};
+          result.details.forEach((err: any) => {
+            if (err.path && err.path.length > 0) {
+              validationErrors[err.path[0]] = err.message;
+            }
+          });
+          // Navigate to step 1 if there are validation errors in required fields
+          if (validationErrors.title || validationErrors.description) {
+            setCurrentStep(1);
+          }
+        }
+        
+        console.error("Training creation failed:", {
+          status: response.status,
+          error: result.error,
+          field: result.field,
+          code: result.code,
+          details: result.details,
+        });
         setIsLoading(false);
         return;
       }
 
-      toast.success("Training created successfully!");
+      if (result.success) {
+        toast.success("Training created successfully!");
+      } else {
+        toast.error(result.error || "Failed to create training", { duration: 6000 });
+        setIsLoading(false);
+        return;
+      }
       
       if (onSuccess) {
         onSuccess();
