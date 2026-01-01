@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Copy, ChevronRight, ChevronLeft, Check } from "lucide-react";
+import { Copy, ChevronLeft, Check } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -540,7 +540,6 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
                 className={styles.nextButton}
               >
                 Continue
-                <ChevronRight size={18} />
               </Button>
             ) : (
               <Button
