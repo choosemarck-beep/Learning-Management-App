@@ -186,7 +186,21 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
       if (!response.ok) {
         // Handle HTTP errors (4xx, 5xx)
         const errorMessage = data.error || data.message || `Server error (${response.status})`;
-        toast.error(errorMessage);
+        toast.error(errorMessage, { duration: 6000 });
+        
+        // Handle field-specific errors (e.g., unique constraint violations)
+        if (data.field) {
+          const fieldErrors: Record<string, string> = {};
+          fieldErrors[data.field] = errorMessage;
+          setErrors(fieldErrors);
+          
+          // Navigate to the appropriate step based on the field
+          if (data.field === "email" || data.field === "firstName" || data.field === "lastName") {
+            setCurrentStep(1);
+          } else if (data.field === "employeeNumber" || data.field === "phone" || data.field === "companyId") {
+            setCurrentStep(2);
+          }
+        }
         
         if (data.details) {
           const validationErrors: Record<string, string> = {};
@@ -204,6 +218,8 @@ export const CreateTrainerModal: React.FC<CreateTrainerModalProps> = ({
         console.error("Trainer creation failed:", {
           status: response.status,
           error: data.error,
+          field: data.field,
+          code: data.code,
           details: data.details,
         });
         return;

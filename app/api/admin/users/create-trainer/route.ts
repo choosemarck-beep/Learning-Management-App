@@ -102,15 +102,37 @@ export async function POST(request: NextRequest) {
     // Wrap Prisma queries in try-catch
     try {
       // Check if email already exists
-      const existingUser = await prisma.user.findUnique({
+      const existingUserByEmail = await prisma.user.findUnique({
         where: { email: validatedData.email },
       });
 
-      if (existingUser) {
+      if (existingUserByEmail) {
         return NextResponse.json(
-          { success: false, error: "Email already exists" },
+          { 
+            success: false, 
+            error: "A user with this email address already exists. Please use a different email.",
+            field: "email",
+          },
           { status: 400 }
         );
+      }
+
+      // Check if employeeNumber already exists (if provided)
+      if (validatedData.employeeNumber && validatedData.employeeNumber.trim() !== "") {
+        const existingUserByEmployeeNumber = await prisma.user.findUnique({
+          where: { employeeNumber: validatedData.employeeNumber.trim() },
+        });
+
+        if (existingUserByEmployeeNumber) {
+          return NextResponse.json(
+            { 
+              success: false, 
+              error: "A user with this employee number already exists. Please use a different employee number or leave it blank.",
+              field: "employeeNumber",
+            },
+            { status: 400 }
+          );
+        }
       }
 
       // Generate random password
@@ -204,8 +226,68 @@ export async function POST(request: NextRequest) {
       );
     } catch (dbError) {
       console.error("Database error creating trainer:", dbError);
+      
+      // Handle Prisma unique constraint errors
+      if (dbError && typeof dbError === "object" && "code" in dbError) {
+        const prismaError = dbError as { code: string; meta?: any };
+        
+        if (prismaError.code === "P2002") {
+          // Unique constraint violation
+          const target = prismaError.meta?.target || [];
+          let errorMessage = "A trainer with this information already exists.";
+          
+          if (target.includes("email")) {
+            errorMessage = "A user with this email address already exists. Please use a different email.";
+          } else if (target.includes("employeeNumber")) {
+            errorMessage = "A user with this employee number already exists. Please use a different employee number or leave it blank.";
+          } else if (target.includes("phone")) {
+            errorMessage = "A user with this phone number already exists. Please use a different phone number or leave it blank.";
+          }
+          
+          return NextResponse.json(
+            { 
+              success: false, 
+              error: errorMessage,
+              code: prismaError.code,
+              field: target[0] || null,
+            },
+            { status: 400 }
+          );
+        }
+        
+        if (prismaError.code === "P2003") {
+          // Foreign key constraint violation
+          return NextResponse.json(
+            { 
+              success: false, 
+              error: "Invalid company or position selected. Please select a valid option.",
+              code: prismaError.code,
+            },
+            { status: 400 }
+          );
+        }
+        
+        if (prismaError.code === "P1001") {
+          // Database connection error
+          return NextResponse.json(
+            { 
+              success: false, 
+              error: "Database connection error. Please try again later.",
+              code: prismaError.code,
+            },
+            { status: 503 }
+          );
+        }
+      }
+      
+      // Generic database error
+      const errorMessage = dbError instanceof Error ? dbError.message : String(dbError);
       return NextResponse.json(
-        { success: false, error: "Failed to create trainer" },
+        { 
+          success: false, 
+          error: "Failed to create trainer account. Please try again.",
+          details: process.env.NODE_ENV === "development" ? errorMessage : undefined,
+        },
         { status: 500 }
       );
     }
