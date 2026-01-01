@@ -6,6 +6,8 @@ import { TrainerLayout } from "@/components/layout/trainer/TrainerLayout";
 import { ViewLogsClient } from "@/components/features/trainer/ViewLogsClient";
 import styles from "./page.module.css";
 
+// Trainer Logs Page - View all system activity logs
+
 export default async function TrainerLogsPage() {
   try {
     const user = await getCurrentUser();
