@@ -21,60 +21,71 @@
   gap: var(--spacing-md);
 }
 
-/* Desktop responsive styles */
+/* Desktop responsive styles - Complete overhaul to eliminate gap */
 @media (min-width: 768px) {
   .container {
+    /* Break out of mainContent constraints completely */
+    position: fixed;
+    top: 64px; /* Below header */
+    left: 0; /* Start from viewport left edge */
+    right: 0; /* Extend to viewport right edge */
+    width: 100vw; /* Full viewport width */
     max-width: none;
-    width: calc(100% + 89px); /* Extend width to cover gap area */
+    height: calc(100vh - 64px); /* Full height minus header */
     margin: 0;
-    margin-left: -89px !important; /* Pull back to sidebar edge */
-    padding: 0 !important;
+    padding: 0;
     gap: 0;
-    height: calc(100vh - 64px);
     overflow-y: auto;
     overflow-x: hidden;
-    position: relative;
-    left: 0;
-    top: 0;
     background: var(--color-bg-dark);
     z-index: 2;
+    /* Ensure background covers everything including gap area */
+    box-sizing: border-box;
   }
   
   .contentWrapper {
     width: 100%;
     max-width: 100%;
-    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 100px; /* 90px sidebar (89px + 1px border) + 10px gap */
+    /* Start content at 100px: 90px sidebar (89px + 1px border) + 10px gap */
+    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 100px;
     margin: 0;
     gap: var(--spacing-md);
     box-sizing: border-box;
     background: var(--color-bg-dark);
+    min-height: 100%;
   }
 }
 
 @media (min-width: 1024px) {
   .container {
-    max-width: none;
-    width: calc(100% + 89px); /* Extend width to cover gap area */
-    margin: 0;
-    margin-left: -89px !important; /* Pull back to sidebar edge */
-    padding: 0 !important;
-    gap: 0;
-    overflow-x: hidden;
-    position: relative;
+    /* Same positioning strategy for larger screens */
+    position: fixed;
+    top: 64px;
     left: 0;
-    top: 0;
+    right: 0;
+    width: 100vw;
+    max-width: none;
+    height: calc(100vh - 64px);
+    margin: 0;
+    padding: 0;
+    gap: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
     background: var(--color-bg-dark);
     z-index: 2;
+    box-sizing: border-box;
   }
   
   .contentWrapper {
     width: 100%;
     max-width: 100%;
-    padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 100px; /* 90px sidebar (89px + 1px border) + 10px gap */
+    /* Start content at 100px: 90px sidebar (89px + 1px border) + 10px gap */
+    padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 100px;
     margin: 0;
     gap: var(--spacing-md);
     box-sizing: border-box;
     background: var(--color-bg-dark);
+    min-height: 100%;
   }
 }
 
@@ -125,4 +136,3 @@
     font-size: var(--font-size-sm);
   }
 }
-

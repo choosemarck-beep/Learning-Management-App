@@ -1,8 +1,23 @@
 /* Create Trainer Modal - Professional Multi-Step Design */
 
 .modal {
-  max-width: 500px;
+  max-width: 500px !important; /* Override base Modal styles */
   width: 100%;
+}
+
+/* Desktop: Smaller modal, centered accounting for sidebar */
+@media (min-width: 768px) {
+  .modal {
+    max-width: 480px !important; /* Reduced from 520px, override base Modal */
+    width: 100%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .modal {
+    max-width: 500px !important; /* Keep compact size, override base Modal */
+    width: 100%;
+  }
 }
 
 .form {
@@ -10,6 +25,14 @@
   flex-direction: column;
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
+}
+
+/* Reduce form padding on desktop for more compact layout */
+@media (min-width: 768px) {
+  .form {
+    padding: var(--spacing-md) var(--spacing-lg);
+    gap: var(--spacing-md);
+  }
 }
 
 /* Progress Section */
@@ -25,7 +48,7 @@
 
 /* Step Container */
 .stepContainer {
-  min-height: 200px;
+  min-height: 180px; /* Reduced from 200px */
   position: relative;
   overflow: hidden;
   flex: 1;
@@ -58,7 +81,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs); /* Reduced from var(--spacing-sm) */
   width: 100%;
 }
 
@@ -82,7 +105,7 @@
 .fieldsGroup {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs); /* Reduced from var(--spacing-sm) */
   width: 100%;
 }
 
@@ -113,8 +136,8 @@
 .actions {
   display: flex;
   gap: var(--spacing-sm);
-  margin-top: var(--spacing-sm);
-  padding: var(--spacing-sm) 0;
+  margin-top: var(--spacing-xs); /* Reduced from var(--spacing-sm) */
+  padding: var(--spacing-xs) 0; /* Reduced from var(--spacing-sm) */
   border-top: 1px solid rgba(139, 92, 246, 0.15);
   align-items: center;
   justify-content: flex-end;
@@ -273,15 +296,15 @@
 
 /* Responsive adjustments for desktop */
 @media (min-width: 768px) {
-  .modal {
-    max-width: 520px;
-  }
-
   .stepContainer {
-    min-height: 240px;
+    min-height: 200px; /* Reduced from 240px */
   }
 
   .stepTitle {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg); /* Reduced from var(--font-size-xl) */
+  }
+  
+  .stepDescription {
+    font-size: var(--font-size-sm);
   }
 }

@@ -26,7 +26,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   pageDescription,
 }) => {
   return (
-    <div className={styles.layout}>
+    <div className={styles.layout} data-admin-layout="true">
       <ConditionalGalaxyBackground starCount={150} meteorCount={3} />
       <AdminSidebar
         userRole={userRole}

@@ -16,10 +16,11 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* Trainer layout - position modal beside sidebar */
-.backdropTrainer {
+/* Admin/Trainer layout - position modal beside sidebar, centered in remaining space */
+.backdropDesktop {
   left: 89px !important; /* Collapsed sidebar width */
   width: calc(100vw - 89px) !important;
+  /* Modal will be centered within this space */
 }
 
 .modal {

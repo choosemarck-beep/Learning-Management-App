@@ -27,7 +27,7 @@ export const Modal: React.FC<ModalProps> = ({
   className,
 }) => {
   const [mounted, setMounted] = useState(false);
-  const [isTrainerLayout, setIsTrainerLayout] = useState(false);
+  const [isDesktopLayout, setIsDesktopLayout] = useState(false);
 
   // Ensure we're in the browser before rendering portal
   useEffect(() => {
@@ -35,18 +35,19 @@ export const Modal: React.FC<ModalProps> = ({
     return () => setMounted(false);
   }, []);
 
-  // Check if we're in trainer layout
+  // Check if we're in admin or trainer layout (both have sidebars)
   useEffect(() => {
     if (!mounted) return;
     
-    const checkTrainerLayout = () => {
+    const checkDesktopLayout = () => {
+      const adminLayout = document.querySelector('[data-admin-layout="true"]');
       const trainerLayout = document.querySelector('[data-trainer-layout="true"]');
-      setIsTrainerLayout(!!trainerLayout);
+      setIsDesktopLayout(!!(adminLayout || trainerLayout));
     };
     
-    checkTrainerLayout();
+    checkDesktopLayout();
     // Check periodically in case layout changes
-    const interval = setInterval(checkTrainerLayout, 100);
+    const interval = setInterval(checkDesktopLayout, 100);
     return () => clearInterval(interval);
   }, [mounted]);
 
@@ -85,7 +86,7 @@ export const Modal: React.FC<ModalProps> = ({
   // Render modal using React Portal at document.body level
   const modalContent = (
     <div
-      className={cn(styles.backdrop, isTrainerLayout && styles.backdropTrainer)}
+      className={cn(styles.backdrop, isDesktopLayout && styles.backdropDesktop)}
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
