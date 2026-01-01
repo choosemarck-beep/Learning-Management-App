@@ -941,6 +941,29 @@ The application supports four distinct user roles with different access levels:
   - **Call-to-Action**: Make CTAs clear, action-oriented, and gamified (e.g., "Start Learning Now" instead of "Login")
   - **Subject Lines**: Use positive, gamified language (e.g., "Get Back to Learning!" instead of "Reset Password")
   - **No Emojis**: Follow project rules - no emojis in email content (use text-based gamification instead)
+- **CRITICAL - Response Format Requirements (MANDATORY)**:
+  - **Timestamps**: ALWAYS include a timestamp at the beginning of every response in the format: `[YYYY-MM-DD HH:MM:SS]` (e.g., `[2024-01-15 14:30:45]`)
+  - **Problem-Solution Format**: ALWAYS provide the following structure for every action taken:
+    1. **Problem**: What issue or requirement needs to be addressed
+    2. **Cause**: Why the problem exists or what's causing it
+    3. **Solution**: What action is being taken to fix it
+    4. **Effect**: What the expected outcome or result will be
+  - **Format Example**:
+    ```
+    [2024-01-15 14:30:45]
+    
+    **Problem**: [Description of the issue]
+    **Cause**: [Root cause explanation]
+    **Solution**: [What I'm doing to fix it]
+    **Effect**: [Expected result]
+    ```
+  - **When to Apply**: This format must be used for:
+    - All code changes
+    - All file modifications
+    - All configuration updates
+    - All troubleshooting steps
+    - Any action that modifies the codebase
+  - **Rationale**: Helps track when changes were made and provides clear context for future reference
 - **CRITICAL - User is Not a Developer**: 
   - Always explain what you're doing and why
   - Describe the problem before presenting the solution

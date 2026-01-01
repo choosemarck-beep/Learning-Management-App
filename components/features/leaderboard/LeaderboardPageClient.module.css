@@ -33,14 +33,16 @@
     height: calc(100vh - 64px); /* Full height minus header */
     overflow-y: auto;
     overflow-x: hidden; /* Prevent horizontal scrolling */
-    position: relative;
-    left: 0;
+    position: absolute; /* Position absolutely to control exact placement */
+    left: 0; /* Start at the left edge of the content container (right after sidebar) */
+    top: 0;
+    background: transparent; /* Ensure background doesn't create visual gap */
   }
   
   .contentWrapper {
     width: 100%;
     max-width: 100%;
-    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 8px; /* Minimal left padding (8px) for visual balance */
+    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 0; /* Remove left padding to eliminate gap */
     margin: 0; /* Ensure no margin */
     gap: var(--spacing-md);
     box-sizing: border-box; /* Include padding in width calculation */
@@ -55,14 +57,16 @@
     padding: 0 !important; /* Remove ALL padding */
     gap: 0;
     overflow-x: hidden; /* Prevent horizontal scrolling */
-    position: relative;
-    left: 0;
+    position: absolute; /* Position absolutely to control exact placement */
+    left: 0; /* Start at the left edge of the content container (right after sidebar) */
+    top: 0;
+    background: transparent; /* Ensure background doesn't create visual gap */
   }
   
   .contentWrapper {
     width: 100%;
     max-width: 100%;
-    padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 8px; /* Minimal left padding (8px) for visual balance */
+    padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 0; /* Remove left padding to eliminate gap */
     margin: 0; /* Ensure no margin */
     gap: var(--spacing-md);
     box-sizing: border-box; /* Include padding in width calculation */
