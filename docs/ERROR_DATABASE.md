@@ -3427,6 +3427,7 @@ useEffect(() => {
 - **Pattern**: When using async operations in `useEffect` or `useCallback`, always check mount status before setting state
 - **2025-01-01**: Added React error #310 pattern - use `useRef` mount guards to prevent state updates after component unmount
 - **2025-01-02**: Added conditional hook call pattern - hooks called after early return violate Rules of Hooks, must move hooks before early returns
+- **2025-01-02**: Added systematic approach to fixing React error #310 - check ALL components at once, not one at a time
 
 ---
 
@@ -3479,6 +3480,27 @@ useEffect(() => {
 - **2025-01-02**: Added ESLint build errors after package updates - configure ESLint rules to disable/relax strict rules that have many violations
 
 ---
+
+#### Error: React Hook Called After Early Return (Conditional Hook Call) - SYSTEMATIC FIX APPROACH
+
+**CRITICAL - Fix ALL Instances at Once:**
+When fixing React error #310, ALWAYS search for ALL components with conditional hooks and fix them in a single commit. Do NOT fix them one at a time.
+
+**Systematic Search Pattern:**
+1. Search for all early returns: `grep -r "^\s*if.*return" components --include="*.tsx"`
+2. Check each file for hooks called AFTER the early return
+3. Fix ALL instances before committing
+4. Test the entire application, not just one component
+
+**Files Already Fixed:**
+- `components/layout/SplashScreenWrapper.tsx` - Moved useEffect before early return
+- `components/features/trainer/TrainerDashboardClient.tsx` - Added mount guards
+
+**Files to Check When Error Persists:**
+- All analytics components (TrainerCompletionAnalytics, TrainerQuizAnalytics, TrainerEngagementAnalytics) - ✅ Verified: Early returns are AFTER hooks (OK)
+- All modal components
+- All page components with conditional rendering
+- All components that use `useMemo` or `useCallback` conditionally
 
 #### Error: React Hook Called After Early Return (Conditional Hook Call)
 **Symptoms:**
