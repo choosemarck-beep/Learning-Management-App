@@ -1387,7 +1387,7 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
           <div className={styles.quizWarningActions}>
             <Button
               variant="primary"
-              onClick={handleStartQuiz}
+              onClick={() => handleStartQuiz(false)}
               className={styles.quizWarningButton}
             >
               Yes, I'm Ready

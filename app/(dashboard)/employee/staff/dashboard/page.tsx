@@ -8,6 +8,7 @@ import { CarouselHeader } from "@/components/features/dashboard/CarouselHeader";
 import { CarouselPlaceholder } from "@/components/features/dashboard/CarouselPlaceholder";
 import { DashboardCoursesSection } from "@/components/features/dashboard/DashboardCoursesSection";
 import { TrainerAnnouncementsSection } from "@/components/features/dashboard/TrainerAnnouncementsSection";
+import { calculateCourseProgress } from "@/lib/utils/trainingProgress";
 import styles from "./page.module.css";
 
 export const dynamic = 'force-dynamic';
@@ -193,6 +194,7 @@ export default async function StaffDashboardPage() {
           imageUrl: true,
           title: true,
           description: true,
+          redirectUrl: true,
         },
       });
     }
@@ -210,6 +212,7 @@ export default async function StaffDashboardPage() {
           imageUrl: true,
           title: true,
           description: true,
+          redirectUrl: true,
         },
       });
     } catch (imageError) {
@@ -235,16 +238,23 @@ export default async function StaffDashboardPage() {
     // Ensure courseProgresses is an array
     const courseProgresses = Array.isArray(userData.courseProgresses) ? userData.courseProgresses : [];
     
-    // Serialize courses data - ensure all values are primitives
-    const courses = courseProgresses.map((cp) => ({
-      id: String(cp.course.id),
-      title: String(cp.course.title || ''),
-      description: String(cp.course.description || ''),
-      thumbnail: cp.course.thumbnail ? String(cp.course.thumbnail) : null,
-      totalXP: typeof cp.course.totalXP === 'number' ? cp.course.totalXP : 0,
-      progress: typeof cp.progress === 'number' ? cp.progress : 0,
-      isCompleted: typeof cp.isCompleted === 'boolean' ? cp.isCompleted : false,
-    }));
+    // Recalculate progress for each course to ensure it's up-to-date
+    const courses = await Promise.all(
+      courseProgresses.map(async (cp) => {
+        // Recalculate progress to ensure it's current
+        const calculated = await calculateCourseProgress(user.id, cp.courseId);
+        
+        return {
+          id: String(cp.course.id),
+          title: String(cp.course.title || ''),
+          description: String(cp.course.description || ''),
+          thumbnail: cp.course.thumbnail ? String(cp.course.thumbnail) : null,
+          totalXP: typeof cp.course.totalXP === 'number' ? cp.course.totalXP : 0,
+          progress: calculated.progress, // Use recalculated progress
+          isCompleted: calculated.isCompleted, // Use recalculated completion status
+        };
+      })
+    );
 
     const onboardingCompleted = userData.onboardingCompleted || false;
     
@@ -279,11 +289,11 @@ export default async function StaffDashboardPage() {
         <CarouselPlaceholder />
       )}
 
-      {/* Courses Section */}
-      <DashboardCoursesSection courses={courses} />
-
       {/* Announcements Section */}
       <TrainerAnnouncementsSection />
+
+      {/* Courses Section */}
+      <DashboardCoursesSection courses={courses} />
 
       {/* Bottom Navigation */}
       <ProfileBottomNav

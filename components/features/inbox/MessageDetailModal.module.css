@@ -1,0 +1,108 @@
+/* Message Detail Modal - Mobile-First Design (320px-428px) */
+
+.modal {
+  max-width: 428px;
+}
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm);
+}
+
+.messageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.senderInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.senderAvatar,
+.senderAvatarPlaceholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.senderAvatar {
+  object-fit: cover;
+}
+
+.senderAvatarPlaceholder {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+}
+
+.senderDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+  flex: 1;
+}
+
+.senderName {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.messageDate {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.messageContent {
+  padding: var(--spacing-md) 0;
+}
+
+.contentText {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.messageLink {
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.linkButton {
+  width: 100%;
+}
+
+.modalActions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.markReadButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+}
+
+.closeButton {
+  width: 100%;
+}
+

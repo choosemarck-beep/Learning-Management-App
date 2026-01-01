@@ -12,6 +12,10 @@
     box-shadow var(--transition-normal) ease;
 }
 
+.itemCard.clickable {
+  cursor: pointer;
+}
+
 .itemCard:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
@@ -93,7 +97,7 @@
   margin: 0;
   line-height: 1.6;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

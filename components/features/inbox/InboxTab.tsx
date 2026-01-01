@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Circle, CheckCircle2 } from "lucide-react";
+import { MessageDetailModal } from "./MessageDetailModal";
 import styles from "./InboxTab.module.css";
 
 interface InboxItem {
@@ -32,6 +33,8 @@ export const InboxTab: React.FC<InboxTabProps> = ({
   onMarkAsRead,
   emptyMessage,
 }) => {
+  const [selectedMessage, setSelectedMessage] = useState<InboxItem | null>(null);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -61,13 +64,30 @@ export const InboxTab: React.FC<InboxTabProps> = ({
     );
   }
 
+  const handleMessageClick = (item: InboxItem) => {
+    setSelectedMessage(item);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedMessage(null);
+  };
+
+  const handleMarkAsReadInModal = (id: string, type?: "notification" | "message" | "announcement") => {
+    if (onMarkAsRead) {
+      onMarkAsRead(id, type);
+    }
+    // Don't close modal after marking as read
+  };
+
   return (
-    <div className={styles.itemsList}>
-      {items.map((item) => (
-        <Card
-          key={item.id}
-          className={`${styles.itemCard} ${!item.isRead ? styles.unread : ""}`}
-        >
+    <>
+      <div className={styles.itemsList}>
+        {items.map((item) => (
+          <Card
+            key={item.id}
+            className={`${styles.itemCard} ${!item.isRead ? styles.unread : ""} ${styles.clickable}`}
+            onClick={() => handleMessageClick(item)}
+          >
           <CardBody>
             <div className={styles.itemContent}>
               <div className={styles.itemHeader}>
@@ -115,7 +135,17 @@ export const InboxTab: React.FC<InboxTabProps> = ({
           </CardBody>
         </Card>
       ))}
-    </div>
+      </div>
+
+      {selectedMessage && (
+        <MessageDetailModal
+          isOpen={!!selectedMessage}
+          onClose={handleCloseModal}
+          item={selectedMessage}
+          onMarkAsRead={selectedMessage && !selectedMessage.isRead && onMarkAsRead ? () => handleMarkAsReadInModal(selectedMessage.id, selectedMessage.type) : undefined}
+        />
+      )}
+    </>
   );
 };
 
