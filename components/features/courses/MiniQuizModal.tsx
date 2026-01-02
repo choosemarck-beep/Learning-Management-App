@@ -97,7 +97,64 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
     }
   }, [isOpen]);
 
-  // Timer for quiz
+  // CRITICAL: handleSubmit must be wrapped in useCallback and defined before useEffect that uses it
+  const handleSubmit = useCallback(async () => {
+    // Check if all questions are answered
+    const unansweredQuestions = quiz.questions.filter(
+      (q) => !answers[q.id]
+    );
+    if (unansweredQuestions.length > 0) {
+      toast.error(`Please answer all questions. ${unansweredQuestions.length} question(s) remaining.`);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(`/api/mini-trainings/${miniTrainingId}/quiz/submit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          answers,
+          startedAt: quizStartTime?.toISOString() || new Date().toISOString(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setResults(data.data.results);
+        setScore(data.data.score);
+        setXpEarned(data.data.xpEarned || null);
+        setQuizTiming({
+          startedAt: data.data.startedAt || null,
+          completedAt: data.data.completedAt || null,
+          timeSpent: data.data.timeSpent || null,
+        });
+        
+        if (data.data.passed) {
+          toast.success(`Quiz passed! Score: ${data.data.score}%`);
+          // Call onComplete after a short delay to show the success message
+          setTimeout(() => {
+            onComplete();
+          }, 1500);
+        } else {
+          toast.error(`Quiz failed. Score: ${data.data.score}%. Passing score: ${quiz.passingScore}%`);
+        }
+      } else {
+        toast.error(data.error || "Failed to submit quiz");
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
+      toast.error("Failed to submit quiz. Please try again.");
+      setIsSubmitting(false);
+    }
+  }, [quiz.questions, answers, miniTrainingId, quizStartTime, quiz.passingScore, onComplete]);
+
+  // Timer for quiz - CRITICAL: handleSubmit must be defined before this useEffect
   useEffect(() => {
     if (quiz.timeLimit && !results && !isSubmitting && isOpen) {
       setTimeRemaining(quiz.timeLimit);
@@ -116,7 +173,7 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
 
       return () => clearInterval(interval);
     }
-  }, [quiz.timeLimit, results, isSubmitting, isOpen]);
+  }, [quiz.timeLimit, results, isSubmitting, isOpen, handleSubmit]);
 
   // Handle option click with confirmation popup (like QuizCard)
   const handleOptionClick = (questionId: string, optionId: string, optionIndex: number) => {
