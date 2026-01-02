@@ -4132,6 +4132,60 @@ useEffect(() => {
 **Files Fixed:**
 - `components/features/trainer/TrainerDashboardClient.tsx` - Moved `statsRef` declaration before `useEffect` that uses it
 
+---
+
+### React error #310: Stale Closure from Non-Memoized Variable Used in useCallback
+
+**Symptoms:**
+- "Application error: a client-side exception has occurred" (generic Next.js error)
+- Component crashes or shows error overlay
+- Error occurs when `useCallback` function references a variable that's recreated on every render
+- Variable is not in the dependency array, causing stale closure
+
+**Root Cause:**
+- A variable (e.g., `legacyQuestions`) is defined as a regular `const` (not memoized)
+- This variable is used inside a `useCallback` function
+- The variable is not included in the `useCallback` dependency array
+- On each render, the variable gets a new reference, but `useCallback` still references the old value
+- This creates a stale closure that can cause runtime errors or crashes
+
+**Example of the Problem:**
+```typescript
+// ❌ WRONG - legacyQuestions recreated on every render, but not in dependencies
+const legacyQuestions = quiz.questions.map((q) => ({ ... }));
+
+const handleSubmit = useCallback(async () => {
+  const displayedQuestionIds = legacyQuestions.map(q => q.id); // Stale closure!
+  // ...
+}, [quiz.questions]); // legacyQuestions not in dependencies
+```
+
+**Solution:**
+1. **Memoize the variable with `useMemo`**: Ensure it only changes when its dependencies change
+2. **Add the memoized variable to `useCallback` dependencies**: This ensures `useCallback` updates when the variable changes
+
+**Example Fix:**
+```typescript
+// ✅ CORRECT - Memoize legacyQuestions and include in dependencies
+const legacyQuestions = useMemo(() => {
+  return quiz.questions.map((q) => ({ ... }));
+}, [quiz.questions]);
+
+const handleSubmit = useCallback(async () => {
+  const displayedQuestionIds = legacyQuestions.map(q => q.id); // Always current!
+  // ...
+}, [legacyQuestions, quiz.questions]); // Include memoized variable
+```
+
+**Files Fixed:**
+- `components/features/courses/TrainingQuizPageClient.tsx` - Memoized `legacyQuestions` and added to `handleSubmit` dependencies (2025-01-02)
+
+**Prevention:**
+- Always memoize variables that are used in `useCallback` or `useEffect` hooks
+- Include all referenced variables in dependency arrays
+- Use `useMemo` for derived data that's used in other hooks
+- Review ESLint warnings for missing dependencies
+
 **Prevention:**
 - **CRITICAL**: Always declare all hooks in this order:
   1. `useState` hooks (all together)

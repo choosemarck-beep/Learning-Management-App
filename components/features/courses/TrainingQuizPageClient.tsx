@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, XCircle, Award, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -117,14 +117,17 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
   };
 
   // Convert quiz questions to legacy format for QuizCard (must be before handleSubmit)
-  const legacyQuestions: LegacyQuizQuestion[] = quiz.questions.map((q) => ({
-    id: q.id,
-    question: q.question,
-    type: q.type,
-    options: q.options,
-    correctAnswer: q.correctAnswer,
-    explanation: q.explanation,
-  }));
+  // CRITICAL: Memoize to prevent stale closures in handleSubmit
+  const legacyQuestions: LegacyQuizQuestion[] = useMemo(() => {
+    return quiz.questions.map((q) => ({
+      id: q.id,
+      question: q.question,
+      type: q.type,
+      options: q.options,
+      correctAnswer: q.correctAnswer,
+      explanation: q.explanation,
+    }));
+  }, [quiz.questions]);
 
   // CRITICAL: handleSubmit must be wrapped in useCallback and defined before useEffect that uses it
   const handleSubmit = useCallback(async (submittedAnswers?: Record<string, string>) => {
@@ -200,7 +203,7 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
       toast.error("Failed to submit quiz. Please try again.");
       setIsSubmitting(false);
     }
-  }, [results, answers, quiz.questions, quiz.passingScore, trainingId, isRefresher, quizStartTime, router]);
+  }, [results, answers, legacyQuestions, quiz.questions, quiz.passingScore, trainingId, isRefresher, quizStartTime, router]);
 
   // Timer for quiz - CRITICAL: handleSubmit must be defined before this useEffect
   useEffect(() => {
