@@ -2,6 +2,15 @@
 
 This document tracks common errors encountered during development and their solutions. This helps prevent repeating the same fixes and allows us to reference proven solutions.
 
+**CRITICAL - Systematic Error Tracking:**
+- **ALL errors encountered are documented here** with symptoms, causes, solutions, and prevention guidelines
+- **Every fix is tracked** with file names, commit references, and date stamps
+- **Patterns are identified** to prevent similar errors in the future
+- **Learning from debugging** is captured in prevention guidelines and best practices
+- **Error categories** are organized for easy reference (TypeScript, Runtime, Database, Authentication, etc.)
+- **Revision history** tracks when new error patterns are added
+- **This is a living document** that grows with every error we encounter and fix
+
 ## Error Categories
 
 ### 1. TypeScript/Compilation Errors

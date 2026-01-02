@@ -435,7 +435,7 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
       totalCourses: courseStatsLength,
       pendingCompletions: totalAssigned - totalCompleted,
     };
-  }, [stats?.trainingStats?.length, stats?.courseStats?.length, stats?.totalAssigned, stats?.totalCompleted]);
+  }, [stats]); // Use entire stats object as dependency to satisfy ESLint and ensure consistency
 
   // Show error state if there's an error
   // CRITICAL: Early return MUST be AFTER all hooks (useState, useEffect, useCallback, useMemo)
