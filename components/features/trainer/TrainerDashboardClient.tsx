@@ -359,19 +359,33 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
     }
   };
 
+  // Use refs to track previous prop values for comparison
+  const prevTrainingsRef = useRef<string>("");
+  const prevCoursesRef = useRef<string>("");
+
   // Sync allTrainingsList and allCoursesList with props when they change
+  // Only update if the array contents actually changed (not just reference)
   useEffect(() => {
     if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
     
-    console.log("[TrainerDashboardClient] Updating trainings list:", allTrainings?.length || 0);
-    if (Array.isArray(allTrainings)) {
-      if (isMountedRef.current) {
-        setAllTrainingsList(allTrainings);
-      }
-    } else {
-      console.error("[TrainerDashboardClient] Invalid allTrainings prop:", typeof allTrainings);
-      if (isMountedRef.current) {
-        setError("Invalid trainings data received");
+    // Create a stable string representation of the trainings array for comparison
+    const trainingsKey = Array.isArray(allTrainings) 
+      ? allTrainings.map(t => t.id).sort().join(",")
+      : "";
+    
+    // Only update if the contents actually changed
+    if (prevTrainingsRef.current !== trainingsKey) {
+      prevTrainingsRef.current = trainingsKey;
+      console.log("[TrainerDashboardClient] Updating trainings list:", allTrainings?.length || 0);
+      if (Array.isArray(allTrainings)) {
+        if (isMountedRef.current) {
+          setAllTrainingsList(allTrainings);
+        }
+      } else {
+        console.error("[TrainerDashboardClient] Invalid allTrainings prop:", typeof allTrainings);
+        if (isMountedRef.current) {
+          setError("Invalid trainings data received");
+        }
       }
     }
   }, [allTrainings]);
@@ -379,15 +393,24 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
   useEffect(() => {
     if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
     
-    console.log("[TrainerDashboardClient] Updating courses list:", allCourses?.length || 0);
-    if (Array.isArray(allCourses)) {
-      if (isMountedRef.current) {
-        setAllCoursesList(allCourses);
-      }
-    } else {
-      console.error("[TrainerDashboardClient] Invalid allCourses prop:", typeof allCourses);
-      if (isMountedRef.current) {
-        setError("Invalid courses data received");
+    // Create a stable string representation of the courses array for comparison
+    const coursesKey = Array.isArray(allCourses)
+      ? allCourses.map(c => c.id).sort().join(",")
+      : "";
+    
+    // Only update if the contents actually changed
+    if (prevCoursesRef.current !== coursesKey) {
+      prevCoursesRef.current = coursesKey;
+      console.log("[TrainerDashboardClient] Updating courses list:", allCourses?.length || 0);
+      if (Array.isArray(allCourses)) {
+        if (isMountedRef.current) {
+          setAllCoursesList(allCourses);
+        }
+      } else {
+        console.error("[TrainerDashboardClient] Invalid allCourses prop:", typeof allCourses);
+        if (isMountedRef.current) {
+          setError("Invalid courses data received");
+        }
       }
     }
   }, [allCourses]);
