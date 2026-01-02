@@ -252,10 +252,10 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
           // Only update stats if data actually changed (prevent unnecessary re-renders)
           const newStats = data.data;
           const statsChanged = 
-            JSON.stringify(stats?.trainingStats?.map(s => s.trainingId).sort()) !== 
-            JSON.stringify(newStats?.trainingStats?.map(s => s.trainingId).sort()) ||
-            JSON.stringify(stats?.courseStats?.map(s => s.courseId).sort()) !== 
-            JSON.stringify(newStats?.courseStats?.map(s => s.courseId).sort()) ||
+            JSON.stringify(stats?.trainingStats?.map((s: TrainingStat) => s.trainingId).sort()) !== 
+            JSON.stringify(newStats?.trainingStats?.map((s: TrainingStat) => s.trainingId).sort()) ||
+            JSON.stringify(stats?.courseStats?.map((s: CourseStat) => s.courseId).sort()) !== 
+            JSON.stringify(newStats?.courseStats?.map((s: CourseStat) => s.courseId).sort()) ||
             stats?.totalAssigned !== newStats?.totalAssigned ||
             stats?.totalCompleted !== newStats?.totalCompleted ||
             stats?.overallCompletionRate !== newStats?.overallCompletionRate;

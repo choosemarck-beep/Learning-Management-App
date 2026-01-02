@@ -4047,12 +4047,17 @@ const displayedTrainings = useMemo(() => {
 
 **Files Fixed:**
 - `components/features/trainer/TrainerDashboardClient.tsx` - Changed `displayedTrainings` and `displayedCourses` useMemo dependencies from `stats.trainingStats`/`stats.courseStats` to `stats`
+- `components/features/trainer/TrainerDashboardClient.tsx` - Added content-based comparison for `stats` updates in `fetchStats` to prevent unnecessary state updates when data hasn't changed
 
 **Prevention:**
 - When using nested array/object properties in `useMemo`, use the entire parent object as dependency
 - Extract nested values inside the `useMemo` callback for safer access
+- **CRITICAL**: Add content-based comparison before updating state objects to prevent unnecessary re-renders
+- Only call `setStats` (or any state setter) if the data actually changed, not just the reference
+- Compare actual data values (IDs, counts, rates) rather than object references
 - This prevents infinite loops from array reference changes while still recalculating when the object actually changes
 - **Performance Note**: Using the entire object is fine because React only recalculates when the object reference changes (not when nested properties change if the object reference stays the same)
 - **2025-01-02**: Added infinite loop pattern from useMemo with unstable array dependencies
+- **2025-01-02**: Added content-based comparison for stats updates to prevent unnecessary state updates
 
 ---
