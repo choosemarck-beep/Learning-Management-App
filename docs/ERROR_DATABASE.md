@@ -4047,17 +4047,31 @@ const displayedTrainings = useMemo(() => {
 
 **Files Fixed:**
 - `components/features/trainer/TrainerDashboardClient.tsx` - Changed `displayedTrainings` and `displayedCourses` useMemo dependencies from `stats.trainingStats`/`stats.courseStats` to `stats`
-- `components/features/trainer/TrainerDashboardClient.tsx` - Added content-based comparison for `stats` updates in `fetchStats` to prevent unnecessary state updates when data hasn't changed
+- `components/features/trainer/TrainerDashboardClient.tsx` - Added ref-based stats comparison to avoid closure issues in `fetchStats` useCallback
+
+**Root Cause Identified:**
+- `fetchStats` was wrapped in `useCallback` with empty dependency array `[]`
+- This captured the initial `stats` value in closure, causing stale comparisons
+- `JSON.stringify` comparison was expensive and compared stale values
+- `stats` could be `null`/`undefined` causing `useMemo` errors
+
+**Final Solution:**
+1. **Use `useRef` to track current stats value** - Avoids closure issues in `useCallback`
+2. **Replace expensive `JSON.stringify` with simple value comparisons** - Compares only key values (totalAssigned, totalCompleted, lengths)
+3. **Add `DEFAULT_STATS` constant** - Ensures `stats` is never `null`/`undefined`
+4. **Update ref when stats state changes** - Keep ref in sync with state via `useEffect`
 
 **Prevention:**
 - When using nested array/object properties in `useMemo`, use the entire parent object as dependency
 - Extract nested values inside the `useMemo` callback for safer access
-- **CRITICAL**: Add content-based comparison before updating state objects to prevent unnecessary re-renders
+- **CRITICAL**: When using `useCallback` with state comparisons, use `useRef` to track current values (avoids closure issues)
+- **CRITICAL**: Never use `JSON.stringify` for comparisons in `useCallback` - it's expensive and can cause performance issues
+- **CRITICAL**: Ensure state objects are never `null`/`undefined` - provide default values
 - Only call `setStats` (or any state setter) if the data actually changed, not just the reference
-- Compare actual data values (IDs, counts, rates) rather than object references
-- This prevents infinite loops from array reference changes while still recalculating when the object actually changes
+- Compare actual data values (counts, rates, lengths) rather than object references or expensive serialization
+- This prevents infinite loops from stale closure values and expensive operations
 - **Performance Note**: Using the entire object is fine because React only recalculates when the object reference changes (not when nested properties change if the object reference stays the same)
 - **2025-01-02**: Added infinite loop pattern from useMemo with unstable array dependencies
-- **2025-01-02**: Added content-based comparison for stats updates to prevent unnecessary state updates
+- **2025-01-02**: Added ref-based comparison pattern to avoid closure issues in useCallback
 
 ---
