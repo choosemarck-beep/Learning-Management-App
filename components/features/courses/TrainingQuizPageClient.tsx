@@ -97,7 +97,82 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
     }
   }, [quizStartTime, results, isSubmitting]);
 
-  // Timer for quiz
+  const handleSubmit = async (submittedAnswers?: Record<string, string>) => {
+    // Don't submit if already showing results
+    if (results !== null) {
+      return;
+    }
+
+    // Use submitted answers if provided (from QuizCard), otherwise use state answers
+    const answersToValidate = submittedAnswers || answers;
+    
+    // Validate only against questions that were actually displayed
+    // QuizCard only displays questions from legacyQuestions, so we validate against those
+    // legacyQuestions is created from quiz.questions and should only contain displayed questions
+    const displayedQuestionIds = legacyQuestions.map(q => q.id);
+    const displayedQuestions = quiz.questions.filter(q => displayedQuestionIds.includes(q.id));
+    
+    // Check if all displayed questions are answered
+    const unansweredQuestions = displayedQuestions.filter(
+      (q) => !answersToValidate[q.id]
+    );
+    if (unansweredQuestions.length > 0) {
+      toast.error(`Please answer all questions. ${unansweredQuestions.length} question(s) remaining.`);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const url = new URL(`/api/trainings/${trainingId}/quiz/submit`, window.location.origin);
+      if (isRefresher) {
+        url.searchParams.set("refresher", "true");
+      }
+      
+      const response = await fetch(url.toString(), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          answers: answersToValidate,
+          startedAt: quizStartTime?.toISOString() || new Date().toISOString(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setResults(data.data.results);
+        setScore(data.data.score);
+        setXpEarned(data.data.xpEarned);
+        setPassed(data.data.passed || false);
+        setQuizTiming({
+          startedAt: data.data.startedAt || null,
+          completedAt: data.data.completedAt || null,
+          timeSpent: data.data.timeSpent || null,
+        });
+        
+        // Refresh router to update course page progress
+        router.refresh();
+        
+        if (data.data.passed) {
+          toast.success(`Quiz passed! Score: ${data.data.score}%`);
+        } else {
+          toast.error(`Quiz failed. Score: ${data.data.score}%. Passing score: ${quiz.passingScore}%`);
+        }
+      } else {
+        toast.error(data.error || "Failed to submit quiz");
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
+      toast.error("Failed to submit quiz. Please try again.");
+      setIsSubmitting(false);
+    }
+  };
+
+  // Timer for quiz - CRITICAL: handleSubmit must be defined before this useEffect
   useEffect(() => {
     if (quiz.timeLimit && !results && !isSubmitting) {
       setTimeRemaining(quiz.timeLimit);
@@ -117,7 +192,7 @@ export const TrainingQuizPageClient: React.FC<TrainingQuizPageClientProps> = ({
 
       return () => clearInterval(interval);
     }
-  }, [quiz.timeLimit, results, isSubmitting]);
+  }, [quiz.timeLimit, results, isSubmitting, handleSubmit]);
 
   const handleAnswerSelect = (questionId: string, answerId: string) => {
     setAnswers((prev) => ({

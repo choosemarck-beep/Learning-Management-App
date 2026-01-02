@@ -205,61 +205,6 @@ export const MiniQuizModal: React.FC<MiniQuizModalProps> = ({
     }
   };
 
-  const handleSubmit = async () => {
-    // Check if all questions are answered
-    const unansweredQuestions = quiz.questions.filter(
-      (q) => !answers[q.id]
-    );
-    if (unansweredQuestions.length > 0) {
-      toast.error(`Please answer all questions. ${unansweredQuestions.length} question(s) remaining.`);
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch(`/api/mini-trainings/${miniTrainingId}/quiz/submit`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          answers,
-          startedAt: quizStartTime?.toISOString() || new Date().toISOString(),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setResults(data.data.results);
-        setScore(data.data.score);
-        setXpEarned(data.data.xpEarned || null);
-        setQuizTiming({
-          startedAt: data.data.startedAt || null,
-          completedAt: data.data.completedAt || null,
-          timeSpent: data.data.timeSpent || null,
-        });
-        
-        if (data.data.passed) {
-          toast.success(`Quiz passed! Score: ${data.data.score}%`);
-          // Call onComplete after a short delay to show the success message
-          setTimeout(() => {
-            onComplete();
-          }, 1500);
-        } else {
-          toast.error(`Quiz failed. Score: ${data.data.score}%. Passing score: ${quiz.passingScore}%`);
-        }
-      } else {
-        toast.error(data.error || "Failed to submit quiz");
-        setIsSubmitting(false);
-      }
-    } catch (error) {
-      console.error("Error submitting quiz:", error);
-      toast.error("Failed to submit quiz. Please try again.");
-      setIsSubmitting(false);
-    }
-  };
 
   if (!isOpen) return null;
 
