@@ -16,7 +16,7 @@ export default async function LeaderboardPage() {
     redirect("/login");
   }
 
-  // Fetch full user data to get avatar
+  // Fetch full user data to get avatar and role
   const userData = await prisma.user.findUnique({
     where: { id: user.id },
     select: {
@@ -40,6 +40,25 @@ export default async function LeaderboardPage() {
   const safeUserName = String(userData.name);
   const safeUserEmail = String(userData.email);
   const safeUserAvatar = userData.avatar ? String(userData.avatar) : null;
+
+  // Get dashboard route based on role (for ProfileBottomNav)
+  const getDashboardRoute = () => {
+    switch (userData.role) {
+      case "BRANCH_MANAGER":
+        return "/employee/branch-manager/dashboard";
+      case "AREA_MANAGER":
+        return "/employee/area-manager/dashboard";
+      case "REGIONAL_MANAGER":
+        return "/employee/regional-manager/dashboard";
+      case "TRAINER":
+        return "/employee/trainer/dashboard";
+      case "EMPLOYEE":
+      default:
+        return "/employee/staff/dashboard";
+    }
+  };
+
+  const dashboardRoute = getDashboardRoute();
 
   // Admin/Super Admin: Desktop layout with sidebar
   if (userData.role === "ADMIN" || userData.role === "SUPER_ADMIN") {
@@ -79,7 +98,7 @@ export default async function LeaderboardPage() {
         <LeaderboardPageClient initialData={null} userRole={userData.role} />
         <ProfileBottomNav
           userRole={userData.role}
-          dashboardRoute="/employee/staff/dashboard"
+          dashboardRoute={dashboardRoute}
         />
       </div>
     );
@@ -102,4 +121,3 @@ export default async function LeaderboardPage() {
   // Fallback: redirect to login
   redirect("/login");
 }
-
