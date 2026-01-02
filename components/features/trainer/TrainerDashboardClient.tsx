@@ -270,18 +270,36 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
           const newStats = data.data;
           const currentStats = statsRef.current;
           
-          // Simple comparison: only update if key values changed (avoid expensive JSON.stringify)
+          // Deep comparison: compare actual values, not just references
+          // Only update if data actually changed to prevent unnecessary re-renders
           const statsChanged = 
             !currentStats ||
             currentStats.totalAssigned !== newStats.totalAssigned ||
             currentStats.totalCompleted !== newStats.totalCompleted ||
             currentStats.overallCompletionRate !== newStats.overallCompletionRate ||
+            // Compare array lengths first (quick check)
             currentStats.trainingStats?.length !== newStats.trainingStats?.length ||
-            currentStats.courseStats?.length !== newStats.courseStats?.length;
+            currentStats.courseStats?.length !== newStats.courseStats?.length ||
+            // Deep compare: check if training IDs changed
+            (Array.isArray(currentStats.trainingStats) && Array.isArray(newStats.trainingStats) &&
+             JSON.stringify(currentStats.trainingStats.map(s => s.trainingId).sort()) !== 
+             JSON.stringify(newStats.trainingStats.map(s => s.trainingId).sort())) ||
+            // Deep compare: check if course IDs changed
+            (Array.isArray(currentStats.courseStats) && Array.isArray(newStats.courseStats) &&
+             JSON.stringify(currentStats.courseStats.map(s => s.courseId).sort()) !== 
+             JSON.stringify(newStats.courseStats.map(s => s.courseId).sort()));
           
+          // CRITICAL: Only update state if data actually changed
+          // This prevents unnecessary re-renders that trigger useMemo recalculation
           if (statsChanged) {
             statsRef.current = newStats; // Update ref first
             setStats(newStats);
+          } else {
+            // Data unchanged - no state update needed
+            // This prevents infinite loops from unnecessary re-renders
+            if (process.env.NODE_ENV === 'development') {
+              console.log("[TrainerDashboardClient] Stats unchanged, skipping state update");
+            }
           }
           setError(null);
         }
