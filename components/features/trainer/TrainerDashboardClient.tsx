@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { ChevronUp, ChevronDown, BookOpen, Users, CheckCircle, Trophy, Settings } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
@@ -134,42 +134,50 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
     }
   }, [initialStats, allTrainings, allCourses]);
 
-  // Get trainings currently on dashboard
-  const displayedTrainings = trainingPreferences
-    .map((trainingId) => {
-      const stat = stats.trainingStats.find((s) => s.trainingId === trainingId);
-      const training = allTrainingsList.find((t) => t.id === trainingId);
-      if (!training) return null;
-      return {
-        ...training,
-        ...stat,
-        course: training.course,
-      };
-    })
-    .filter((t): t is DisplayedTraining => t !== null);
+  // Get trainings currently on dashboard - Memoized to prevent unnecessary recalculations
+  const displayedTrainings = useMemo(() => {
+    return trainingPreferences
+      .map((trainingId) => {
+        const stat = stats.trainingStats.find((s) => s.trainingId === trainingId);
+        const training = allTrainingsList.find((t) => t.id === trainingId);
+        if (!training) return null;
+        return {
+          ...training,
+          ...stat,
+          course: training.course,
+        };
+      })
+      .filter((t): t is DisplayedTraining => t !== null);
+  }, [trainingPreferences, stats.trainingStats, allTrainingsList]);
 
-  // Get courses currently on dashboard
-  const displayedCourses = coursePreferences
-    .map((courseId) => {
-      const stat = stats.courseStats?.find((s) => s.courseId === courseId);
-      const course = allCoursesList.find((c) => c.id === courseId);
-      if (!course) return null;
-      return {
-        ...course,
-        ...stat,
-      };
-    })
-    .filter((c): c is CourseStat & { id: string; title: string; description: string; thumbnail: string | null; _count: { trainings: number } } => c !== null);
+  // Get courses currently on dashboard - Memoized to prevent unnecessary recalculations
+  const displayedCourses = useMemo(() => {
+    return coursePreferences
+      .map((courseId) => {
+        const stat = stats.courseStats?.find((s) => s.courseId === courseId);
+        const course = allCoursesList.find((c) => c.id === courseId);
+        if (!course) return null;
+        return {
+          ...course,
+          ...stat,
+        };
+      })
+      .filter((c): c is CourseStat & { id: string; title: string; description: string; thumbnail: string | null; _count: { trainings: number } } => c !== null);
+  }, [coursePreferences, stats.courseStats, allCoursesList]);
 
-  // Get trainings not on dashboard
-  const availableTrainings = allTrainingsList.filter(
-    (t) => !trainingPreferences.includes(t.id)
-  );
+  // Get trainings not on dashboard - Memoized to prevent unnecessary recalculations
+  const availableTrainings = useMemo(() => {
+    return allTrainingsList.filter(
+      (t) => !trainingPreferences.includes(t.id)
+    );
+  }, [allTrainingsList, trainingPreferences]);
 
-  // Get courses not on dashboard
-  const availableCourses = allCoursesList.filter(
-    (c) => !coursePreferences.includes(c.id)
-  );
+  // Get courses not on dashboard - Memoized to prevent unnecessary recalculations
+  const availableCourses = useMemo(() => {
+    return allCoursesList.filter(
+      (c) => !coursePreferences.includes(c.id)
+    );
+  }, [allCoursesList, coursePreferences]);
 
   const fetchStats = useCallback(async () => {
     if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
@@ -374,7 +382,18 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
     return () => clearInterval(interval);
   }, [fetchStats]);
 
+  // Calculate overview stats - Memoized to prevent unnecessary recalculations
+  // CRITICAL: This useMemo MUST be called BEFORE any early returns to maintain consistent hook order
+  const { totalTrainings, totalCourses, pendingCompletions } = useMemo(() => {
+    return {
+      totalTrainings: stats.trainingStats.length,
+      totalCourses: stats.courseStats?.length || 0,
+      pendingCompletions: stats.totalAssigned - stats.totalCompleted,
+    };
+  }, [stats.trainingStats.length, stats.courseStats?.length, stats.totalAssigned, stats.totalCompleted]);
+
   // Show error state if there's an error
+  // CRITICAL: Early return MUST be AFTER all hooks (useState, useEffect, useCallback, useMemo)
   if (error) {
     return (
       <div className={styles.container}>
@@ -398,11 +417,6 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
       </div>
     );
   }
-
-  // Calculate overview stats
-  const totalTrainings = stats.trainingStats.length;
-  const totalCourses = stats.courseStats?.length || 0;
-  const pendingCompletions = stats.totalAssigned - stats.totalCompleted;
 
   return (
     <div className={styles.container}>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Play, Pause, CheckCircle2, FileQuestion, Award, Lock, ChevronDown, ChevronUp, AlertTriangle, Maximize, Minimize } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -133,7 +133,7 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
 
   // Update video progress on server
   // Saves watch position regardless of quiz status to enable resume functionality
-  const updateVideoProgress = async (seconds: number, playing: boolean, immediate: boolean = false) => {
+  const updateVideoProgress = useCallback(async (seconds: number, playing: boolean, immediate: boolean = false) => {
     try {
       // Ensure seconds is a valid integer
       const watchedSeconds = Math.floor(seconds);
@@ -205,10 +205,10 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
         toast.error("Network error: Could not save progress");
       }
     }
-  };
+  }, [trainingId, progress, router]);
 
   // Debounced save function to prevent excessive API calls
-  const debouncedSaveProgress = (seconds: number, playing: boolean, delay: number = 1000) => {
+  const debouncedSaveProgress = useCallback((seconds: number, playing: boolean, delay: number = 1000) => {
     // Clear existing timeout
     if (saveProgressTimeoutRef.current) {
       clearTimeout(saveProgressTimeoutRef.current);
@@ -223,10 +223,10 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
       updateVideoProgress(seconds, playing);
       lastSavedSecondsRef.current = seconds;
     }, delay);
-  };
+  }, [updateVideoProgress]);
 
   // Immediate save function for critical events (pause, end, page unload)
-  const saveProgressImmediately = (seconds: number, playing: boolean, force: boolean = false) => {
+  const saveProgressImmediately = useCallback((seconds: number, playing: boolean, force: boolean = false) => {
     // Clear any pending debounced saves
     if (saveProgressTimeoutRef.current) {
       clearTimeout(saveProgressTimeoutRef.current);
@@ -238,84 +238,49 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
       updateVideoProgress(seconds, playing);
       lastSavedSecondsRef.current = seconds;
     }
-  };
+  }, [updateVideoProgress]);
 
-  // Phase 4: YouTube Player API Integration
-  useEffect(() => {
-    if (!isYouTube || !embedUrl) {
-      setIsYouTubePlayerReady(false);
-      return;
+  const stopYouTubeTracking = useCallback(() => {
+    if (youtubeIntervalRef.current) {
+      clearInterval(youtubeIntervalRef.current);
+      youtubeIntervalRef.current = null;
     }
-    
-    // Reset ready state when video changes
-    setIsYouTubePlayerReady(false);
+  }, []);
 
-    // Suppress YouTube postMessage origin warnings in development
-    // This is a known harmless warning when using YouTube IFrame API on localhost
-    // The player still works correctly despite this warning
-    let originalConsoleError: typeof console.error | null = null;
-    
-    if (process.env.NODE_ENV === 'development') {
-      originalConsoleError = console.error;
-      console.error = (...args: any[]) => {
-        // Suppress the specific YouTube postMessage origin error
-        const message = args[0]?.toString() || '';
-        if (
-          message.includes('postMessage') &&
-          message.includes('youtube.com') &&
-          (message.includes('does not match') || message.includes('target origin'))
-        ) {
-          // Silently ignore this harmless development warning
-          return;
-        }
-        // Call original console.error for all other errors
-        if (originalConsoleError) {
-          originalConsoleError.apply(console, args);
-        }
-      };
+  const startYouTubeTracking = useCallback(() => {
+    // Stop any existing tracking
+    if (youtubeIntervalRef.current) {
+      clearInterval(youtubeIntervalRef.current);
+      youtubeIntervalRef.current = null;
     }
 
-    // Load YouTube IFrame Player API if not already loaded
-    if (!window.YT) {
-      const tag = document.createElement("script");
-      tag.src = "https://www.youtube.com/iframe_api";
-      const firstScriptTag = document.getElementsByTagName("script")[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-      window.onYouTubeIframeAPIReady = () => {
-        initializeYouTubePlayer();
-      };
-    } else if (window.YT.Player) {
-      initializeYouTubePlayer();
-    }
-
-    return () => {
-      // Restore original console.error
-      if (originalConsoleError && process.env.NODE_ENV === 'development') {
-        console.error = originalConsoleError;
-      }
-      // Reset ready state
-      setIsYouTubePlayerReady(false);
-      // Cleanup YouTube player interval
-      if (youtubeIntervalRef.current) {
-        clearInterval(youtubeIntervalRef.current);
-        youtubeIntervalRef.current = null;
-      }
-      // Cleanup YouTube player
-      if (youtubePlayerRef.current) {
+    // Start new tracking interval
+    youtubeIntervalRef.current = setInterval(() => {
+      if (youtubePlayerRef.current && typeof youtubePlayerRef.current.getPlayerState === 'function') {
         try {
-          if (typeof youtubePlayerRef.current.destroy === "function") {
-            youtubePlayerRef.current.destroy();
+          // Check player state directly instead of relying on isPlaying state
+          const playerState = youtubePlayerRef.current.getPlayerState();
+          // Player states: -1 (unstarted), 0 (ended), 1 (playing), 2 (paused), 3 (buffering), 5 (cued)
+          const isCurrentlyPlaying = playerState === 1; // Playing
+          
+          if (isCurrentlyPlaying && typeof youtubePlayerRef.current.getCurrentTime === 'function') {
+            const currentTime = youtubePlayerRef.current.getCurrentTime();
+            const seconds = Math.floor(currentTime);
+            setWatchedSeconds(seconds);
+            // Use debounced save for time updates (saves every 1 second if position changed)
+            debouncedSaveProgress(seconds, true, 1000);
+          } else if (playerState === 2 || playerState === 0) {
+            // Paused or ended - stop tracking
+            stopYouTubeTracking();
           }
         } catch (error) {
-          console.error("[YouTube Player] Error destroying player:", error);
+          console.error("[YouTube Player] Error getting current time:", error);
         }
-        youtubePlayerRef.current = null;
       }
-    };
-  }, [isYouTube, embedUrl, trainingId]);
+    }, 1000); // Check every second
+  }, [debouncedSaveProgress, stopYouTubeTracking]);
 
-  const initializeYouTubePlayer = () => {
+  const initializeYouTubePlayer = useCallback(() => {
     if (!embedUrl || !isYouTube) {
       console.log("[YouTube Player] Initialization skipped: missing embedUrl or not YouTube");
       return;
@@ -446,47 +411,82 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
       setIsYouTubePlayerReady(false);
       toast.error("Failed to initialize video player. Please refresh the page.");
     }
-  };
+  }, [embedUrl, isYouTube, initialData.progress.videoWatchedSeconds, initialData.training.videoDuration, actualVideoDuration, isPlaying, watchedSeconds, startYouTubeTracking, stopYouTubeTracking, saveProgressImmediately]);
 
-  const startYouTubeTracking = () => {
-    // Stop any existing tracking
-    if (youtubeIntervalRef.current) {
-      clearInterval(youtubeIntervalRef.current);
-      youtubeIntervalRef.current = null;
+  // Phase 4: YouTube Player API Integration
+  useEffect(() => {
+    if (!isYouTube || !embedUrl) {
+      setIsYouTubePlayerReady(false);
+      return;
+    }
+    
+    // Reset ready state when video changes
+    setIsYouTubePlayerReady(false);
+
+    // Suppress YouTube postMessage origin warnings in development
+    // This is a known harmless warning when using YouTube IFrame API on localhost
+    // The player still works correctly despite this warning
+    let originalConsoleError: typeof console.error | null = null;
+    
+    if (process.env.NODE_ENV === 'development') {
+      originalConsoleError = console.error;
+      console.error = (...args: any[]) => {
+        // Suppress the specific YouTube postMessage origin error
+        const message = args[0]?.toString() || '';
+        if (
+          message.includes('postMessage') &&
+          message.includes('youtube.com') &&
+          (message.includes('does not match') || message.includes('target origin'))
+        ) {
+          // Silently ignore this harmless development warning
+          return;
+        }
+        // Call original console.error for all other errors
+        if (originalConsoleError) {
+          originalConsoleError.apply(console, args);
+        }
+      };
     }
 
-    // Start new tracking interval
-    youtubeIntervalRef.current = setInterval(() => {
-      if (youtubePlayerRef.current && typeof youtubePlayerRef.current.getPlayerState === 'function') {
+    // Load YouTube IFrame Player API if not already loaded
+    if (!window.YT) {
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName("script")[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+      window.onYouTubeIframeAPIReady = () => {
+        initializeYouTubePlayer();
+      };
+    } else if (window.YT.Player) {
+      initializeYouTubePlayer();
+    }
+
+    return () => {
+      // Restore original console.error
+      if (originalConsoleError && process.env.NODE_ENV === 'development') {
+        console.error = originalConsoleError;
+      }
+      // Reset ready state
+      setIsYouTubePlayerReady(false);
+      // Cleanup YouTube player interval
+      if (youtubeIntervalRef.current) {
+        clearInterval(youtubeIntervalRef.current);
+        youtubeIntervalRef.current = null;
+      }
+      // Cleanup YouTube player
+      if (youtubePlayerRef.current) {
         try {
-          // Check player state directly instead of relying on isPlaying state
-          const playerState = youtubePlayerRef.current.getPlayerState();
-          // Player states: -1 (unstarted), 0 (ended), 1 (playing), 2 (paused), 3 (buffering), 5 (cued)
-          const isCurrentlyPlaying = playerState === 1; // Playing
-          
-          if (isCurrentlyPlaying && typeof youtubePlayerRef.current.getCurrentTime === 'function') {
-            const currentTime = youtubePlayerRef.current.getCurrentTime();
-            const seconds = Math.floor(currentTime);
-            setWatchedSeconds(seconds);
-            // Use debounced save for time updates (saves every 1 second if position changed)
-            debouncedSaveProgress(seconds, true, 1000);
-          } else if (playerState === 2 || playerState === 0) {
-            // Paused or ended - stop tracking
-            stopYouTubeTracking();
+          if (typeof youtubePlayerRef.current.destroy === "function") {
+            youtubePlayerRef.current.destroy();
           }
         } catch (error) {
-          console.error("[YouTube Player] Error getting current time:", error);
+          console.error("[YouTube Player] Error destroying player:", error);
         }
+        youtubePlayerRef.current = null;
       }
-    }, 1000); // Check every second
-  };
-
-  const stopYouTubeTracking = () => {
-    if (youtubeIntervalRef.current) {
-      clearInterval(youtubeIntervalRef.current);
-      youtubeIntervalRef.current = null;
-    }
-  };
+    };
+  }, [isYouTube, embedUrl, trainingId, initializeYouTubePlayer]);
 
   // Handle page visibility change - pause video when user leaves page
   useEffect(() => {
@@ -519,7 +519,7 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
         clearTimeout(controlsTimeoutRef.current);
       }
     };
-  }, [isYouTube]);
+  }, [isYouTube, stopYouTubeTracking]);
 
   // Handle fullscreen changes
   useEffect(() => {
@@ -793,7 +793,7 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isYouTube, watchedSeconds]);
+  }, [isYouTube, watchedSeconds, saveProgressImmediately]);
 
   // Auto-save progress on page unload (navigation away, tab close)
   useEffect(() => {
@@ -857,7 +857,7 @@ export const TrainingVideoPageClient: React.FC<TrainingVideoPageClientProps> = (
         clearTimeout(saveProgressTimeoutRef.current);
       }
     };
-  }, [trainingId, isYouTube, watchedSeconds]);
+  }, [trainingId, isYouTube, watchedSeconds, saveProgressImmediately]);
 
   // Use actual duration from video element/player if available, otherwise fall back to initialData
   const videoDuration = actualVideoDuration || initialData.training.videoDuration || 0;

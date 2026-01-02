@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { X, Play, Lock, CheckCircle2, FileQuestion, Maximize, Minimize } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -84,7 +84,7 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
       setIsLoading(true); // Ensure loading state is set when modal opens
       fetchMiniTraining();
     }
-  }, [isOpen, miniTrainingId]);
+  }, [isOpen, miniTrainingId, fetchMiniTraining]);
 
   // Reset state when modal closes (separate effect to avoid render-time updates)
   useEffect(() => {
@@ -107,7 +107,7 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
     }
   }, [isOpen]);
 
-  const fetchMiniTraining = async () => {
+  const fetchMiniTraining = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/mini-trainings/${miniTrainingId}`);
@@ -182,7 +182,7 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [miniTrainingId, onClose, router]);
 
   // YouTube Player API initialization
   useEffect(() => {
@@ -261,9 +261,9 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
         }
       };
     }
-  }, [isOpen, isYouTube, embedUrl, miniTraining]);
+  }, [isOpen, isYouTube, embedUrl, miniTraining, initializeYouTubePlayer]);
 
-  const initializeYouTubePlayer = () => {
+  const initializeYouTubePlayer = useCallback(() => {
     if (!window.YT || !window.YT.Player) {
       setTimeout(initializeYouTubePlayer, 100);
       return;
@@ -382,9 +382,9 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
       console.error("[Mini Training YouTube] Error initializing player:", error);
       toast.error("Failed to initialize video player.");
     }
-  };
+  }, [videoUrl, progress, actualVideoDuration, miniTraining, startYouTubeTracking, stopYouTubeTracking, saveProgressImmediately, watchedSeconds]);
 
-  const startYouTubeTracking = () => {
+  const startYouTubeTracking = useCallback(() => {
     // Stop any existing tracking
     if (youtubeIntervalRef.current) {
       clearInterval(youtubeIntervalRef.current);
@@ -415,18 +415,18 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
         }
       }
     }, 1000);
-  };
+  }, [debouncedSaveProgress]);
 
-  const stopYouTubeTracking = () => {
+  const stopYouTubeTracking = useCallback(() => {
     if (youtubeIntervalRef.current) {
       clearInterval(youtubeIntervalRef.current);
       youtubeIntervalRef.current = null;
     }
-  };
+  }, []);
 
   // Update video progress on server
   // Saves watch position regardless of quiz status to enable resume functionality
-  const updateVideoProgress = async (seconds: number, playing: boolean, immediate: boolean = false) => {
+  const updateVideoProgress = useCallback(async (seconds: number, playing: boolean, immediate: boolean = false) => {
     try {
       // Ensure seconds is a valid integer
       const watchedSeconds = Math.floor(seconds);
@@ -493,10 +493,10 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
         toast.error("Network error: Could not save progress");
       }
     }
-  };
+  }, [miniTrainingId, progress, router]);
 
   // Debounced save function to prevent excessive API calls
-  const debouncedSaveProgress = (seconds: number, playing: boolean, delay: number = 1000) => {
+  const debouncedSaveProgress = useCallback((seconds: number, playing: boolean, delay: number = 1000) => {
     // Clear existing timeout
     if (saveProgressTimeoutRef.current) {
       clearTimeout(saveProgressTimeoutRef.current);
@@ -511,10 +511,10 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
       updateVideoProgress(seconds, playing);
       lastSavedSecondsRef.current = seconds;
     }, delay);
-  };
+  }, [updateVideoProgress]);
 
   // Immediate save function for critical events (pause, end, page unload)
-  const saveProgressImmediately = (seconds: number, playing: boolean, force: boolean = false) => {
+  const saveProgressImmediately = useCallback((seconds: number, playing: boolean, force: boolean = false) => {
     // Clear any pending debounced saves
     if (saveProgressTimeoutRef.current) {
       clearTimeout(saveProgressTimeoutRef.current);
@@ -526,7 +526,7 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
       updateVideoProgress(seconds, playing);
       lastSavedSecondsRef.current = seconds;
     }
-  };
+  }, [updateVideoProgress]);
 
   // Check if quiz can be taken (based on minimum watch time)
   useEffect(() => {
@@ -570,7 +570,7 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
         clearTimeout(controlsTimeoutRef.current);
       }
     };
-  }, [isYouTube]);
+  }, [isYouTube, stopYouTubeTracking]);
 
   // Handle fullscreen changes
   useEffect(() => {
@@ -608,7 +608,7 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isYouTube, watchedSeconds]);
+  }, [isYouTube, watchedSeconds, saveProgressImmediately]);
 
   // Auto-save progress on page unload (navigation away, tab close)
   useEffect(() => {

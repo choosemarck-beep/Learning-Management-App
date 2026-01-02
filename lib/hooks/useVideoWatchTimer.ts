@@ -45,63 +45,6 @@ export function useVideoWatchTimer({
     }
   }, [watchedSeconds, minimumWatchTime, onProgressUpdate]);
 
-  // Handle tab visibility changes
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // Tab is hidden, stop tracking
-        if (isTracking) {
-          stopTracking();
-        }
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [isTracking]);
-
-  const startTracking = useCallback(() => {
-    if (isTracking) return;
-
-    setIsTracking(true);
-    lastUpdateRef.current = Date.now();
-
-    // Update every second
-    intervalRef.current = setInterval(() => {
-      const now = Date.now();
-      const elapsed = Math.floor((now - lastUpdateRef.current) / 1000);
-      lastUpdateRef.current = now;
-
-      accumulatedSecondsRef.current += elapsed;
-      setWatchedSeconds((prev) => {
-        const newValue = prev + elapsed;
-        return newValue;
-      });
-    }, 1000);
-  }, [isTracking]);
-
-  const stopTracking = useCallback(() => {
-    if (!isTracking) return;
-
-    setIsTracking(false);
-
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-
-    // Save accumulated seconds
-    if (accumulatedSecondsRef.current > 0) {
-      setWatchedSeconds((prev) => prev + accumulatedSecondsRef.current);
-      accumulatedSecondsRef.current = 0;
-    }
-
-    // Update backend
-    updateProgress();
-  }, [isTracking]);
-
   const updateProgress = useCallback(async () => {
     // Clear any pending update
     if (updateTimeoutRef.current) {
@@ -137,6 +80,63 @@ export function useVideoWatchTimer({
       }
     }, 2000);
   }, [lessonId, watchedSeconds, isTracking]);
+
+  const stopTracking = useCallback(() => {
+    if (!isTracking) return;
+
+    setIsTracking(false);
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    // Save accumulated seconds
+    if (accumulatedSecondsRef.current > 0) {
+      setWatchedSeconds((prev) => prev + accumulatedSecondsRef.current);
+      accumulatedSecondsRef.current = 0;
+    }
+
+    // Update backend
+    updateProgress();
+  }, [isTracking, updateProgress]);
+
+  const startTracking = useCallback(() => {
+    if (isTracking) return;
+
+    setIsTracking(true);
+    lastUpdateRef.current = Date.now();
+
+    // Update every second
+    intervalRef.current = setInterval(() => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - lastUpdateRef.current) / 1000);
+      lastUpdateRef.current = now;
+
+      accumulatedSecondsRef.current += elapsed;
+      setWatchedSeconds((prev) => {
+        const newValue = prev + elapsed;
+        return newValue;
+      });
+    }, 1000);
+  }, [isTracking]);
+
+  // Handle tab visibility changes
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Tab is hidden, stop tracking
+        if (isTracking) {
+          stopTracking();
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [isTracking, stopTracking]);
 
   const reset = useCallback(() => {
     setWatchedSeconds(initialWatchedSeconds);
