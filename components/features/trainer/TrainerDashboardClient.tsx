@@ -88,16 +88,10 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
   // Mount guard to prevent state updates after unmount
   const isMountedRef = useRef(false);
 
-  // Log component initialization for debugging
+  // Log component initialization for debugging - Only run once on mount
   useEffect(() => {
     isMountedRef.current = true; // Mark as mounted
     
-    return () => {
-      isMountedRef.current = false; // Mark as unmounted in cleanup
-    };
-  }, []);
-
-  useEffect(() => {
     console.log("[TrainerDashboardClient] Component mounted and initialized:", {
       statsCount: initialStats?.trainingStats?.length || 0,
       trainingPreferencesCount: initialTrainingPreferences?.length || 0,
@@ -111,9 +105,7 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
       hasAllCourses: Array.isArray(allCourses),
     });
     
-    // Check for any undefined or null critical props
-    if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
-    
+    // Check for any undefined or null critical props (only on mount)
     if (!initialStats) {
       console.error("[TrainerDashboardClient] CRITICAL: initialStats is missing!");
       if (isMountedRef.current) {
@@ -132,7 +124,11 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
         setError("Courses data is invalid. Please refresh the page.");
       }
     }
-  }, [initialStats, allTrainings, allCourses]);
+    
+    return () => {
+      isMountedRef.current = false; // Mark as unmounted in cleanup
+    };
+  }, []); // Empty dependency array - only run once on mount
 
   // Get trainings currently on dashboard - Memoized to prevent unnecessary recalculations
   // CRITICAL: Must be called before early return to maintain consistent hook order
