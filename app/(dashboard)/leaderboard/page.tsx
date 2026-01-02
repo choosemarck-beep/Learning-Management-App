@@ -52,7 +52,7 @@ export default async function LeaderboardPage() {
         pageTitle="Leaderboard"
         pageDescription="View employee rankings and leaderboard statistics."
       >
-        <LeaderboardPageClient initialData={null} />
+        <LeaderboardPageClient initialData={null} userRole={userData.role} />
       </AdminLayout>
     );
   }
@@ -67,7 +67,7 @@ export default async function LeaderboardPage() {
         pageTitle="Leaderboard"
         pageDescription="View employee rankings and leaderboard statistics."
       >
-        <LeaderboardPageClient initialData={null} />
+        <LeaderboardPageClient initialData={null} userRole={userData.role} />
       </TrainerLayout>
     );
   }
@@ -76,7 +76,7 @@ export default async function LeaderboardPage() {
   if (userData.role === "EMPLOYEE") {
     return (
       <div className={styles.container}>
-        <LeaderboardPageClient initialData={null} />
+        <LeaderboardPageClient initialData={null} userRole={userData.role} />
         <ProfileBottomNav
           userRole={userData.role}
           dashboardRoute="/employee/staff/dashboard"

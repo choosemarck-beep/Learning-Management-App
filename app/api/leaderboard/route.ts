@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch full user data from database to get branch, area, region fields
+    // Fetch full user data from database to get branch, area, region, and role fields
     const userData = await prisma.user.findUnique({
       where: { id: currentUser.id },
       select: {
@@ -33,12 +33,15 @@ export async function GET(request: NextRequest) {
         branch: true,
         area: true,
         region: true,
+        role: true,
       },
     });
 
     if (!userData) {
       return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }
+
+    const userRole = userData.role;
 
     const { searchParams } = new URL(request.url);
     const view = (searchParams.get("view") || "INDIVIDUAL") as LeaderboardView;
@@ -69,7 +72,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Build where clause based on view
-    // Exclude ADMIN, SUPER_ADMIN, and TRAINER from leaderboards
+    // Exclude ADMIN, SUPER_ADMIN, and TRAINER from appearing in leaderboards
+    // But allow them to VIEW the leaderboard
     const whereClause: any = {
       role: {
         notIn: [UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.TRAINER],
@@ -78,14 +82,28 @@ export async function GET(request: NextRequest) {
     };
 
     // Filter by view (Branch, Area, Regional)
-    if (view === "BRANCH" && userData.branch) {
-      whereClause.branch = userData.branch;
-    } else if (view === "AREA" && userData.area) {
-      whereClause.area = userData.area;
-    } else if (view === "REGIONAL" && userData.region) {
-      whereClause.region = userData.region;
+    // Trainers and Admins see ALL employees regardless of branch/area/region
+    // Employees see filtered by their branch/area/region
+    if (userRole === UserRole.TRAINER || userRole === UserRole.ADMIN || userRole === UserRole.SUPER_ADMIN) {
+      // Trainers and Admins see all employees - no branch/area/region filtering
+      // They can still use the view selector to filter if needed, but it won't apply to them
+      // For now, show all employees in INDIVIDUAL view
+      if (view !== "INDIVIDUAL") {
+        // For BRANCH/AREA/REGIONAL views, trainers/admins can still filter
+        // But we'll need to get the filter value from query params or show all
+        // For MVP, just show all employees regardless of view for trainers/admins
+      }
+    } else {
+      // Employees: Filter by their branch/area/region based on view
+      if (view === "BRANCH" && userData.branch) {
+        whereClause.branch = userData.branch;
+      } else if (view === "AREA" && userData.area) {
+        whereClause.area = userData.area;
+      } else if (view === "REGIONAL" && userData.region) {
+        whereClause.region = userData.region;
+      }
+      // INDIVIDUAL view shows all users (no additional filter for employees too)
     }
-    // INDIVIDUAL view shows all users (no additional filter)
 
     // Add search filter if provided
     if (search) {
@@ -157,40 +175,44 @@ export async function GET(request: NextRequest) {
     });
 
     // Find current user's rank and entry
+    // Only show current user entry if they're an employee (not trainer/admin)
     const currentUserRank = rankMap.get(currentUser.id) || 0;
     let currentUserEntry = null;
 
-    // If current user is not in top users, get their entry
-    if (!topUsers.find((u) => u.userId === currentUser.id)) {
-      const currentUserData = await prisma.user.findUnique({
-        where: { id: currentUser.id },
-        select: {
-          id: true,
-          name: true,
-          avatar: true,
-          xp: true,
-          level: true,
-          streak: true,
-          diamonds: true,
-          employeeNumber: true,
-        },
-      });
+    // Only show current user entry for employees (trainers/admins don't appear in leaderboard)
+    if (userRole !== UserRole.TRAINER && userRole !== UserRole.ADMIN && userRole !== UserRole.SUPER_ADMIN) {
+      // If current user is not in top users, get their entry
+      if (!topUsers.find((u) => u.userId === currentUser.id)) {
+        const currentUserData = await prisma.user.findUnique({
+          where: { id: currentUser.id },
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+            xp: true,
+            level: true,
+            streak: true,
+            diamonds: true,
+            employeeNumber: true,
+          },
+        });
 
-      if (currentUserData) {
-        const rankName = getRankName(currentUserData.level, currentUserData.xp);
-        currentUserEntry = {
-          userId: currentUserData.id,
-          name: currentUserData.name,
-          avatar: currentUserData.avatar,
-          rank: currentUserRank,
-          xp: currentUserData.xp,
-          level: currentUserData.level,
-          rankName,
-          streak: currentUserData.streak,
-          diamonds: currentUserData.diamonds,
-          xpEarned: currentUserData.xp,
-          employeeNumber: currentUserData.employeeNumber || null,
-        };
+        if (currentUserData) {
+          const rankName = getRankName(currentUserData.level, currentUserData.xp);
+          currentUserEntry = {
+            userId: currentUserData.id,
+            name: currentUserData.name,
+            avatar: currentUserData.avatar,
+            rank: currentUserRank,
+            xp: currentUserData.xp,
+            level: currentUserData.level,
+            rankName,
+            streak: currentUserData.streak,
+            diamonds: currentUserData.diamonds,
+            xpEarned: currentUserData.xp,
+            employeeNumber: currentUserData.employeeNumber || null,
+          };
+        }
       }
     }
 

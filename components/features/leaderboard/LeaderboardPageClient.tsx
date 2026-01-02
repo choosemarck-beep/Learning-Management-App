@@ -6,16 +6,29 @@ import { LeaderboardSearch } from "./LeaderboardSearch";
 import { LeaderboardList } from "./LeaderboardList";
 import { LeaderboardPagination } from "./LeaderboardPagination";
 import { LeaderboardResponse } from "@/types/leaderboard";
+import { UserRole } from "@prisma/client";
 import styles from "./LeaderboardPageClient.module.css";
 
 interface LeaderboardPageClientProps {
   initialData: LeaderboardResponse | null;
+  userRole: UserRole;
 }
 
 export const LeaderboardPageClient: React.FC<LeaderboardPageClientProps> = ({
   initialData,
+  userRole,
 }) => {
-  const [view, setView] = useState<"INDIVIDUAL" | "BRANCH" | "AREA" | "REGIONAL">("INDIVIDUAL");
+  // Determine default view based on role
+  // Employees: Show their branch by default
+  // Trainers/Admins: Show all employees (INDIVIDUAL) by default
+  const getDefaultView = (): "INDIVIDUAL" | "BRANCH" | "AREA" | "REGIONAL" => {
+    if (userRole === UserRole.TRAINER || userRole === UserRole.ADMIN || userRole === UserRole.SUPER_ADMIN) {
+      return "INDIVIDUAL"; // Trainers/Admins see all employees
+    }
+    return "BRANCH"; // Employees see their branch by default
+  };
+
+  const [view, setView] = useState<"INDIVIDUAL" | "BRANCH" | "AREA" | "REGIONAL">(getDefaultView());
   const [period, setPeriod] = useState<"DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY">("DAILY");
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -83,6 +96,7 @@ export const LeaderboardPageClient: React.FC<LeaderboardPageClientProps> = ({
           period={period}
           onViewChange={handleViewChange}
           onPeriodChange={handlePeriodChange}
+          userRole={userRole}
         />
 
         <LeaderboardSearch

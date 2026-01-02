@@ -8,10 +8,12 @@ import {
   Globe2, 
   Calendar, 
   CalendarDays, 
-  CalendarRange 
+  CalendarRange,
+  Users
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { LeaderboardView, LeaderboardPeriod } from "@/types/leaderboard";
+import { UserRole } from "@prisma/client";
 import styles from "./LeaderboardHeader.module.css";
 
 interface LeaderboardHeaderProps {
@@ -19,6 +21,7 @@ interface LeaderboardHeaderProps {
   period: LeaderboardPeriod;
   onViewChange: (view: LeaderboardView) => void;
   onPeriodChange: (period: LeaderboardPeriod) => void;
+  userRole: UserRole;
 }
 
 export const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
@@ -26,13 +29,25 @@ export const LeaderboardHeader: React.FC<LeaderboardHeaderProps> = ({
   period,
   onViewChange,
   onPeriodChange,
+  userRole,
 }) => {
-  const views: { value: LeaderboardView; label: string; icon: LucideIcon }[] = [
-    { value: "INDIVIDUAL", label: "Individual", icon: User },
-    { value: "BRANCH", label: "Branch", icon: Building2 },
-    { value: "AREA", label: "Area", icon: MapPin },
-    { value: "REGIONAL", label: "Regional", icon: Globe2 },
-  ];
+  // Customize views based on role
+  // Employees: See Branch/Area/Regional views (filtered by their location)
+  // Trainers/Admins: See "All Employees" view (no filtering)
+  const isTrainerOrAdmin = userRole === UserRole.TRAINER || userRole === UserRole.ADMIN || userRole === UserRole.SUPER_ADMIN;
+  
+  const views: { value: LeaderboardView; label: string; icon: LucideIcon }[] = isTrainerOrAdmin
+    ? [
+        // Trainers/Admins: Only show "All Employees" view
+        { value: "INDIVIDUAL", label: "All Employees", icon: Users },
+      ]
+    : [
+        // Employees: Show Branch/Area/Regional views
+        { value: "BRANCH", label: "Branch", icon: Building2 },
+        { value: "AREA", label: "Area", icon: MapPin },
+        { value: "REGIONAL", label: "Regional", icon: Globe2 },
+        { value: "INDIVIDUAL", label: "All", icon: User },
+      ];
 
   const periods: { value: LeaderboardPeriod; label: string; icon: LucideIcon }[] = [
     { value: "DAILY", label: "Daily", icon: Calendar },
