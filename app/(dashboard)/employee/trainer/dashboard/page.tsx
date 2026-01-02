@@ -345,11 +345,88 @@ export default async function TrainerDashboardPage() {
       }
     }
 
+    // Calculate stats for all courses using TrainingProgressNew (aggregate trainings in each course)
+    const courseIdsForStats = allCourses.map((c) => c.id);
+    const courseStats: Array<{
+      courseId: string;
+      title: string;
+      completionRate: number;
+      totalAssigned: number;
+      totalCompleted: number;
+      trainingCount: number;
+    }> = [];
+
+    if (courseIdsForStats.length > 0) {
+      try {
+        // Get per-course stats (aggregate all trainings in the course)
+        for (const course of allCourses) {
+          try {
+            // Get all training IDs for this course
+            const courseTrainings = await prisma.training.findMany({
+              where: {
+                courseId: course.id,
+              },
+              select: {
+                id: true,
+              },
+            });
+
+            const courseTrainingIds = courseTrainings.map((t) => t.id);
+
+            if (courseTrainingIds.length === 0) {
+              courseStats.push({
+                courseId: course.id,
+                title: course.title,
+                completionRate: 0,
+                totalAssigned: 0,
+                totalCompleted: 0,
+                trainingCount: 0,
+              });
+              continue;
+            }
+
+            // Count TrainingProgressNew records for all trainings in this course
+            const assigned = await prisma.trainingProgressNew.count({
+              where: {
+                trainingId: { in: courseTrainingIds },
+              },
+            });
+
+            // Count completed TrainingProgressNew records
+            const completed = await prisma.trainingProgressNew.count({
+              where: {
+                trainingId: { in: courseTrainingIds },
+                isCompleted: true,
+              },
+            });
+
+            const completionRate = assigned > 0 ? (completed / assigned) * 100 : 0;
+
+            courseStats.push({
+              courseId: course.id,
+              title: course.title,
+              completionRate: Math.round(completionRate * 100) / 100,
+              totalAssigned: assigned,
+              totalCompleted: completed,
+              trainingCount: courseTrainingIds.length,
+            });
+          } catch (statError) {
+            console.error(`Error fetching stats for course ${course.id}:`, statError);
+            // Continue with next course
+          }
+        }
+      } catch (statsError) {
+        console.error("Error calculating course stats:", statsError);
+        // Use defaults (already set to empty array)
+      }
+    }
+
   const initialStats = {
     overallCompletionRate: Math.round(overallCompletionRate * 100) / 100,
     totalAssigned,
     totalCompleted,
     trainingStats,
+    courseStats,
   };
 
   // Log data being passed to client component for debugging
@@ -419,6 +496,16 @@ export default async function TrainerDashboardPage() {
             completionRate: typeof stat.completionRate === 'number' ? stat.completionRate : 0,
             totalAssigned: typeof stat.totalAssigned === 'number' ? stat.totalAssigned : 0,
             totalCompleted: typeof stat.totalCompleted === 'number' ? stat.totalCompleted : 0,
+          }))
+        : [],
+      courseStats: Array.isArray(initialStats.courseStats)
+        ? initialStats.courseStats.map(stat => ({
+            courseId: String(stat.courseId),
+            title: String(stat.title || ''),
+            completionRate: typeof stat.completionRate === 'number' ? stat.completionRate : 0,
+            totalAssigned: typeof stat.totalAssigned === 'number' ? stat.totalAssigned : 0,
+            totalCompleted: typeof stat.totalCompleted === 'number' ? stat.totalCompleted : 0,
+            trainingCount: typeof stat.trainingCount === 'number' ? stat.trainingCount : 0,
           }))
         : [],
     };
