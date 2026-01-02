@@ -39,6 +39,15 @@ interface DashboardStats {
   courseStats?: CourseStat[];
 }
 
+// Default empty stats to prevent null/undefined issues
+const DEFAULT_STATS: DashboardStats = {
+  overallCompletionRate: 0,
+  totalAssigned: 0,
+  totalCompleted: 0,
+  trainingStats: [],
+  courseStats: [],
+};
+
 type DisplayedTraining = TrainingStat & {
   id: string;
   title: string;
@@ -75,7 +84,13 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
   allTrainings,
   allCourses,
 }) => {
-  const [stats, setStats] = useState<DashboardStats>(initialStats);
+  // Ensure stats is never null/undefined - use default if initialStats is missing
+  const [stats, setStats] = useState<DashboardStats>(initialStats || DEFAULT_STATS);
+  
+  // Initialize ref with current stats
+  useEffect(() => {
+    statsRef.current = stats;
+  }, [stats]);
   const [trainingPreferences, setTrainingPreferences] = useState<string[]>(initialTrainingPreferences);
   const [coursePreferences, setCoursePreferences] = useState<string[]>(initialCoursePreferences);
   const [allTrainingsList, setAllTrainingsList] = useState(allTrainings);
@@ -87,6 +102,8 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
   
   // Mount guard to prevent state updates after unmount
   const isMountedRef = useRef(false);
+  // Ref to store current stats for comparison (avoids closure issues)
+  const statsRef = useRef<DashboardStats | null>(stats);
 
   // Log component initialization for debugging - Only run once on mount
   useEffect(() => {
@@ -249,18 +266,20 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
 
       if (data.success) {
         if (isMountedRef.current) {
-          // Only update stats if data actually changed (prevent unnecessary re-renders)
           const newStats = data.data;
+          const currentStats = statsRef.current;
+          
+          // Simple comparison: only update if key values changed (avoid expensive JSON.stringify)
           const statsChanged = 
-            JSON.stringify(stats?.trainingStats?.map((s: TrainingStat) => s.trainingId).sort()) !== 
-            JSON.stringify(newStats?.trainingStats?.map((s: TrainingStat) => s.trainingId).sort()) ||
-            JSON.stringify(stats?.courseStats?.map((s: CourseStat) => s.courseId).sort()) !== 
-            JSON.stringify(newStats?.courseStats?.map((s: CourseStat) => s.courseId).sort()) ||
-            stats?.totalAssigned !== newStats?.totalAssigned ||
-            stats?.totalCompleted !== newStats?.totalCompleted ||
-            stats?.overallCompletionRate !== newStats?.overallCompletionRate;
+            !currentStats ||
+            currentStats.totalAssigned !== newStats.totalAssigned ||
+            currentStats.totalCompleted !== newStats.totalCompleted ||
+            currentStats.overallCompletionRate !== newStats.overallCompletionRate ||
+            currentStats.trainingStats?.length !== newStats.trainingStats?.length ||
+            currentStats.courseStats?.length !== newStats.courseStats?.length;
           
           if (statsChanged) {
+            statsRef.current = newStats; // Update ref first
             setStats(newStats);
           }
           setError(null);
