@@ -135,7 +135,12 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
   }, [initialStats, allTrainings, allCourses]);
 
   // Get trainings currently on dashboard - Memoized to prevent unnecessary recalculations
+  // CRITICAL: Must be called before early return to maintain consistent hook order
   const displayedTrainings = useMemo(() => {
+    // Safety check: ensure allTrainingsList is an array
+    if (!Array.isArray(allTrainingsList) || !Array.isArray(trainingPreferences)) {
+      return [];
+    }
     return trainingPreferences
       .map((trainingId) => {
         const stat = stats.trainingStats.find((s) => s.trainingId === trainingId);
@@ -151,7 +156,12 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
   }, [trainingPreferences, stats.trainingStats, allTrainingsList]);
 
   // Get courses currently on dashboard - Memoized to prevent unnecessary recalculations
+  // CRITICAL: Must be called before early return to maintain consistent hook order
   const displayedCourses = useMemo(() => {
+    // Safety check: ensure allCoursesList is an array
+    if (!Array.isArray(allCoursesList) || !Array.isArray(coursePreferences)) {
+      return [];
+    }
     return coursePreferences
       .map((courseId) => {
         const stat = stats.courseStats?.find((s) => s.courseId === courseId);
@@ -166,14 +176,24 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
   }, [coursePreferences, stats.courseStats, allCoursesList]);
 
   // Get trainings not on dashboard - Memoized to prevent unnecessary recalculations
+  // CRITICAL: Must be called before early return to maintain consistent hook order
   const availableTrainings = useMemo(() => {
+    // Safety check: ensure allTrainingsList is an array
+    if (!Array.isArray(allTrainingsList) || !Array.isArray(trainingPreferences)) {
+      return [];
+    }
     return allTrainingsList.filter(
       (t) => !trainingPreferences.includes(t.id)
     );
   }, [allTrainingsList, trainingPreferences]);
 
   // Get courses not on dashboard - Memoized to prevent unnecessary recalculations
+  // CRITICAL: Must be called before early return to maintain consistent hook order
   const availableCourses = useMemo(() => {
+    // Safety check: ensure allCoursesList is an array
+    if (!Array.isArray(allCoursesList) || !Array.isArray(coursePreferences)) {
+      return [];
+    }
     return allCoursesList.filter(
       (c) => !coursePreferences.includes(c.id)
     );
