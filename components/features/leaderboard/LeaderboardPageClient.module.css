@@ -21,71 +21,64 @@
   gap: var(--spacing-md);
 }
 
-/* Desktop responsive styles - Complete overhaul to eliminate gap */
+/* Desktop responsive styles - Work within TrainerLayout/AdminLayout */
 @media (min-width: 768px) {
   .container {
-    /* Break out of mainContent constraints completely */
-    position: fixed;
-    top: 64px; /* Below header */
-    left: 0; /* Start from viewport left edge */
-    right: 0; /* Extend to viewport right edge */
-    width: 100vw; /* Full viewport width */
+    /* Use relative positioning to work within TrainerLayout/AdminLayout */
+    position: relative;
+    width: 100%;
     max-width: none;
-    height: calc(100vh - 64px); /* Full height minus header */
+    height: 100%;
     margin: 0;
     padding: 0;
     gap: 0;
     overflow-y: auto;
     overflow-x: hidden;
-    background: var(--color-bg-dark);
-    z-index: 2;
-    /* Ensure background covers everything including gap area */
+    background: transparent; /* Let layout handle background */
+    z-index: 1;
     box-sizing: border-box;
   }
   
   .contentWrapper {
     width: 100%;
     max-width: 100%;
-    /* Start content at 100px: 90px sidebar (89px + 1px border) + 10px gap */
+    /* Padding accounts for sidebar (89px) + gap (11px) = 100px */
     padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) 100px;
     margin: 0;
     gap: var(--spacing-md);
     box-sizing: border-box;
-    background: var(--color-bg-dark);
-    min-height: 100%;
+    background: transparent;
+    min-height: calc(100vh - 64px); /* Full height minus header */
   }
 }
 
 @media (min-width: 1024px) {
   .container {
     /* Same positioning strategy for larger screens */
-    position: fixed;
-    top: 64px;
-    left: 0;
-    right: 0;
-    width: 100vw;
+    position: relative;
+    width: 100%;
     max-width: none;
-    height: calc(100vh - 64px);
+    height: 100%;
     margin: 0;
     padding: 0;
     gap: 0;
     overflow-y: auto;
     overflow-x: hidden;
-    background: var(--color-bg-dark);
-    z-index: 2;
+    background: transparent; /* Let layout handle background */
+    z-index: 1;
     box-sizing: border-box;
   }
   
   .contentWrapper {
     width: 100%;
     max-width: 100%;
-    /* Start content at 100px: 90px sidebar (89px + 1px border) + 10px gap */
+    /* Padding accounts for sidebar (89px) + gap (11px) = 100px */
     padding: var(--spacing-md) var(--spacing-xl) var(--spacing-md) 100px;
     margin: 0;
     gap: var(--spacing-md);
     box-sizing: border-box;
-    background: var(--color-bg-dark);
-    min-height: 100%;
+    background: transparent;
+    min-height: calc(100vh - 64px); /* Full height minus header */
   }
 }
 

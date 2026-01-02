@@ -3597,6 +3597,92 @@ export const Component: React.FC<Props> = ({ prop }) => {
 **Troubleshooting Steps When Error Persists:**
 1. Check browser console for the exact stack trace to identify which component is causing the issue
 2. Look for Suspense boundaries or error boundaries that might cause remounts
+
+---
+
+## Layout & CSS Positioning Issues
+
+### Issue: Component Not Visible in Desktop Layout (TrainerLayout/AdminLayout)
+
+**Symptoms:**
+- Component renders but is not visible when navigating to the page
+- Page appears blank or empty
+- Component works in mobile view but not in desktop layout
+- Console shows no errors, component appears to render successfully
+
+**Common Causes:**
+1. **Fixed Positioning Conflict**: Component uses `position: fixed` which positions it relative to viewport, not parent container
+2. **Overflow Hidden**: Parent container has `overflow: hidden` which clips content
+3. **Z-Index Issues**: Component has lower z-index than other elements, causing it to be hidden behind them
+4. **Height/Width Constraints**: Container has height/width constraints that prevent content from displaying
+5. **Background Color**: Component background is transparent and blends with layout background
+
+**Solution:**
+1. **Use Relative Positioning**: Change `position: fixed` to `position: relative` when component is inside a layout container
+2. **Allow Scrolling**: Change parent container's `overflow: hidden` to `overflow-y: auto` to allow content scrolling
+3. **Adjust Z-Index**: Ensure component has appropriate z-index (usually `z-index: 1` for content within layout)
+4. **Remove Fixed Dimensions**: Use `height: 100%` or `min-height` instead of fixed `height` values
+5. **Check Container Structure**: Verify component is properly nested within layout's content area
+
+**Example Fix:**
+```css
+/* ❌ WRONG - Fixed positioning breaks layout */
+@media (min-width: 768px) {
+  .container {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    width: 100vw;
+    height: calc(100vh - 64px);
+    z-index: 2;
+  }
+}
+
+/* ✅ CORRECT - Relative positioning works within layout */
+@media (min-width: 768px) {
+  .container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+}
+```
+
+**Layout Container Fix:**
+```css
+/* ❌ WRONG - Overflow hidden clips content */
+.content {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ✅ CORRECT - Allow scrolling for content */
+.content {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: calc(100vh - 64px); /* Account for header */
+}
+```
+
+**Files Fixed:**
+- `components/features/leaderboard/LeaderboardPageClient.module.css` - Changed from `position: fixed` to `position: relative` for desktop layouts
+- `components/layout/trainer/TrainerLayout.module.css` - Changed `.content` from `overflow: hidden` to `overflow-y: auto`
+
+**Prevention Guidelines:**
+- Always use `position: relative` for components inside layout containers (TrainerLayout, AdminLayout)
+- Only use `position: fixed` for elements that need to be positioned relative to viewport (modals, tooltips)
+- Ensure parent containers allow scrolling with `overflow-y: auto` instead of `overflow: hidden`
+- Account for header height in height calculations: `height: calc(100vh - 64px)`
+- Test components in both mobile and desktop layouts to catch positioning issues early
+
+**Troubleshooting Steps:**
+1. Check browser DevTools to see if component is rendered but hidden (check `display`, `visibility`, `opacity`, `z-index`)
+2. Verify component is properly nested within layout's content area
+3. Check if parent container has `overflow: hidden` that might be clipping content
+4. Verify z-index values - content should have `z-index: 1`, modals/tooltips should have higher values
+5. Test with different viewport sizes to identify if issue is specific to desktop/mobile layouts
 3. Check if parent components conditionally render the component
 4. Verify all child components (especially `TrainerAnalyticsDashboard` and its children) don't have conditional hooks
 5. Add `console.log` at the start of component to track when it mounts/unmounts

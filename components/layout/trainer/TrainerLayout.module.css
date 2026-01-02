@@ -35,9 +35,10 @@
 .content {
   flex: 1;
   padding: 0; /* Remove ALL padding to magnetize containers */
-  overflow: hidden; /* No scrolling in desktop view */
+  overflow-y: auto; /* Allow scrolling for content that exceeds viewport */
+  overflow-x: hidden;
   position: relative;
   z-index: 1;
-  height: 100vh; /* Full height since header is no longer fixed */
+  height: calc(100vh - 64px); /* Full height minus header (64px) */
 }
 
