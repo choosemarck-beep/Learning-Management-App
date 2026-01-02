@@ -86,11 +86,6 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
 }) => {
   // Ensure stats is never null/undefined - use default if initialStats is missing
   const [stats, setStats] = useState<DashboardStats>(initialStats || DEFAULT_STATS);
-  
-  // Initialize ref with current stats
-  useEffect(() => {
-    statsRef.current = stats;
-  }, [stats]);
   const [trainingPreferences, setTrainingPreferences] = useState<string[]>(initialTrainingPreferences);
   const [coursePreferences, setCoursePreferences] = useState<string[]>(initialCoursePreferences);
   const [allTrainingsList, setAllTrainingsList] = useState(allTrainings);
@@ -103,7 +98,13 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
   // Mount guard to prevent state updates after unmount
   const isMountedRef = useRef(false);
   // Ref to store current stats for comparison (avoids closure issues)
+  // CRITICAL: Must be declared BEFORE useEffect that uses it
   const statsRef = useRef<DashboardStats | null>(stats);
+  
+  // Initialize ref with current stats (must be AFTER statsRef declaration)
+  useEffect(() => {
+    statsRef.current = stats;
+  }, [stats]);
 
   // Log component initialization for debugging - Only run once on mount
   useEffect(() => {
