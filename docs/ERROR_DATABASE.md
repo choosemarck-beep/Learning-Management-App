@@ -4073,5 +4073,75 @@ const displayedTrainings = useMemo(() => {
 - **Performance Note**: Using the entire object is fine because React only recalculates when the object reference changes (not when nested properties change if the object reference stays the same)
 - **2025-01-02**: Added infinite loop pattern from useMemo with unstable array dependencies
 - **2025-01-02**: Added ref-based comparison pattern to avoid closure issues in useCallback
+- **2025-01-02**: **CRITICAL** - Fixed hook order violation: `statsRef` was used in `useEffect` before declaration
+
+---
+
+### React error #310: Hook Used Before Declaration (Hook Order Violation)
+
+**Symptoms:**
+- Minified React error #310 with `useMemo` or other hooks in stack trace
+- Error occurs consistently on component mount/render
+- Component crashes or shows error overlay
+- Error persists even after fixing closure issues and dependencies
+
+**Root Cause:**
+- A hook (e.g., `useRef`, `useMemo`, `useCallback`) is used in another hook (e.g., `useEffect`) **before** it's declared
+- React requires all hooks to be called in the same order every render
+- If a hook is used before declaration, the order changes between renders, causing React error #310
+
+**Example of the Problem:**
+```typescript
+// ❌ WRONG - statsRef used in useEffect before it's declared
+const [stats, setStats] = useState(initialStats);
+
+useEffect(() => {
+  statsRef.current = stats; // ERROR: statsRef not declared yet!
+}, [stats]);
+
+// ... more useState hooks ...
+
+const statsRef = useRef(stats); // Declared too late!
+```
+
+**Solution:**
+- **Declare all refs BEFORE any useEffect hooks that use them**
+- Group all `useState` hooks together
+- Group all `useRef` hooks together (immediately after useState)
+- Group all `useMemo` hooks together
+- Group all `useCallback` hooks together
+- Group all `useEffect` hooks together (last)
+- **CRITICAL**: Never use a hook variable in another hook before it's declared
+
+**Example Fix:**
+```typescript
+// ✅ CORRECT - All refs declared before useEffect
+const [stats, setStats] = useState(initialStats);
+const [otherState, setOtherState] = useState(initial);
+
+// All refs declared together, before any useEffect
+const isMountedRef = useRef(false);
+const statsRef = useRef<DashboardStats | null>(stats);
+
+// Now useEffect can safely use statsRef
+useEffect(() => {
+  statsRef.current = stats;
+}, [stats]);
+```
+
+**Files Fixed:**
+- `components/features/trainer/TrainerDashboardClient.tsx` - Moved `statsRef` declaration before `useEffect` that uses it
+
+**Prevention:**
+- **CRITICAL**: Always declare all hooks in this order:
+  1. `useState` hooks (all together)
+  2. `useRef` hooks (all together, immediately after useState)
+  3. `useMemo` hooks (all together)
+  4. `useCallback` hooks (all together)
+  5. `useEffect` hooks (all together, last)
+- Never use a hook variable in another hook before it's declared
+- If a `useEffect` needs a ref, declare the ref first
+- Use ESLint to catch hook order violations
+- **2025-01-02**: Added hook order violation pattern - hooks must be declared before use
 
 ---
