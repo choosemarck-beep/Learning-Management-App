@@ -100,6 +100,9 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
   // Ref to store current stats for comparison (avoids closure issues)
   // CRITICAL: Must be declared BEFORE useEffect that uses it
   const statsRef = useRef<DashboardStats | null>(stats);
+  // Refs to track previous prop values for comparison (must be with other useRef hooks)
+  const prevTrainingsRef = useRef<string>("");
+  const prevCoursesRef = useRef<string>("");
   
   // Initialize ref with current stats (must be AFTER statsRef declaration)
   useEffect(() => {
@@ -432,10 +435,6 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
       savePreferences(trainingPreferences, newPreferences);
     }
   };
-
-  // Use refs to track previous prop values for comparison
-  const prevTrainingsRef = useRef<string>("");
-  const prevCoursesRef = useRef<string>("");
 
   // Sync allTrainingsList and allCoursesList with props when they change
   // Only update if the array contents actually changed (not just reference)
