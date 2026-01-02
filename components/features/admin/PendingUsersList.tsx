@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
 import { UserCard } from "./UserCard";
 import styles from "./PendingUsersList.module.css";
@@ -42,7 +42,7 @@ export const PendingUsersList: React.FC<PendingUsersListProps> = ({
     null
   );
 
-  const fetchPendingUsers = async () => {
+  const fetchPendingUsers = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch("/api/admin/users/pending");
@@ -59,13 +59,13 @@ export const PendingUsersList: React.FC<PendingUsersListProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (initialUsers.length === 0) {
       fetchPendingUsers();
     }
-  }, []);
+  }, [initialUsers.length, fetchPendingUsers]);
 
   const handleApprove = async (userId: string) => {
     setProcessingUserId(userId);

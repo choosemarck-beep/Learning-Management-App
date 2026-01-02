@@ -98,13 +98,70 @@ export const UsersTable: React.FC<UsersTableProps> = ({
   const [resizeStartWidth, setResizeStartWidth] = useState(0);
   const tableRef = useRef<HTMLTableElement>(null);
 
+  const fetchUsers = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      // "ALL" statusFilter means show only APPROVED users
+      if (statusFilter === "ALL") {
+        params.append("status", "ALL"); // API will convert this to APPROVED
+      } else if (statusFilter) {
+        params.append("status", statusFilter);
+      }
+
+      const url = `/api/admin/users?${params.toString()}`;
+      console.log("[UsersTable] Fetching users from:", url);
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        console.error("[UsersTable] API error:", {
+          status: response.status,
+          statusText: response.statusText,
+          url,
+        });
+        toast.error(`Failed to fetch users: ${response.status} ${response.statusText}`);
+        return;
+      }
+
+      const data = await response.json();
+      console.log("[UsersTable] API response:", {
+        success: data.success,
+        userCount: data.data?.length || 0,
+        pagination: data.pagination,
+      });
+
+      if (data.success) {
+        if (Array.isArray(data.data)) {
+          setUsers(data.data);
+          console.log("[UsersTable] Users set successfully:", data.data.length);
+        } else {
+          console.error("[UsersTable] Invalid data format - expected array, got:", typeof data.data);
+          toast.error("Invalid response format from server");
+        }
+      } else {
+        console.error("[UsersTable] API returned error:", data.error);
+        toast.error(data.error || "Failed to fetch users");
+      }
+    } catch (error) {
+      console.error("[UsersTable] Error fetching users:", {
+        error,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      toast.error("Failed to fetch users. Please check your connection and try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [statusFilter]);
+
   useEffect(() => {
     // Always fetch users when statusFilter changes to ensure correct filtering
     // Don't rely on initialUsers as they may not be filtered by the current status
     fetchUsers();
     // Reset to page 1 when status filter changes
     setCurrentPage(1);
-  }, [statusFilter]);
+  }, [fetchUsers]);
 
   // Save column widths to localStorage
   useEffect(() => {
@@ -272,62 +329,6 @@ export const UsersTable: React.FC<UsersTableProps> = ({
     }
   }, [resizingColumn, handleResizeMove, handleResizeEnd]);
 
-  const fetchUsers = async () => {
-    setIsLoading(true);
-    try {
-      const params = new URLSearchParams();
-      // "ALL" statusFilter means show only APPROVED users
-      if (statusFilter === "ALL") {
-        params.append("status", "ALL"); // API will convert this to APPROVED
-      } else if (statusFilter) {
-        params.append("status", statusFilter);
-      }
-
-      const url = `/api/admin/users?${params.toString()}`;
-      console.log("[UsersTable] Fetching users from:", url);
-      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        console.error("[UsersTable] API error:", {
-          status: response.status,
-          statusText: response.statusText,
-          url,
-        });
-        toast.error(`Failed to fetch users: ${response.status} ${response.statusText}`);
-        return;
-      }
-
-      const data = await response.json();
-      console.log("[UsersTable] API response:", {
-        success: data.success,
-        userCount: data.data?.length || 0,
-        pagination: data.pagination,
-      });
-
-      if (data.success) {
-        if (Array.isArray(data.data)) {
-          setUsers(data.data);
-          console.log("[UsersTable] Users set successfully:", data.data.length);
-        } else {
-          console.error("[UsersTable] Invalid data format - expected array, got:", typeof data.data);
-          toast.error("Invalid response format from server");
-        }
-      } else {
-        console.error("[UsersTable] API returned error:", data.error);
-        toast.error(data.error || "Failed to fetch users");
-      }
-    } catch (error) {
-      console.error("[UsersTable] Error fetching users:", {
-        error,
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-      toast.error("Failed to fetch users. Please check your connection and try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleApprove = async (userId: string) => {
     setProcessingUserId(userId);

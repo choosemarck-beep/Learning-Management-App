@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Activity, Calendar, User, FileText } from "lucide-react";
 import toast from "react-hot-toast";
 import styles from "./ActivityLogsClient.module.css";
@@ -24,11 +24,7 @@ export const ActivityLogsClient: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [filterType, setFilterType] = useState<string>("all");
 
-  useEffect(() => {
-    fetchLogs();
-  }, [filterType]);
-
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     try {
       setIsLoading(true);
       const url = filterType === "all" 
@@ -49,7 +45,11 @@ export const ActivityLogsClient: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filterType]);
+
+  useEffect(() => {
+    fetchLogs();
+  }, [fetchLogs]);
 
   const getActivityIcon = (type: string) => {
     if (type.includes("TRAINING")) {
