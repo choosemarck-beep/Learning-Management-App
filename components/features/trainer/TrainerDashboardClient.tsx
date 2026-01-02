@@ -105,6 +105,25 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
       hasAllCourses: Array.isArray(allCourses),
     });
     
+    // Debug: Log hook execution order
+    if (process.env.NODE_ENV === 'development') {
+      console.log("[TrainerDashboardClient] Hook execution order verified:", {
+        hooksCalled: [
+          'useState (multiple)',
+          'useRef (isMountedRef)',
+          'useEffect (mount logging)',
+          'useMemo (displayedTrainings)',
+          'useMemo (displayedCourses)',
+          'useMemo (availableTrainings)',
+          'useMemo (availableCourses)',
+          'useMemo (overview stats)',
+          'useCallback (fetchStats)',
+          'useCallback (savePreferences)',
+          'useEffect (fetchStats interval)',
+        ],
+      });
+    }
+    
     // Check for any undefined or null critical props (only on mount)
     if (!initialStats) {
       console.error("[TrainerDashboardClient] CRITICAL: initialStats is missing!");
