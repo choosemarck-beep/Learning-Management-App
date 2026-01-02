@@ -3602,10 +3602,41 @@ export const Component: React.FC<Props> = ({ prop }) => {
   - Component is being remounted/remounted unexpectedly (Suspense boundaries, error boundaries)
   - Parent component conditionally renders this component
   - There are other components with conditional hooks that haven't been found yet
+  - Component is lazy-loaded or dynamically imported
+  - Component is rendered inside a conditional container (Accordion, Modal, Tab) that mounts/unmounts
+  - Production build minification is hiding the actual error location
 
 **Troubleshooting Steps When Error Persists:**
-1. Check browser console for the exact stack trace to identify which component is causing the issue
-2. Look for Suspense boundaries or error boundaries that might cause remounts
+1. **Check Browser Console**: Look for the exact stack trace to identify which component is causing the issue
+   - In production (minified), the stack trace may not be helpful
+   - Try running in development mode to get clearer error messages
+2. **Check for Suspense Boundaries**: Look for `<Suspense>` components that might cause remounts
+3. **Check for Error Boundaries**: Look for error boundary components that might catch and remount
+4. **Check Conditional Rendering**: Look for parent components that conditionally render children:
+   - Accordions that only render children when open
+   - Modals that mount/unmount
+   - Tabs that conditionally render content
+   - Route-based conditional rendering
+5. **Check Lazy Loading**: Look for `React.lazy()` or dynamic imports that might cause remounts
+6. **Check React Strict Mode**: In development, React Strict Mode causes double renders - this is normal but can expose hook order issues
+7. **Systematic Component Check**: When error persists, check ALL components in the render tree:
+   - Start from the page component
+   - Check each child component for conditional hooks
+   - Check each nested component (especially analytics, modals, accordions)
+8. **Production vs Development**: If error only occurs in production:
+   - Check if there are any build-time optimizations causing issues
+   - Verify all components are properly exported
+   - Check for any code splitting that might affect hook order
+9. **Add Debugging**: Add `console.log` at the start of components to track mount/unmount cycles:
+   ```typescript
+   useEffect(() => {
+     console.log("[ComponentName] Mounted");
+     return () => {
+       console.log("[ComponentName] Unmounted");
+     };
+   }, []);
+   ```
+10. **Check Hook Dependencies**: Ensure all `useMemo` and `useCallback` hooks have correct dependencies - missing dependencies can cause inconsistent hook execution
 
 ---
 
