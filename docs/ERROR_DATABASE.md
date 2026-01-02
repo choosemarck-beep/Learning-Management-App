@@ -4003,3 +4003,56 @@ const { totalTrainings, totalCourses } = useMemo(() => {
 - **2025-01-02**: Added useMemo nested property dependency pattern - use entire object as dependency instead of nested properties
 
 ---
+
+### React error #310: Infinite Loop from useMemo with Unstable Array Dependencies
+
+**Symptoms:**
+- Minified React error #310 with `useMemo` in stack trace
+- Console shows repetitive stack trace (same file repeated 20-25 times)
+- Browser becomes unresponsive or crashes
+- Component re-renders infinitely
+
+**Common Causes:**
+- `useMemo` hook depends on array properties (e.g., `stats.trainingStats`) that get new references on every state update
+- When `setStats` is called, `stats.trainingStats` gets a new array reference, triggering `useMemo` to recalculate
+- The recalculation might trigger a re-render, which updates state, creating an infinite loop
+- Using nested array properties as dependencies instead of the entire parent object
+
+**Solution:**
+- **Use entire object as dependency**: Instead of `[stats.trainingStats, stats.courseStats]`, use `[stats]`
+- This ensures `useMemo` only recalculates when the `stats` object reference changes, not when nested arrays get new references
+- Add safety checks inside `useMemo` to handle undefined/null values
+- Extract array values inside `useMemo` callback for safer access
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - Causes infinite loop: stats.trainingStats gets new reference on every setStats call
+const displayedTrainings = useMemo(() => {
+  return trainingPreferences.map((trainingId) => {
+    const stat = stats.trainingStats.find((s) => s.trainingId === trainingId);
+    // ...
+  });
+}, [trainingPreferences, stats.trainingStats, allTrainingsList]); // stats.trainingStats changes on every setStats
+
+// ✅ CORRECT - Use entire stats object as dependency
+const displayedTrainings = useMemo(() => {
+  // Safety check and extract array inside useMemo
+  const trainingStats = Array.isArray(stats?.trainingStats) ? stats.trainingStats : [];
+  return trainingPreferences.map((trainingId) => {
+    const stat = trainingStats.find((s) => s.trainingId === trainingId);
+    // ...
+  });
+}, [trainingPreferences, stats, allTrainingsList]); // Entire stats object as dependency
+```
+
+**Files Fixed:**
+- `components/features/trainer/TrainerDashboardClient.tsx` - Changed `displayedTrainings` and `displayedCourses` useMemo dependencies from `stats.trainingStats`/`stats.courseStats` to `stats`
+
+**Prevention:**
+- When using nested array/object properties in `useMemo`, use the entire parent object as dependency
+- Extract nested values inside the `useMemo` callback for safer access
+- This prevents infinite loops from array reference changes while still recalculating when the object actually changes
+- **Performance Note**: Using the entire object is fine because React only recalculates when the object reference changes (not when nested properties change if the object reference stays the same)
+- **2025-01-02**: Added infinite loop pattern from useMemo with unstable array dependencies
+
+---

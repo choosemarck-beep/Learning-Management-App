@@ -151,14 +151,16 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
 
   // Get trainings currently on dashboard - Memoized to prevent unnecessary recalculations
   // CRITICAL: Must be called before early return to maintain consistent hook order
+  // CRITICAL: Use entire stats object as dependency to prevent infinite loops from array reference changes
   const displayedTrainings = useMemo(() => {
     // Safety check: ensure allTrainingsList is an array
     if (!Array.isArray(allTrainingsList) || !Array.isArray(trainingPreferences)) {
       return [];
     }
+    const trainingStats = Array.isArray(stats?.trainingStats) ? stats.trainingStats : [];
     return trainingPreferences
       .map((trainingId) => {
-        const stat = stats.trainingStats.find((s) => s.trainingId === trainingId);
+        const stat = trainingStats.find((s) => s.trainingId === trainingId);
         const training = allTrainingsList.find((t) => t.id === trainingId);
         if (!training) return null;
         return {
@@ -168,18 +170,20 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
         };
       })
       .filter((t): t is DisplayedTraining => t !== null);
-  }, [trainingPreferences, stats.trainingStats, allTrainingsList]);
+  }, [trainingPreferences, stats, allTrainingsList]); // Use entire stats object instead of stats.trainingStats
 
   // Get courses currently on dashboard - Memoized to prevent unnecessary recalculations
   // CRITICAL: Must be called before early return to maintain consistent hook order
+  // CRITICAL: Use entire stats object as dependency to prevent infinite loops from array reference changes
   const displayedCourses = useMemo(() => {
     // Safety check: ensure allCoursesList is an array
     if (!Array.isArray(allCoursesList) || !Array.isArray(coursePreferences)) {
       return [];
     }
+    const courseStats = Array.isArray(stats?.courseStats) ? stats.courseStats : [];
     return coursePreferences
       .map((courseId) => {
-        const stat = stats.courseStats?.find((s) => s.courseId === courseId);
+        const stat = courseStats.find((s) => s.courseId === courseId);
         const course = allCoursesList.find((c) => c.id === courseId);
         if (!course) return null;
         return {
@@ -188,7 +192,7 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
         };
       })
       .filter((c): c is CourseStat & { id: string; title: string; description: string; thumbnail: string | null; _count: { trainings: number } } => c !== null);
-  }, [coursePreferences, stats.courseStats, allCoursesList]);
+  }, [coursePreferences, stats, allCoursesList]); // Use entire stats object instead of stats.courseStats
 
   // Get trainings not on dashboard - Memoized to prevent unnecessary recalculations
   // CRITICAL: Must be called before early return to maintain consistent hook order
