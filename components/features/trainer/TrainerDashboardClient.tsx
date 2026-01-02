@@ -282,12 +282,12 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
             currentStats.courseStats?.length !== newStats.courseStats?.length ||
             // Deep compare: check if training IDs changed
             (Array.isArray(currentStats.trainingStats) && Array.isArray(newStats.trainingStats) &&
-             JSON.stringify(currentStats.trainingStats.map(s => s.trainingId).sort()) !== 
-             JSON.stringify(newStats.trainingStats.map(s => s.trainingId).sort())) ||
+             JSON.stringify(currentStats.trainingStats.map((s: TrainingStat) => s.trainingId).sort()) !== 
+             JSON.stringify(newStats.trainingStats.map((s: TrainingStat) => s.trainingId).sort())) ||
             // Deep compare: check if course IDs changed
             (Array.isArray(currentStats.courseStats) && Array.isArray(newStats.courseStats) &&
-             JSON.stringify(currentStats.courseStats.map(s => s.courseId).sort()) !== 
-             JSON.stringify(newStats.courseStats.map(s => s.courseId).sort()));
+             JSON.stringify(currentStats.courseStats.map((s: CourseStat) => s.courseId).sort()) !== 
+             JSON.stringify(newStats.courseStats.map((s: CourseStat) => s.courseId).sort()));
           
           // CRITICAL: Only update state if data actually changed
           // This prevents unnecessary re-renders that trigger useMemo recalculation
