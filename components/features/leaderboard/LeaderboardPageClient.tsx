@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { LeaderboardHeader } from "./LeaderboardHeader";
 import { LeaderboardSearch } from "./LeaderboardSearch";
 import { LeaderboardList } from "./LeaderboardList";
@@ -34,42 +34,103 @@ export const LeaderboardPageClient: React.FC<LeaderboardPageClientProps> = ({
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardResponse | null>(initialData);
   const [isLoading, setIsLoading] = useState(!initialData);
 
-  // Fetch leaderboard data
-  const fetchLeaderboard = React.useCallback(async () => {
+  // Mount guard to prevent state updates after unmount
+  const isMountedRef = useRef(false);
+  // Ref to store current page to avoid dependency issues
+  const pageRef = useRef(page);
+  // Track if this is the initial mount
+  const isInitialMountRef = useRef(true);
+
+  // Update pageRef when page changes
+  useEffect(() => {
+    pageRef.current = page;
+  }, [page]);
+
+  // Fetch leaderboard data - use ref for page to prevent dependency loop
+  const fetchLeaderboard = useCallback(async () => {
+    if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
+    
     setIsLoading(true);
     try {
       const params = new URLSearchParams({
         view,
         period,
-        page: page.toString(),
-        limit: page === 1 ? "10" : "20",
+        page: pageRef.current.toString(),
+        limit: pageRef.current === 1 ? "10" : "20",
         ...(search ? { search } : {}),
       });
 
       const response = await fetch(`/api/leaderboard?${params.toString()}`);
+      
+      if (!isMountedRef.current) return; // Guard: Check again before setting state
+      
       const data = await response.json();
 
       if (data.success) {
-        setLeaderboardData(data.data);
+        if (isMountedRef.current) {
+          setLeaderboardData(data.data);
+        }
       } else {
         console.error("[LeaderboardPageClient] Error fetching leaderboard:", data.error);
       }
     } catch (error) {
+      if (!isMountedRef.current) return; // Guard: Check before error handling
       console.error("[LeaderboardPageClient] Error fetching leaderboard:", error);
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
     }
-  }, [view, period, page, search]);
+  }, [view, period, search]); // Removed page from dependencies - using ref instead
 
-  // Fetch on mount and when filters change
+  // Initialize mount guard
   useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false; // Mark as unmounted in cleanup
+    };
+  }, []);
+
+  // Reset to page 1 when view, period, or search changes, then fetch
+  useEffect(() => {
+    if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
+    
+    // Reset page to 1 when filters change (but not on initial mount if page is already 1)
+    if (pageRef.current !== 1) {
+      setPage(1);
+      pageRef.current = 1; // Update ref immediately
+    }
+    
+    // Fetch with current filters (page will be 1)
+    // Don't include fetchLeaderboard in deps to prevent loop - it's stable due to ref usage
     fetchLeaderboard();
-  }, [fetchLeaderboard]);
-
-  // Reset to page 1 when view, period, or search changes
-  useEffect(() => {
-    setPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, period, search]);
+
+  // Fetch when page changes (user clicks pagination) - but not on initial mount
+  useEffect(() => {
+    if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
+    if (isInitialMountRef.current) {
+      // Skip on initial mount - filter effect will handle it
+      isInitialMountRef.current = false;
+      return;
+    }
+    
+    // Fetch when page changes (pagination)
+    // Don't include fetchLeaderboard in deps to prevent loop - it's stable due to ref usage
+    fetchLeaderboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
+  // Fetch on initial mount if no initial data
+  useEffect(() => {
+    if (initialData === null && isMountedRef.current) {
+      fetchLeaderboard();
+      isInitialMountRef.current = false; // Mark as no longer initial mount
+    } else {
+      isInitialMountRef.current = false; // Mark as no longer initial mount even if we have data
+    }
+  }, []); // Only run on mount
 
   const handleViewChange = (newView: "INDIVIDUAL" | "BRANCH" | "AREA" | "REGIONAL") => {
     setView(newView);
