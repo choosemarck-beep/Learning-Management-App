@@ -3915,6 +3915,60 @@ useEffect(() => {
 - Always wrap functions used in `useEffect` in `useCallback` if they're defined outside
 - Review ESLint warnings and fix missing dependencies systematically
 - Use `// eslint-disable-next-line react-hooks/exhaustive-deps` only when absolutely necessary
+- **For useMemo dependencies**: When accessing nested properties, use the entire parent object as dependency (e.g., `[stats]` instead of `[stats.trainingStats.length]`) to satisfy ESLint and ensure consistency
 - **2025-01-02**: Added ESLint missing dependencies warning - wrap functions in useCallback when used in useEffect
+- **2025-01-02**: Added useMemo dependency pattern - use entire object as dependency when accessing nested properties
+
+---
+
+### Warning: React Hook useMemo Missing Dependencies (Nested Properties)
+
+**Symptoms:**
+- ESLint warning: "React Hook useMemo has missing dependencies: 'stats.courseStats' and 'stats.trainingStats'. Either include them or remove the dependency array."
+- Warning occurs when using nested property access in `useMemo` dependencies (e.g., `stats.trainingStats.length`)
+- ESLint wants the entire object (`stats`) or all accessed properties as dependencies
+
+**Common Causes:**
+- Using nested property access in dependencies: `[stats.trainingStats.length]` instead of `[stats]`
+- ESLint's exhaustive-deps rule detects that nested properties are accessed but not included as dependencies
+- Attempting to optimize by only including specific properties (`.length`) but ESLint wants the whole object
+
+**Solution:**
+- **Use entire object as dependency**: Instead of `[stats.trainingStats.length, stats.courseStats.length]`, use `[stats]`
+- This ensures `useMemo` recalculates when any part of `stats` changes, which is usually the desired behavior
+- The performance impact is minimal since `useMemo` only recalculates when the dependency reference changes
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - ESLint warning about missing dependencies
+const { totalTrainings, totalCourses } = useMemo(() => {
+  return {
+    totalTrainings: stats.trainingStats.length,
+    totalCourses: stats.courseStats?.length || 0,
+  };
+}, [stats.trainingStats.length, stats.courseStats?.length]); // Warning: missing stats.courseStats and stats.trainingStats
+
+// ✅ CORRECT - Use entire object as dependency
+const { totalTrainings, totalCourses } = useMemo(() => {
+  // Safety checks inside useMemo
+  const trainingStatsLength = Array.isArray(stats?.trainingStats) ? stats.trainingStats.length : 0;
+  const courseStatsLength = Array.isArray(stats?.courseStats) ? stats.courseStats.length : 0;
+  
+  return {
+    totalTrainings: trainingStatsLength,
+    totalCourses: courseStatsLength,
+  };
+}, [stats]); // Entire stats object as dependency - satisfies ESLint and ensures consistency
+```
+
+**Files Fixed:**
+- `components/features/trainer/TrainerDashboardClient.tsx` - Changed useMemo dependency from `[stats?.trainingStats?.length, stats?.courseStats?.length, ...]` to `[stats]`
+
+**Prevention:**
+- When accessing nested properties in `useMemo`, use the entire parent object as the dependency
+- Add safety checks inside the `useMemo` callback to handle undefined/null values
+- This approach satisfies ESLint and ensures the memoized value updates when any part of the object changes
+- **Performance Note**: Using the entire object is usually fine because `useMemo` only recalculates when the object reference changes (not when nested properties change if the object reference stays the same)
+- **2025-01-02**: Added useMemo nested property dependency pattern - use entire object as dependency instead of nested properties
 
 ---
