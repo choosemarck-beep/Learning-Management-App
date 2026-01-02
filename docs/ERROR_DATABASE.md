@@ -3570,6 +3570,37 @@ export const Component: React.FC<Props> = ({ prop }) => {
 
 **Files Fixed:**
 - `components/layout/SplashScreenWrapper.tsx` - Moved `useEffect` before early return, added `isClient` guard inside effect
+- `components/features/trainer/TrainerDashboardClient.tsx` - Moved `useMemo` for overview stats before early return, added safety checks to all `useMemo` hooks (Array.isArray checks)
+- `components/features/courses/MiniTrainingModal.tsx` - Reordered all function declarations (updateVideoProgress, debouncedSaveProgress, saveProgressImmediately, stopYouTubeTracking, startYouTubeTracking, initializeYouTubePlayer, fetchMiniTraining) to be declared before `useEffect` hooks that use them
+- `components/features/courses/TrainingVideoPageClient.tsx` - Wrapped functions in `useCallback` and reordered to be defined before use
+- `lib/hooks/useVideoWatchTimer.ts` - Reordered functions to be defined before `useEffect` that uses them
+
+**Latest Fixes (2025-01-02):**
+1. **TrainerDashboardClient.tsx**:
+   - Moved `useMemo` for `totalTrainings`, `totalCourses`, `pendingCompletions` before early return
+   - Added `Array.isArray()` safety checks to all `useMemo` hooks (`displayedTrainings`, `displayedCourses`, `availableTrainings`, `availableCourses`)
+   - Ensures hooks always execute in the same order regardless of data state
+   - Commit: `4e533ce` - "Add safety checks to useMemo hooks in TrainerDashboardClient"
+
+2. **MiniTrainingModal.tsx**:
+   - Fixed "Block-scoped variable used before declaration" errors
+   - Reordered all `useCallback` functions before `useEffect` hooks that use them
+   - Order: `updateVideoProgress` → `debouncedSaveProgress` → `saveProgressImmediately` → `stopYouTubeTracking` → `startYouTubeTracking` → `initializeYouTubePlayer` → `fetchMiniTraining`
+   - Commit: `d84d00c` - "Fix: Reorder function declarations in MiniTrainingModal"
+
+**Persistent Issues:**
+- React error #310 may still occur if:
+  - Component is being remounted/remounted unexpectedly (Suspense boundaries, error boundaries)
+  - Parent component conditionally renders this component
+  - There are other components with conditional hooks that haven't been found yet
+
+**Troubleshooting Steps When Error Persists:**
+1. Check browser console for the exact stack trace to identify which component is causing the issue
+2. Look for Suspense boundaries or error boundaries that might cause remounts
+3. Check if parent components conditionally render the component
+4. Verify all child components (especially `TrainerAnalyticsDashboard` and its children) don't have conditional hooks
+5. Add `console.log` at the start of component to track when it mounts/unmounts
+6. Check if the error occurs on initial load or only after certain user actions
 
 **Prevention:**
 - **CRITICAL**: Always call all hooks at the top level, before any early returns
@@ -3577,6 +3608,10 @@ export const Component: React.FC<Props> = ({ prop }) => {
 - Review components with early returns to ensure all hooks are called first
 - Use ESLint rule `react-hooks/rules-of-hooks` to catch these issues
 - **Pattern**: All hooks → Early returns → Render logic
+- **Function Declaration Order**: Always declare functions (especially `useCallback`) before `useEffect` hooks that use them
+- **Safety Checks**: Add `Array.isArray()` checks in `useMemo` hooks that use array methods to prevent runtime errors
 - **2025-01-02**: Added conditional hook call error - hooks must be called before any early returns to maintain consistent hook order
+- **2025-01-02**: Added function declaration order fix - functions must be declared before `useEffect` hooks that use them
+- **2025-01-02**: Added safety checks to `useMemo` hooks to ensure consistent execution
 
 ---
