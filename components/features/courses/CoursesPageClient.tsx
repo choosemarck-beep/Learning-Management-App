@@ -32,6 +32,9 @@ export const CoursesPageClient: React.FC<CoursesPageClientProps> = ({
 
   // Filter and sort courses
   const filteredAndSortedCourses = useMemo(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log("[CoursesPageClient] useMemo called for filteredAndSortedCourses");
+    }
     let filtered = initialCourses;
 
     // Search filter

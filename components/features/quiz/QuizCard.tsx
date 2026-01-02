@@ -134,6 +134,9 @@ export const QuizCard: React.FC<QuizCardProps> = ({
 }) => {
   // Memoize converted questions to prevent unnecessary re-renders
   const convertedQuestions = useMemo(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log("[QuizCard] useMemo called for convertedQuestions");
+    }
     if (legacyQuestions) {
       return convertLegacyQuestions(legacyQuestions);
     }
