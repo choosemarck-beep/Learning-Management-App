@@ -424,12 +424,18 @@ export const TrainerDashboardClient: React.FC<TrainerDashboardClientProps> = ({
   // Calculate overview stats - Memoized to prevent unnecessary recalculations
   // CRITICAL: This useMemo MUST be called BEFORE any early returns to maintain consistent hook order
   const { totalTrainings, totalCourses, pendingCompletions } = useMemo(() => {
+    // Safety checks to prevent errors if stats structure is invalid
+    const trainingStatsLength = Array.isArray(stats?.trainingStats) ? stats.trainingStats.length : 0;
+    const courseStatsLength = Array.isArray(stats?.courseStats) ? stats.courseStats.length : 0;
+    const totalAssigned = typeof stats?.totalAssigned === 'number' ? stats.totalAssigned : 0;
+    const totalCompleted = typeof stats?.totalCompleted === 'number' ? stats.totalCompleted : 0;
+    
     return {
-      totalTrainings: stats.trainingStats.length,
-      totalCourses: stats.courseStats?.length || 0,
-      pendingCompletions: stats.totalAssigned - stats.totalCompleted,
+      totalTrainings: trainingStatsLength,
+      totalCourses: courseStatsLength,
+      pendingCompletions: totalAssigned - totalCompleted,
     };
-  }, [stats.trainingStats.length, stats.courseStats?.length, stats.totalAssigned, stats.totalCompleted]);
+  }, [stats?.trainingStats?.length, stats?.courseStats?.length, stats?.totalAssigned, stats?.totalCompleted]);
 
   // Show error state if there's an error
   // CRITICAL: Early return MUST be AFTER all hooks (useState, useEffect, useCallback, useMemo)

@@ -3811,8 +3811,101 @@ export const Component: React.FC<Props> = ({ prop }) => {
 - **Pattern**: All hooks → Early returns → Render logic
 - **Function Declaration Order**: Always declare functions (especially `useCallback`) before `useEffect` hooks that use them
 - **Safety Checks**: Add `Array.isArray()` checks in `useMemo` hooks that use array methods to prevent runtime errors
+- **useMemo Safety**: Always add safety checks for nested object properties in `useMemo` dependencies (e.g., `stats?.trainingStats?.length` instead of `stats.trainingStats.length`)
 - **2025-01-02**: Added conditional hook call error - hooks must be called before any early returns to maintain consistent hook order
 - **2025-01-02**: Added function declaration order fix - functions must be declared before `useEffect` hooks that use them
 - **2025-01-02**: Added safety checks to `useMemo` hooks to ensure consistent execution
+- **2025-01-02**: Added useMemo nested property safety - use optional chaining in dependencies to prevent errors when accessing nested properties
+
+---
+
+## ESLint Warnings & Best Practices
+
+### Warning: Using `<img>` instead of Next.js `<Image />` Component
+
+**Symptoms:**
+- ESLint warning: "Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image`"
+- Multiple warnings across components (30+ instances)
+- Warning appears for all `<img>` tags in the codebase
+
+**Common Causes:**
+- Using native HTML `<img>` tags instead of Next.js optimized `<Image />` component
+- External image URLs (Cloudinary) may not work well with Next.js Image optimization
+- Legacy code using `<img>` tags before Next.js Image component was adopted
+
+**Solution:**
+- **Configure ESLint to warn instead of error**: Add `"@next/next/no-img-element": "warn"` to `.eslintrc.json`
+- **For Cloudinary URLs**: Consider using Next.js Image with `unoptimized` prop for external images
+- **For static images**: Use Next.js `<Image />` component for better performance
+- **For dynamic external images**: May need to keep `<img>` tags if Next.js Image doesn't support the image source
+
+**Example Fix:**
+```json
+// .eslintrc.json
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "@next/next/no-img-element": "warn" // Warn instead of error
+  }
+}
+```
+
+**Files Fixed:**
+- `.eslintrc.json` - Added `"@next/next/no-img-element": "warn"` to reduce build noise
+
+**Prevention:**
+- Use Next.js `<Image />` component for static images in `/public` folder
+- For external images (Cloudinary), consider using `<Image />` with `unoptimized` prop or keep `<img>` tags
+- Document image optimization strategy in project guidelines
+- **Note**: Cloudinary already provides image optimization, so using Next.js Image may be redundant
+- **2025-01-02**: Added ESLint img element warning - configure to warn instead of error for external image URLs
+
+---
+
+### Warning: React Hook useEffect Missing Dependencies
+
+**Symptoms:**
+- ESLint warning: "React Hook useEffect has a missing dependency: 'functionName'. Either include it or remove the dependency array."
+- Multiple warnings across components
+- Functions used in `useEffect` but not included in dependency array
+
+**Common Causes:**
+- Functions defined outside `useEffect` but used inside it
+- Functions not wrapped in `useCallback`, causing dependency warnings
+- Intentional omission of dependencies (e.g., functions that shouldn't trigger re-runs)
+
+**Solution:**
+1. **Wrap functions in `useCallback`**: If function is used in `useEffect`, wrap it in `useCallback` and add to dependencies
+2. **Move function inside `useEffect`**: If function is only used in one effect, define it inside the effect
+3. **Use ESLint disable comment**: If dependency is intentionally omitted, add `// eslint-disable-next-line react-hooks/exhaustive-deps`
+
+**Example Fix:**
+```typescript
+// ❌ WRONG - Missing dependency warning
+const fetchData = async () => {
+  const data = await fetch('/api/data');
+  setData(data);
+};
+
+useEffect(() => {
+  fetchData(); // Warning: fetchData not in dependencies
+}, []);
+
+// ✅ CORRECT - Wrap in useCallback
+const fetchData = useCallback(async () => {
+  const data = await fetch('/api/data');
+  setData(data);
+}, []);
+
+useEffect(() => {
+  fetchData();
+}, [fetchData]); // Now included in dependencies
+```
+
+**Prevention:**
+- Always wrap functions used in `useEffect` in `useCallback` if they're defined outside
+- Review ESLint warnings and fix missing dependencies systematically
+- Use `// eslint-disable-next-line react-hooks/exhaustive-deps` only when absolutely necessary
+- **2025-01-02**: Added ESLint missing dependencies warning - wrap functions in useCallback when used in useEffect
 
 ---
