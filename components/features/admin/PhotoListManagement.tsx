@@ -340,6 +340,8 @@ export const PhotoListManagement: React.FC<PhotoListManagementProps> = ({
                       disabled={isUploading}
                     />
                     <input
+                      id={`photo-upload-${idx}`}
+                      name={`photoUpload-${idx}`}
                       ref={(el) => { fileInputRefs.current[idx] = el; }}
                       type="file"
                       accept="image/*"

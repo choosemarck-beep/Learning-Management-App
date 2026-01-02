@@ -3683,6 +3683,121 @@ export const Component: React.FC<Props> = ({ prop }) => {
 3. Check if parent container has `overflow: hidden` that might be clipping content
 4. Verify z-index values - content should have `z-index: 1`, modals/tooltips should have higher values
 5. Test with different viewport sizes to identify if issue is specific to desktop/mobile layouts
+
+---
+
+### Issue: Form Field Missing `id` or `name` Attribute (Browser Autofill Warning)
+
+**Symptoms:**
+- Browser console shows warning: "A form field element should have an id or name attribute"
+- Warning message: "A form field element has neither an `id` nor a `name` attribute. This might prevent the browser from correctly autofilling the form."
+- Multiple instances may appear (e.g., "2" badge indicating 2 warnings)
+- Form fields may not work properly with browser autofill features
+- Accessibility issues for screen readers and form assistive technologies
+
+**Common Causes:**
+1. **Raw Input Elements**: Using raw `<input>` elements instead of reusable `Input` component
+2. **Missing Attributes**: Input fields created without `id` or `name` attributes
+3. **File Inputs**: File upload inputs often missing `id` or `name` attributes
+4. **Search Inputs**: Custom search input components using raw `<input>` elements
+5. **URL Inputs**: URL input fields in forms missing `name` attribute
+
+**Solution:**
+1. **Add Both `id` and `name` Attributes**: Always include both for better accessibility and autofill support
+2. **Use Reusable Components**: Prefer using `Input`, `Select`, `Textarea` components which automatically generate `id` attributes
+3. **Consistent Naming**: Use descriptive, kebab-case names for `id` and camelCase for `name` attributes
+4. **File Inputs**: Add `id` and `name` to file input elements for proper form handling
+
+**Example Fix:**
+```tsx
+// ❌ WRONG - Missing id and name attributes
+<input
+  type="text"
+  placeholder="Search by name, email, or employee number..."
+  value={localSearch}
+  onChange={(e) => setLocalSearch(e.target.value)}
+  className={styles.searchInput}
+/>
+
+// ✅ CORRECT - Has both id and name attributes
+<input
+  id="leaderboard-search"
+  name="leaderboardSearch"
+  type="text"
+  placeholder="Search by name, email, or employee number..."
+  value={localSearch}
+  onChange={(e) => setLocalSearch(e.target.value)}
+  className={styles.searchInput}
+/>
+```
+
+**File Input Fix:**
+```tsx
+// ❌ WRONG - File input missing id and name
+<input
+  ref={(el) => { fileInputRefs.current[idx] = el; }}
+  type="file"
+  accept="image/*"
+  onChange={handleFileChange}
+/>
+
+// ✅ CORRECT - File input with id and name
+<input
+  id={`photo-upload-${idx}`}
+  name={`photoUpload-${idx}`}
+  ref={(el) => { fileInputRefs.current[idx] = el; }}
+  type="file"
+  accept="image/*"
+  onChange={handleFileChange}
+/>
+```
+
+**URL Input Fix:**
+```tsx
+// ❌ WRONG - URL input missing name attribute
+<input
+  id="playlist-url"
+  type="url"
+  value={playlistUrl}
+  onChange={(e) => setPlaylistUrl(e.target.value)}
+/>
+
+// ✅ CORRECT - URL input with both id and name
+<input
+  id="playlist-url"
+  name="playlistUrl"
+  type="url"
+  value={playlistUrl}
+  onChange={(e) => setPlaylistUrl(e.target.value)}
+/>
+```
+
+**Files Fixed:**
+- `components/features/leaderboard/LeaderboardSearch.tsx` - Added `id="leaderboard-search"` and `name="leaderboardSearch"` to search input
+- `components/features/admin/MediaManagement.tsx` - Added `name="playlistUrl"` to playlist URL input
+- `components/features/admin/PhotoListManagement.tsx` - Added `id` and `name` attributes to file input elements
+
+**Prevention Guidelines:**
+- **Always use reusable components** (`Input`, `Select`, `Textarea`) which automatically handle `id` generation
+- **When using raw `<input>` elements**, always add both `id` and `name` attributes
+- **Use descriptive names**: `id` should be kebab-case (e.g., `leaderboard-search`), `name` should be camelCase (e.g., `leaderboardSearch`)
+- **File inputs**: Always include `id` and `name` even if using refs
+- **Test with browser autofill**: Verify forms work with browser autofill features
+- **Accessibility**: `id` and `name` attributes improve screen reader support and form accessibility
+
+**Troubleshooting Steps:**
+1. Check browser console for warnings about missing `id` or `name` attributes
+2. Search codebase for raw `<input>` elements that might be missing attributes
+3. Verify all form fields have at least one of `id` or `name` (preferably both)
+4. Test form autofill functionality in browsers
+5. Use browser DevTools to inspect form fields and verify attributes are present
+
+**Best Practices:**
+- **Prefer `Input` component**: Use `@/components/ui/Input` which automatically generates `id` using `useId()` hook
+- **Consistent pattern**: If using raw inputs, always follow the pattern: `id="kebab-case"` and `name="camelCase"`
+- **Form submission**: `name` attribute is required for form data to be submitted properly
+- **Accessibility**: `id` attribute is required for proper label association (`htmlFor` on labels)
+- **2025-01-02**: Added form field missing id/name attribute warning - always include both `id` and `name` attributes on form inputs for autofill and accessibility
 3. Check if parent components conditionally render the component
 4. Verify all child components (especially `TrainerAnalyticsDashboard` and its children) don't have conditional hooks
 5. Add `console.log` at the start of component to track when it mounts/unmounts

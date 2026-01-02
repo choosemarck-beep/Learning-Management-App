@@ -36,6 +36,8 @@ export const LeaderboardSearch: React.FC<LeaderboardSearchProps> = ({
       <div className={styles.searchInputWrapper}>
         <Search size={18} className={styles.searchIcon} />
         <input
+          id="leaderboard-search"
+          name="leaderboardSearch"
           type="text"
           placeholder="Search by name, email, or employee number..."
           value={localSearch}

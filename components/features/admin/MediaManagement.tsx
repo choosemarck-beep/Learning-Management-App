@@ -937,6 +937,7 @@ export const MediaManagement: React.FC = () => {
                   </label>
                   <input
                     id="playlist-url"
+                    name="playlistUrl"
                     type="url"
                     value={playlistUrl}
                     onChange={(e) => setPlaylistUrl(e.target.value)}
