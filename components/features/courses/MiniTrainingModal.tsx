@@ -78,191 +78,153 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
   const isYouTube = videoUrl ? isYouTubeUrl(videoUrl) : false;
   const embedUrl = videoUrl ? getVideoEmbedUrl(videoUrl) : null;
 
-  // Fetch mini training data
-  useEffect(() => {
-    if (isOpen && miniTrainingId) {
-      setIsLoading(true); // Ensure loading state is set when modal opens
-      fetchMiniTraining();
-    }
-  }, [isOpen, miniTrainingId, fetchMiniTraining]);
-
-  // Reset state when modal closes (separate effect to avoid render-time updates)
-  useEffect(() => {
-    if (!isOpen) {
-      // Use setTimeout to defer state updates until after render
-      const timer = setTimeout(() => {
-        setMiniTraining(null);
-        setProgress(null);
-        setWatchedSeconds(0);
-        setIsVideoPlaying(false);
-        setIsPlaying(false);
-        setCanTakeQuiz(false);
-        setIsQuizModalOpen(false);
-        setIsLoading(false); // Reset loading state when modal closes
-      }, 0);
-      return () => clearTimeout(timer);
-    } else {
-      // When modal opens, set loading to true immediately
-      setIsLoading(true);
-    }
-  }, [isOpen]);
-
-  const fetchMiniTraining = useCallback(async () => {
-    setIsLoading(true);
+  // Update video progress on server - MUST be declared first (no dependencies on other callbacks)
+  // Saves watch position regardless of quiz status to enable resume functionality
+  const updateVideoProgress = useCallback(async (seconds: number, playing: boolean, immediate: boolean = false) => {
     try {
-      const response = await fetch(`/api/mini-trainings/${miniTrainingId}`);
-      const result = await response.json();
-
-      if (!response.ok) {
-        toast.error(result.error || "Failed to load mini training");
-        // Use setTimeout to avoid calling onClose during render
-        setTimeout(() => {
-          onClose();
-        }, 0);
+      // Ensure seconds is a valid integer
+      const watchedSeconds = Math.floor(seconds);
+      if (isNaN(watchedSeconds) || !isFinite(watchedSeconds) || watchedSeconds < 0) {
+        console.error("Invalid watchedSeconds value:", seconds);
         return;
       }
 
-      const miniTrainingData = result.data.miniTraining;
-      // Parse quiz questions if they exist
-      if (miniTrainingData.miniQuiz && typeof miniTrainingData.miniQuiz.questions === 'string') {
+      const response = await fetch(`/api/mini-trainings/${miniTrainingId}/watch-progress`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          watchedSeconds: watchedSeconds,
+          isPlaying: playing,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorData;
         try {
-          const parsedQuestions = JSON.parse(miniTrainingData.miniQuiz.questions || "[]");
-          // Normalize question options: convert string arrays to object arrays
-          miniTrainingData.miniQuiz.questions = parsedQuestions.map((question: any) => {
-            if (question.options && Array.isArray(question.options)) {
-              // Check if options are strings (from trainer form) or objects
-              const normalizedOptions = question.options.map((option: any, index: number) => {
-                if (typeof option === 'string') {
-                  // Convert string to object format
-                  return {
-                    id: `opt-${question.id || `q-${index}`}-${index}`,
-                    text: option,
-                  };
-                } else {
-                  // Already an object, ensure it has id and text
-                  return {
-                    id: option.id || `opt-${question.id || `q-${index}`}-${index}`,
-                    text: option.text || option.label || String(option),
-                  };
-                }
-              });
-              return {
-                ...question,
-                options: normalizedOptions,
-              };
-            }
-            return question;
-          });
-        } catch (error) {
-          console.error("Error parsing mini quiz questions:", error);
-          miniTrainingData.miniQuiz.questions = [];
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText || "Unknown error" };
         }
-      }
-      setMiniTraining(miniTrainingData);
-      // Initialize watched seconds from progress if available
-      // Note: We track watched seconds locally, but progress is only saved if quiz passed
-      const initialWatchedSeconds = result.data.progress?.videoProgress 
-        ? Math.floor((result.data.progress.videoProgress / 100) * (miniTrainingData.videoDuration || 0))
-        : 0;
-      // Set progress with videoWatchedSeconds calculated from videoProgress
-      setProgress(result.data.progress ? {
-        ...result.data.progress,
-        videoWatchedSeconds: initialWatchedSeconds,
-      } : null);
-      setWatchedSeconds(initialWatchedSeconds);
-      lastSavedSecondsRef.current = initialWatchedSeconds;
-      setHasResumed(false); // Reset resume flag when fetching new data
-    } catch (error) {
-      console.error("Error fetching mini training:", error);
-      toast.error("Failed to load mini training");
-      // Use setTimeout to avoid calling onClose during render
-      setTimeout(() => {
-        onClose();
-      }, 0);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [miniTrainingId, onClose, router]);
-
-  // YouTube Player API initialization
-  useEffect(() => {
-    if (isOpen && isYouTube && embedUrl && miniTraining) {
-      // Suppress YouTube postMessage origin warnings in development
-      // This is a known harmless warning when using YouTube IFrame API on localhost
-      // The player still works correctly despite this warning
-      let originalConsoleError: typeof console.error | null = null;
-      
-      if (process.env.NODE_ENV === 'development') {
-        originalConsoleError = console.error;
-        console.error = (...args: any[]) => {
-          // Suppress the specific YouTube postMessage origin error
-          const message = args[0]?.toString() || '';
-          if (
-            message.includes('postMessage') &&
-            message.includes('youtube.com') &&
-            (message.includes('does not match') || message.includes('target origin'))
-          ) {
-            // Silently ignore this harmless development warning
-            return;
-          }
-          // Call original console.error for all other errors
-          if (originalConsoleError) {
-            originalConsoleError.apply(console, args);
-          }
-        };
+        console.error("Error updating video progress:", response.status, errorData);
+        if (response.status !== 500) {
+          toast.error(`Failed to save progress: ${errorData.error || "Unknown error"}`);
+        }
+        return;
       }
 
-      // Small delay to ensure DOM is ready
-      const timer = setTimeout(() => {
-        // Load YouTube IFrame API if not already loaded
-        if (!window.YT) {
-          const tag = document.createElement("script");
-          tag.src = "https://www.youtube.com/iframe_api";
-          const firstScriptTag = document.getElementsByTagName("script")[0];
-          firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-          window.onYouTubeIframeAPIReady = () => {
-            initializeYouTubePlayer();
-          };
-        } else if (window.YT.Player) {
-          initializeYouTubePlayer();
+      const result = await response.json();
+      if (result.success && result.data) {
+        // Don't update watchedSeconds from API response - it causes timer to jump back and forth
+        // watchedSeconds should only be updated from video's actual current time
+        setCanTakeQuiz(result.data.canTakeQuiz || false);
+        // Only update overall progress if quiz is completed (for progress calculation)
+        // But always save watch position for resume functionality
+        if (result.data.videoProgress !== undefined && progress?.quizCompleted) {
+          const newProgress = result.data.videoProgress || (progress?.videoProgress || 0);
+          const wasCompleted = progress?.isCompleted || false;
+          setProgress((prev) => (prev ? { 
+            ...prev, 
+            videoProgress: result.data.videoProgress || prev.videoProgress,
+            videoWatchedSeconds: result.data.watchedSeconds || prev.videoWatchedSeconds,
+            isCompleted: result.data.isCompleted !== undefined ? result.data.isCompleted : (newProgress >= 100),
+          } : null));
+          // Refresh router if mini-training was just completed
+          if (!wasCompleted && (result.data.isCompleted || newProgress >= 100)) {
+            router.refresh();
+          }
         } else {
-          // Wait for API to be ready
-          const checkReady = setInterval(() => {
-            if (window.YT && window.YT.Player) {
-              clearInterval(checkReady);
-              initializeYouTubePlayer();
-            }
-          }, 100);
-          setTimeout(() => clearInterval(checkReady), 5000); // Timeout after 5 seconds
+          // Still update videoWatchedSeconds even if quiz not completed
+          // This is stored in progress for resume functionality
+          // Note: We don't update progress state here to avoid affecting progress calculation
         }
-      }, 100);
-
-      return () => {
-        // Restore original console.error
-        if (originalConsoleError && process.env.NODE_ENV === 'development') {
-          console.error = originalConsoleError;
-        }
-        clearTimeout(timer);
-        // Cleanup YouTube player
-        if (youtubePlayerRef.current) {
-          try {
-            if (typeof youtubePlayerRef.current.destroy === "function") {
-              youtubePlayerRef.current.destroy();
-            }
-          } catch (error) {
-            console.error("Error destroying YouTube player:", error);
-          }
-          youtubePlayerRef.current = null;
-        }
-        if (youtubeIntervalRef.current) {
-          clearInterval(youtubeIntervalRef.current);
-          youtubeIntervalRef.current = null;
-        }
-      };
+      }
+    } catch (error) {
+      console.error("Error updating video progress:", error);
+      if (error instanceof TypeError && error.message.includes("fetch")) {
+        toast.error("Network error: Could not save progress");
+      }
     }
-  }, [isOpen, isYouTube, embedUrl, miniTraining, initializeYouTubePlayer]);
+  }, [miniTrainingId, progress, router]);
 
+  // Debounced save function to prevent excessive API calls - depends on updateVideoProgress
+  const debouncedSaveProgress = useCallback((seconds: number, playing: boolean, delay: number = 1000) => {
+    // Clear existing timeout
+    if (saveProgressTimeoutRef.current) {
+      clearTimeout(saveProgressTimeoutRef.current);
+    }
+
+    // Only save if position changed significantly (more than 1 second difference)
+    if (Math.abs(seconds - lastSavedSecondsRef.current) < 1) {
+      return;
+    }
+
+    saveProgressTimeoutRef.current = setTimeout(() => {
+      updateVideoProgress(seconds, playing);
+      lastSavedSecondsRef.current = seconds;
+    }, delay);
+  }, [updateVideoProgress]);
+
+  // Immediate save function for critical events (pause, end, page unload) - depends on updateVideoProgress
+  const saveProgressImmediately = useCallback((seconds: number, playing: boolean, force: boolean = false) => {
+    // Clear any pending debounced saves
+    if (saveProgressTimeoutRef.current) {
+      clearTimeout(saveProgressTimeoutRef.current);
+      saveProgressTimeoutRef.current = null;
+    }
+
+    // Always save on pause/end/unload (force=true), or if position changed significantly
+    if (force || Math.abs(seconds - lastSavedSecondsRef.current) >= 1) {
+      updateVideoProgress(seconds, playing);
+      lastSavedSecondsRef.current = seconds;
+    }
+  }, [updateVideoProgress]);
+
+  // Stop YouTube tracking - no dependencies
+  const stopYouTubeTracking = useCallback(() => {
+    if (youtubeIntervalRef.current) {
+      clearInterval(youtubeIntervalRef.current);
+      youtubeIntervalRef.current = null;
+    }
+  }, []);
+
+  // Start YouTube tracking - depends on debouncedSaveProgress
+  const startYouTubeTracking = useCallback(() => {
+    // Stop any existing tracking
+    if (youtubeIntervalRef.current) {
+      clearInterval(youtubeIntervalRef.current);
+      youtubeIntervalRef.current = null;
+    }
+
+    // Start new tracking interval
+    youtubeIntervalRef.current = setInterval(() => {
+      if (
+        youtubePlayerRef.current &&
+        typeof youtubePlayerRef.current.getPlayerState === "function" &&
+        typeof youtubePlayerRef.current.getCurrentTime === "function"
+      ) {
+        try {
+          // Check player state directly
+          const playerState = youtubePlayerRef.current.getPlayerState();
+          const isCurrentlyPlaying = playerState === 1; // Playing
+          
+          if (isCurrentlyPlaying) {
+            const currentTime = youtubePlayerRef.current.getCurrentTime();
+            const seconds = Math.floor(currentTime);
+            setWatchedSeconds(seconds);
+            // Use debounced save for time updates (saves every 1 second if position changed)
+            debouncedSaveProgress(seconds, true, 1000);
+          }
+        } catch (error) {
+          console.error("[Mini Training YouTube] Error tracking:", error);
+        }
+      }
+    }, 1000);
+  }, [debouncedSaveProgress]);
+
+  // Initialize YouTube player - depends on startYouTubeTracking, stopYouTubeTracking, saveProgressImmediately
   const initializeYouTubePlayer = useCallback(() => {
     if (!window.YT || !window.YT.Player) {
       setTimeout(initializeYouTubePlayer, 100);
@@ -382,151 +344,193 @@ export const MiniTrainingModal: React.FC<MiniTrainingModalProps> = ({
       console.error("[Mini Training YouTube] Error initializing player:", error);
       toast.error("Failed to initialize video player.");
     }
-  }, [videoUrl, progress, actualVideoDuration, miniTraining, startYouTubeTracking, stopYouTubeTracking, saveProgressImmediately, watchedSeconds]);
+  }, [videoUrl, progress, actualVideoDuration, miniTraining, startYouTubeTracking, stopYouTubeTracking, saveProgressImmediately, watchedSeconds, isPlaying]);
 
-  const startYouTubeTracking = useCallback(() => {
-    // Stop any existing tracking
-    if (youtubeIntervalRef.current) {
-      clearInterval(youtubeIntervalRef.current);
-      youtubeIntervalRef.current = null;
-    }
-
-    // Start new tracking interval
-    youtubeIntervalRef.current = setInterval(() => {
-      if (
-        youtubePlayerRef.current &&
-        typeof youtubePlayerRef.current.getPlayerState === "function" &&
-        typeof youtubePlayerRef.current.getCurrentTime === "function"
-      ) {
-        try {
-          // Check player state directly
-          const playerState = youtubePlayerRef.current.getPlayerState();
-          const isCurrentlyPlaying = playerState === 1; // Playing
-          
-          if (isCurrentlyPlaying) {
-            const currentTime = youtubePlayerRef.current.getCurrentTime();
-            const seconds = Math.floor(currentTime);
-            setWatchedSeconds(seconds);
-            // Use debounced save for time updates (saves every 1 second if position changed)
-            debouncedSaveProgress(seconds, true, 1000);
-          }
-        } catch (error) {
-          console.error("[Mini Training YouTube] Error tracking:", error);
-        }
-      }
-    }, 1000);
-  }, [debouncedSaveProgress]);
-
-  const stopYouTubeTracking = useCallback(() => {
-    if (youtubeIntervalRef.current) {
-      clearInterval(youtubeIntervalRef.current);
-      youtubeIntervalRef.current = null;
-    }
-  }, []);
-
-  // Update video progress on server
-  // Saves watch position regardless of quiz status to enable resume functionality
-  const updateVideoProgress = useCallback(async (seconds: number, playing: boolean, immediate: boolean = false) => {
+  // Fetch mini training data - MUST be declared before useEffect that uses it
+  const fetchMiniTraining = useCallback(async () => {
+    setIsLoading(true);
     try {
-      // Ensure seconds is a valid integer
-      const watchedSeconds = Math.floor(seconds);
-      if (isNaN(watchedSeconds) || !isFinite(watchedSeconds) || watchedSeconds < 0) {
-        console.error("Invalid watchedSeconds value:", seconds);
-        return;
-      }
-
-      const response = await fetch(`/api/mini-trainings/${miniTrainingId}/watch-progress`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          watchedSeconds: watchedSeconds,
-          isPlaying: playing,
-        }),
-      });
+      const response = await fetch(`/api/mini-trainings/${miniTrainingId}`);
+      const result = await response.json();
 
       if (!response.ok) {
-        const errorText = await response.text();
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch {
-          errorData = { error: errorText || "Unknown error" };
-        }
-        console.error("Error updating video progress:", response.status, errorData);
-        if (response.status !== 500) {
-          toast.error(`Failed to save progress: ${errorData.error || "Unknown error"}`);
-        }
+        toast.error(result.error || "Failed to load mini training");
+        // Use setTimeout to avoid calling onClose during render
+        setTimeout(() => {
+          onClose();
+        }, 0);
         return;
       }
 
-      const result = await response.json();
-      if (result.success && result.data) {
-        // Don't update watchedSeconds from API response - it causes timer to jump back and forth
-        // watchedSeconds should only be updated from video's actual current time
-        setCanTakeQuiz(result.data.canTakeQuiz || false);
-        // Only update overall progress if quiz is completed (for progress calculation)
-        // But always save watch position for resume functionality
-        if (result.data.videoProgress !== undefined && progress?.quizCompleted) {
-          const newProgress = result.data.videoProgress || (progress?.videoProgress || 0);
-          const wasCompleted = progress?.isCompleted || false;
-          setProgress((prev) => (prev ? { 
-            ...prev, 
-            videoProgress: result.data.videoProgress || prev.videoProgress,
-            videoWatchedSeconds: result.data.watchedSeconds || prev.videoWatchedSeconds,
-            isCompleted: result.data.isCompleted !== undefined ? result.data.isCompleted : (newProgress >= 100),
-          } : null));
-          // Refresh router if mini-training was just completed
-          if (!wasCompleted && (result.data.isCompleted || newProgress >= 100)) {
-            router.refresh();
-          }
-        } else {
-          // Still update videoWatchedSeconds even if quiz not completed
-          // This is stored in progress for resume functionality
-          // Note: We don't update progress state here to avoid affecting progress calculation
+      const miniTrainingData = result.data.miniTraining;
+      // Parse quiz questions if they exist
+      if (miniTrainingData.miniQuiz && typeof miniTrainingData.miniQuiz.questions === 'string') {
+        try {
+          const parsedQuestions = JSON.parse(miniTrainingData.miniQuiz.questions || "[]");
+          // Normalize question options: convert string arrays to object arrays
+          miniTrainingData.miniQuiz.questions = parsedQuestions.map((question: any) => {
+            if (question.options && Array.isArray(question.options)) {
+              // Check if options are strings (from trainer form) or objects
+              const normalizedOptions = question.options.map((option: any, index: number) => {
+                if (typeof option === 'string') {
+                  // Convert string to object format
+                  return {
+                    id: `opt-${question.id || `q-${index}`}-${index}`,
+                    text: option,
+                  };
+                } else {
+                  // Already an object, ensure it has id and text
+                  return {
+                    id: option.id || `opt-${question.id || `q-${index}`}-${index}`,
+                    text: option.text || option.label || String(option),
+                  };
+                }
+              });
+              return {
+                ...question,
+                options: normalizedOptions,
+              };
+            }
+            return question;
+          });
+        } catch (error) {
+          console.error("Error parsing mini quiz questions:", error);
+          miniTrainingData.miniQuiz.questions = [];
         }
       }
+      setMiniTraining(miniTrainingData);
+      // Initialize watched seconds from progress if available
+      // Note: We track watched seconds locally, but progress is only saved if quiz passed
+      const initialWatchedSeconds = result.data.progress?.videoProgress 
+        ? Math.floor((result.data.progress.videoProgress / 100) * (miniTrainingData.videoDuration || 0))
+        : 0;
+      // Set progress with videoWatchedSeconds calculated from videoProgress
+      setProgress(result.data.progress ? {
+        ...result.data.progress,
+        videoWatchedSeconds: initialWatchedSeconds,
+      } : null);
+      setWatchedSeconds(initialWatchedSeconds);
+      lastSavedSecondsRef.current = initialWatchedSeconds;
+      setHasResumed(false); // Reset resume flag when fetching new data
     } catch (error) {
-      console.error("Error updating video progress:", error);
-      if (error instanceof TypeError && error.message.includes("fetch")) {
-        toast.error("Network error: Could not save progress");
+      console.error("Error fetching mini training:", error);
+      toast.error("Failed to load mini training");
+      // Use setTimeout to avoid calling onClose during render
+      setTimeout(() => {
+        onClose();
+      }, 0);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [miniTrainingId, onClose, router]);
+
+  // Fetch mini training data
+  useEffect(() => {
+    if (isOpen && miniTrainingId) {
+      setIsLoading(true); // Ensure loading state is set when modal opens
+      fetchMiniTraining();
+    }
+  }, [isOpen, miniTrainingId, fetchMiniTraining]);
+
+  // Reset state when modal closes (separate effect to avoid render-time updates)
+  useEffect(() => {
+    if (!isOpen) {
+      // Use setTimeout to defer state updates until after render
+      const timer = setTimeout(() => {
+        setMiniTraining(null);
+        setProgress(null);
+        setWatchedSeconds(0);
+        setIsVideoPlaying(false);
+        setIsPlaying(false);
+        setCanTakeQuiz(false);
+        setIsQuizModalOpen(false);
+        setIsLoading(false); // Reset loading state when modal closes
+      }, 0);
+      return () => clearTimeout(timer);
+    } else {
+      // When modal opens, set loading to true immediately
+      setIsLoading(true);
+    }
+  }, [isOpen]);
+
+  // YouTube Player API initialization
+  useEffect(() => {
+    if (isOpen && isYouTube && embedUrl && miniTraining) {
+      // Suppress YouTube postMessage origin warnings in development
+      // This is a known harmless warning when using YouTube IFrame API on localhost
+      // The player still works correctly despite this warning
+      let originalConsoleError: typeof console.error | null = null;
+      
+      if (process.env.NODE_ENV === 'development') {
+        originalConsoleError = console.error;
+        console.error = (...args: any[]) => {
+          // Suppress the specific YouTube postMessage origin error
+          const message = args[0]?.toString() || '';
+          if (
+            message.includes('postMessage') &&
+            message.includes('youtube.com') &&
+            (message.includes('does not match') || message.includes('target origin'))
+          ) {
+            // Silently ignore this harmless development warning
+            return;
+          }
+          // Call original console.error for all other errors
+          if (originalConsoleError) {
+            originalConsoleError.apply(console, args);
+          }
+        };
       }
-    }
-  }, [miniTrainingId, progress, router]);
 
-  // Debounced save function to prevent excessive API calls
-  const debouncedSaveProgress = useCallback((seconds: number, playing: boolean, delay: number = 1000) => {
-    // Clear existing timeout
-    if (saveProgressTimeoutRef.current) {
-      clearTimeout(saveProgressTimeoutRef.current);
-    }
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        // Load YouTube IFrame API if not already loaded
+        if (!window.YT) {
+          const tag = document.createElement("script");
+          tag.src = "https://www.youtube.com/iframe_api";
+          const firstScriptTag = document.getElementsByTagName("script")[0];
+          firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
-    // Only save if position changed significantly (more than 1 second difference)
-    if (Math.abs(seconds - lastSavedSecondsRef.current) < 1) {
-      return;
-    }
+          window.onYouTubeIframeAPIReady = () => {
+            initializeYouTubePlayer();
+          };
+        } else if (window.YT.Player) {
+          initializeYouTubePlayer();
+        } else {
+          // Wait for API to be ready
+          const checkReady = setInterval(() => {
+            if (window.YT && window.YT.Player) {
+              clearInterval(checkReady);
+              initializeYouTubePlayer();
+            }
+          }, 100);
+          setTimeout(() => clearInterval(checkReady), 5000); // Timeout after 5 seconds
+        }
+      }, 100);
 
-    saveProgressTimeoutRef.current = setTimeout(() => {
-      updateVideoProgress(seconds, playing);
-      lastSavedSecondsRef.current = seconds;
-    }, delay);
-  }, [updateVideoProgress]);
-
-  // Immediate save function for critical events (pause, end, page unload)
-  const saveProgressImmediately = useCallback((seconds: number, playing: boolean, force: boolean = false) => {
-    // Clear any pending debounced saves
-    if (saveProgressTimeoutRef.current) {
-      clearTimeout(saveProgressTimeoutRef.current);
-      saveProgressTimeoutRef.current = null;
+      return () => {
+        // Restore original console.error
+        if (originalConsoleError && process.env.NODE_ENV === 'development') {
+          console.error = originalConsoleError;
+        }
+        clearTimeout(timer);
+        // Cleanup YouTube player
+        if (youtubePlayerRef.current) {
+          try {
+            if (typeof youtubePlayerRef.current.destroy === "function") {
+              youtubePlayerRef.current.destroy();
+            }
+          } catch (error) {
+            console.error("Error destroying YouTube player:", error);
+          }
+          youtubePlayerRef.current = null;
+        }
+        if (youtubeIntervalRef.current) {
+          clearInterval(youtubeIntervalRef.current);
+          youtubeIntervalRef.current = null;
+        }
+      };
     }
-
-    // Always save on pause/end/unload (force=true), or if position changed significantly
-    if (force || Math.abs(seconds - lastSavedSecondsRef.current) >= 1) {
-      updateVideoProgress(seconds, playing);
-      lastSavedSecondsRef.current = seconds;
-    }
-  }, [updateVideoProgress]);
+  }, [isOpen, isYouTube, embedUrl, miniTraining, initializeYouTubePlayer]);
 
   // Check if quiz can be taken (based on minimum watch time)
   useEffect(() => {
