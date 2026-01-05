@@ -15,6 +15,7 @@ import {
   Settings,
   LogOut,
   X,
+  Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import styles from "./UserMenu.module.css";
@@ -145,6 +146,12 @@ export const UserMenu: React.FC<UserMenuProps> = ({
       icon: Trophy,
       route: "/leaderboard",
       label: "Leaderboard",
+    },
+    {
+      id: "mechanics",
+      icon: Info,
+      route: "/employee/mechanics",
+      label: "Mechanics",
     },
     {
       id: "inbox",

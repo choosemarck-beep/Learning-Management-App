@@ -65,26 +65,75 @@ export const LeaderboardPageClient: React.FC<LeaderboardPageClientProps> = ({
       
       if (!isMountedRef.current) return; // Guard: Check again before setting state
       
+      // Check HTTP status before parsing JSON
+      if (!response.ok) {
+        console.error("[LeaderboardPageClient] API error:", {
+          status: response.status,
+          statusText: response.statusText,
+          url: `/api/leaderboard?${params.toString()}`,
+        });
+        if (isMountedRef.current) {
+          setError(`Failed to fetch leaderboard: ${response.status} ${response.statusText}`);
+        }
+        return; // Exit early
+      }
+      
       const data = await response.json();
 
-      if (data.success) {
-        if (isMountedRef.current) {
-          setLeaderboardData(data.data);
-          setError(null); // Clear any previous errors
+      console.log("[LeaderboardPageClient] API response received", {
+        success: data.success,
+        hasData: !!data.data,
+        topUsersCount: data.data?.topUsers?.length || 0,
+        currentUserRank: data.data?.currentUserRank || 0,
+        userRole,
+      });
+
+      if (data.success && data.data) {
+        // Validate response structure
+        if (Array.isArray(data.data.topUsers)) {
+          if (isMountedRef.current) {
+            setLeaderboardData(data.data);
+            setError(null); // Clear any previous errors
+            console.log("[LeaderboardPageClient] Leaderboard data set successfully", {
+              topUsersCount: data.data?.topUsers?.length || 0,
+            });
+          }
+        } else {
+          console.error("[LeaderboardPageClient] Invalid data structure - topUsers is not an array:", {
+            data: data.data,
+            topUsersType: typeof data.data?.topUsers,
+          });
+          if (isMountedRef.current) {
+            setError("Invalid response format from server");
+          }
         }
       } else {
         const errorMessage = data.error || "Failed to fetch leaderboard";
-        console.error("[LeaderboardPageClient] Error fetching leaderboard:", errorMessage);
+        console.error("[LeaderboardPageClient] API returned error:", {
+          error: errorMessage,
+          success: data.success,
+          hasData: !!data.data,
+        });
         if (isMountedRef.current) {
           setError(errorMessage);
         }
       }
     } catch (error) {
       if (!isMountedRef.current) return; // Guard: Check before error handling
-      const errorMessage = error instanceof Error ? error.message : "Failed to fetch leaderboard";
-      console.error("[LeaderboardPageClient] Error fetching leaderboard:", error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Failed to fetch leaderboard";
+      console.error("[LeaderboardPageClient] Error fetching leaderboard:", {
+        error,
+        message: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+        view,
+        period,
+        page: pageRef.current,
+        search,
+      });
       if (isMountedRef.current) {
-        setError(errorMessage);
+        setError("Failed to fetch leaderboard. Please check your connection and try again.");
       }
     } finally {
       if (isMountedRef.current) {
@@ -101,15 +150,111 @@ export const LeaderboardPageClient: React.FC<LeaderboardPageClientProps> = ({
   }, []);
 
   // Fetch on initial mount if no initial data - this runs first
+  // Use inline async function to avoid stale closure issues with fetchLeaderboard
   useEffect(() => {
     if (initialData === null) {
-      fetchLeaderboard();
+      console.log("[LeaderboardPageClient] Initial mount - fetching leaderboard data", {
+        userRole,
+        view,
+        period,
+        isMounted: isMountedRef.current,
+      });
+      
+      // Inline fetch for initial mount to avoid dependency issues
+      const fetchInitial = async () => {
+        if (!isMountedRef.current) return;
+        
+        setIsLoading(true);
+        try {
+          const params = new URLSearchParams({
+            view,
+            period,
+            page: "1",
+            limit: "10",
+            ...(search ? { search } : {}),
+          });
+
+          const response = await fetch(`/api/leaderboard?${params.toString()}`);
+          
+          if (!isMountedRef.current) return;
+          
+          // Check HTTP status before parsing JSON
+          if (!response.ok) {
+            console.error("[LeaderboardPageClient] Initial fetch API error:", {
+              status: response.status,
+              statusText: response.statusText,
+            });
+            if (isMountedRef.current) {
+              setError(`Failed to fetch leaderboard: ${response.status} ${response.statusText}`);
+            }
+            return;
+          }
+          
+          const data = await response.json();
+
+          console.log("[LeaderboardPageClient] Initial API response received", {
+            success: data.success,
+            hasData: !!data.data,
+            topUsersCount: data.data?.topUsers?.length || 0,
+            currentUserRank: data.data?.currentUserRank || 0,
+            userRole,
+          });
+
+          if (data.success && data.data) {
+            // Validate response structure
+            if (Array.isArray(data.data.topUsers)) {
+              if (isMountedRef.current) {
+                setLeaderboardData(data.data);
+                setError(null);
+                console.log("[LeaderboardPageClient] Initial leaderboard data set successfully", {
+                  topUsersCount: data.data?.topUsers?.length || 0,
+                });
+              }
+            } else {
+              console.error("[LeaderboardPageClient] Invalid initial data structure");
+              if (isMountedRef.current) {
+                setError("Invalid response format from server");
+              }
+            }
+          } else {
+            const errorMessage = data.error || "Failed to fetch leaderboard";
+            console.error("[LeaderboardPageClient] Initial API returned error:", errorMessage);
+            if (isMountedRef.current) {
+              setError(errorMessage);
+            }
+          }
+        } catch (error) {
+          if (!isMountedRef.current) return;
+          const errorMessage = error instanceof Error 
+            ? error.message 
+            : "Failed to fetch leaderboard";
+          console.error("[LeaderboardPageClient] Initial fetch error:", {
+            error,
+            message: errorMessage,
+            stack: error instanceof Error ? error.stack : undefined,
+          });
+          if (isMountedRef.current) {
+            setError("Failed to fetch leaderboard. Please check your connection and try again.");
+          }
+        } finally {
+          if (isMountedRef.current) {
+            setIsLoading(false);
+          }
+        }
+      };
+      
+      fetchInitial();
       isInitialMountRef.current = false;
     } else {
+      console.log("[LeaderboardPageClient] Initial mount - using provided initialData", {
+        userRole,
+        hasData: !!initialData,
+        topUsersCount: initialData?.topUsers?.length || 0,
+      });
       isInitialMountRef.current = false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
+  }, []); // Only run on mount - using inline function to avoid stale closure
 
   // Reset to page 1 when view, period, or search changes, then fetch - but skip on initial mount
   useEffect(() => {

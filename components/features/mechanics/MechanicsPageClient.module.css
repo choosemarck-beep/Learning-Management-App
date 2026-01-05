@@ -1,0 +1,386 @@
+/* Mechanics Page Client - Mobile-First Design (320px-428px) */
+
+.container {
+  width: 100%;
+  max-width: 428px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  min-height: calc(100vh - 80px);
+}
+
+/* Hero Section */
+.hero {
+  text-align: center;
+  padding: var(--spacing-lg) var(--spacing-md);
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.15) 0%,
+    rgba(99, 102, 241, 0.15) 100%
+  );
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  margin-bottom: var(--spacing-sm);
+}
+
+.heroIcon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.starIcon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-primary-purple);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.heroTitle {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+  line-height: 1.3;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary-purple) 0%,
+    var(--color-primary-indigo) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.heroSubtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Progress Card */
+.progressCard {
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.progressTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-md) 0;
+  text-align: center;
+}
+
+.progressStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.statIcon {
+  width: 24px;
+  height: 24px;
+  color: var(--color-primary-purple);
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.statValue {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.statLabel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.levelProgress {
+  margin-top: var(--spacing-md);
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: rgba(139, 92, 246, 0.2);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: var(--spacing-xs);
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary-purple) 0%,
+    var(--color-primary-indigo) 100%
+  );
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: 0;
+}
+
+/* Mechanic Cards */
+.mechanicCard {
+  background: rgba(30, 27, 75, 0.6);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.mechanicHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.mechanicIcon {
+  width: 24px;
+  height: 24px;
+  color: var(--color-primary-purple);
+  flex-shrink: 0;
+}
+
+.mechanicTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.mechanicDescription {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Rewards List */
+.rewardsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.rewardItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm);
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.rewardAmount {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-purple);
+}
+
+.rewardAction {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Highlight Box */
+.highlightBox {
+  padding: var(--spacing-md);
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-primary-purple);
+}
+
+.highlightText {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.highlightText strong {
+  color: var(--color-primary-purple);
+}
+
+/* Ranks List */
+.ranksList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.rankItem {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  position: relative;
+}
+
+.rankItemActive {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: var(--color-primary-purple);
+  border-width: 2px;
+}
+
+.rankLevel {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.rankName {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.rankBadge {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  padding: 2px var(--spacing-xs);
+  background: var(--color-primary-purple);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+.moreRanks {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: var(--spacing-xs) 0 0 0;
+  font-style: italic;
+}
+
+/* Badges Grid */
+.badgesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.badgeItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  background: rgba(139, 92, 246, 0.05);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.badgeIcon {
+  width: 32px;
+  height: 32px;
+  color: var(--color-primary-purple);
+}
+
+.badgeName {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.moreBadges {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: var(--spacing-xs) 0 0 0;
+  font-style: italic;
+}
+
+/* Call to Action */
+.ctaCard {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.2) 0%,
+    rgba(99, 102, 241, 0.2) 100%
+  );
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  border: 2px solid var(--color-primary-purple);
+  text-align: center;
+  margin-top: var(--spacing-sm);
+}
+
+.ctaTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.ctaDescription {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+}
+
+.ctaIcon {
+  width: 20px;
+  height: 20px;
+}
+
