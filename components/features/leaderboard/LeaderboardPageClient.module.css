@@ -129,3 +129,13 @@
     font-size: var(--font-size-sm);
   }
 }
+
+.errorMessage {
+  padding: var(--spacing-md);
+  background: var(--color-error);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-md);
+}

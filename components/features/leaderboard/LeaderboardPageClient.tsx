@@ -33,9 +33,10 @@ export const LeaderboardPageClient: React.FC<LeaderboardPageClientProps> = ({
   const [search, setSearch] = useState("");
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardResponse | null>(initialData);
   const [isLoading, setIsLoading] = useState(!initialData);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mount guard to prevent state updates after unmount
-  const isMountedRef = useRef(false);
+  // Mount guard to prevent state updates after unmount - set immediately to avoid race condition
+  const isMountedRef = useRef(true);
   // Ref to store current page to avoid dependency issues
   const pageRef = useRef(page);
   // Track if this is the initial mount
@@ -69,13 +70,22 @@ export const LeaderboardPageClient: React.FC<LeaderboardPageClientProps> = ({
       if (data.success) {
         if (isMountedRef.current) {
           setLeaderboardData(data.data);
+          setError(null); // Clear any previous errors
         }
       } else {
-        console.error("[LeaderboardPageClient] Error fetching leaderboard:", data.error);
+        const errorMessage = data.error || "Failed to fetch leaderboard";
+        console.error("[LeaderboardPageClient] Error fetching leaderboard:", errorMessage);
+        if (isMountedRef.current) {
+          setError(errorMessage);
+        }
       }
     } catch (error) {
       if (!isMountedRef.current) return; // Guard: Check before error handling
+      const errorMessage = error instanceof Error ? error.message : "Failed to fetch leaderboard";
       console.error("[LeaderboardPageClient] Error fetching leaderboard:", error);
+      if (isMountedRef.current) {
+        setError(errorMessage);
+      }
     } finally {
       if (isMountedRef.current) {
         setIsLoading(false);
@@ -83,54 +93,57 @@ export const LeaderboardPageClient: React.FC<LeaderboardPageClientProps> = ({
     }
   }, [view, period, search]); // Removed page from dependencies - using ref instead
 
-  // Initialize mount guard
+  // Cleanup mount guard on unmount
   useEffect(() => {
-    isMountedRef.current = true;
     return () => {
       isMountedRef.current = false; // Mark as unmounted in cleanup
     };
   }, []);
 
-  // Reset to page 1 when view, period, or search changes, then fetch
+  // Fetch on initial mount if no initial data - this runs first
   useEffect(() => {
+    if (initialData === null) {
+      fetchLeaderboard();
+      isInitialMountRef.current = false;
+    } else {
+      isInitialMountRef.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
+
+  // Reset to page 1 when view, period, or search changes, then fetch - but skip on initial mount
+  useEffect(() => {
+    if (isInitialMountRef.current) {
+      // Skip on initial mount - initial fetch effect already handled it
+      return;
+    }
+    
     if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
     
-    // Reset page to 1 when filters change (but not on initial mount if page is already 1)
+    // Reset page to 1 when filters change
     if (pageRef.current !== 1) {
       setPage(1);
       pageRef.current = 1; // Update ref immediately
     }
     
     // Fetch with current filters (page will be 1)
-    // Don't include fetchLeaderboard in deps to prevent loop - it's stable due to ref usage
     fetchLeaderboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, period, search]);
 
   // Fetch when page changes (user clicks pagination) - but not on initial mount
   useEffect(() => {
-    if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
     if (isInitialMountRef.current) {
-      // Skip on initial mount - filter effect will handle it
-      isInitialMountRef.current = false;
+      // Skip on initial mount - initial fetch effect already handled it
       return;
     }
     
+    if (!isMountedRef.current) return; // Guard: Don't proceed if unmounted
+    
     // Fetch when page changes (pagination)
-    // Don't include fetchLeaderboard in deps to prevent loop - it's stable due to ref usage
     fetchLeaderboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
-
-  // Fetch on initial mount if no initial data
-  useEffect(() => {
-    if (initialData === null && isMountedRef.current) {
-      fetchLeaderboard();
-      isInitialMountRef.current = false; // Mark as no longer initial mount
-    } else {
-      isInitialMountRef.current = false; // Mark as no longer initial mount even if we have data
-    }
-  }, []); // Only run on mount
 
   const handleViewChange = (newView: "INDIVIDUAL" | "BRANCH" | "AREA" | "REGIONAL") => {
     setView(newView);
@@ -164,6 +177,12 @@ export const LeaderboardPageClient: React.FC<LeaderboardPageClientProps> = ({
           onSearchChange={handleSearchChange}
           onSearchSubmit={() => fetchLeaderboard()}
         />
+
+        {error && (
+          <div className={styles.errorMessage}>
+            Error: {error}
+          </div>
+        )}
 
         <LeaderboardList
           topUsers={leaderboardData?.topUsers || []}
